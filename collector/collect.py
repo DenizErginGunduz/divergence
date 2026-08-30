@@ -28,7 +28,7 @@ v2 uc seyi degistiriyor. Ucu de "sonradan eklemesi pahali" oldugu icin simdi:
 Degismeyen kurallar: eszamanlilik once gelir (D-015), ham veri alanlari
 degistirilmez (kural 2), eksik asama gizlenmez (kural 6).
 """
-import json, gzip, os, sys, time, datetime, urllib.request
+import json, gzip, os, re, sys, time, datetime, urllib.request
 
 UA = {'User-Agent': 'divergence-research/0.2 (+github)'}
 GAMMA = 'https://gamma-api.polymarket.com'
@@ -186,12 +186,30 @@ def akis(cids):
     return {'yeni_islemler': yeni, 'kapsam': kapsam}
 
 
-cids = []
+# ---------------- Kapsam filtresi: yalnizca FIYAT MERDIVENLERI ----------------
+# v2'nin ilk kosusu 770 market cekti; bunlar 'bitcoin'/'ethereum' etiketli TUM
+# marketler. Ilan ettigimiz kapsam (D-034) ise BTC/ETH fiyat merdivenleri.
+# Bu bir TOPLAMA filtresidir, siniflandirma DEGILDIR: kontrat tipi (terminal/
+# touch/range) hala kural metninden belirlenir. Burada yalnizca "bu market bir
+# fiyat esigi tasiyor mu" sorusu soruluyor.
+ESIK = re.compile(r'\$\s?\d[\d.,]{2,}')
+
+
+def merdiven_mi(m):
+    metin = '%s %s' % (m.get('question') or '', m.get('groupItemTitle') or '')
+    return bool(ESIK.search(metin))
+
+
+cids, kapsam_disi = [], 0
 for _v, evs in (kova.get('polymarket_events') or {}).items():
     for e in (evs or []):
         for m in (e.get('markets') or []):
-            if m.get('conditionId'):
+            if not m.get('conditionId'):
+                continue
+            if merdiven_mi(m):
                 cids.append(m['conditionId'])
+            else:
+                kapsam_disi += 1
 cids = list(dict.fromkeys(cids))
 asama('akis', lambda: akis(cids))
 
@@ -233,10 +251,14 @@ if 'holders' in kova:
 
 akis_sonuc = kova.get('akis') or {'yeni_islemler': [], 'kapsam': []}
 
-# Yeni islemler: gunluk NDJSON'a EKLENIR. Ham alanlar aynen korunur (kural 2).
-nd = os.path.join(ROOT, 'raw', 'events', 'trades', '%s.ndjson' % GUN)
+# Yeni islemler: KOSU BASINA ayri gz dosyasi. Ham alanlar aynen korunur (kural 2).
+# Neden tek dosyaya eklemiyoruz: git dosyalari tam blob olarak saklar. Buyuyen
+# tek bir NDJSON'a gunde uc kez eklemek, her seferinde dosyanin tamamini yeni
+# bir nesne olarak yazdirir. Kosu basina dosya bu buyumeyi ortadan kaldirir.
+# Tekilleme zaten su isaretiyle yapildigi icin ekleme semantigine ihtiyac yok.
+nd = os.path.join(ROOT, 'raw', 'events', 'trades', GUN, 'trades_%s.ndjson.gz' % DAMGA)
 os.makedirs(os.path.dirname(nd), exist_ok=True)
-with open(nd, 'a', encoding='utf-8') as f:
+with gzip.open(nd, 'wt', encoding='utf-8') as f:
     for t in akis_sonuc['yeni_islemler']:
         f.write(json.dumps(t, ensure_ascii=False, separators=(',', ':')) + '\n')
 yazildi.append({'dosya': os.path.relpath(nd, ROOT), 'bayt': os.path.getsize(nd)})
@@ -255,6 +277,7 @@ K = akis_sonuc['kapsam']
 sayfalama = [k.get('sayfalama_calisti') for k in K if k.get('sayfalama_calisti') is not None]
 ozet = {
     'market': len(K),
+    'kapsam_disi_market': kapsam_disi,   # fiyat esigi tasimadigi icin cekilmedi
     'yeni_islem': len(akis_sonuc['yeni_islemler']),
     'limit_dolan': sum(1 for k in K if k.get('limit_doldu')),
     'BOSLUKLU': sum(1 for k in K if k.get('BOSLUK')),
@@ -276,7 +299,7 @@ with open(mp, 'w', encoding='utf-8') as f:
 print('DIVERGENCE v2 — %s' % zaman.isoformat())
 print('  fiyat penceresi : %.2f sn' % PENCERE)
 print('  toplam sure     : %.2f sn' % meta['toplam_saniye'])
-print('  akis: %(market)d market | %(yeni_islem)d YENI islem | limit dolan %(limit_dolan)d'
+print('  akis: %(market)d merdiven marketi (kapsam disi %(kapsam_disi_market)d) | %(yeni_islem)d YENI islem | limit dolan %(limit_dolan)d'
       ' | BOSLUKLU %(BOSLUKLU)d | ilk kez %(ilk_kez)d' % ozet)
 print('  sayfalama: %d denendi, %d calisti  <- data-api offset destegi BU SATIRDAN okunur'
       % (ozet['sayfalama_denendi'], ozet['sayfalama_calisti']))
