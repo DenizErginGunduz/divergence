@@ -7,7 +7,7 @@ on:
   schedule:
     - cron: '0 13 * * *'    # 13:00 UTC — ABD acilisindan once
     - cron: '0 21 * * *'    # 21:00 UTC — ABD kapanisindan sonra
-    - cron: '0 5  * * *'    # 05:00 UTC — Asya seansi
+    - cron: '0 5  * * *'    # 05:00 UTC — Asya seansi + gunun holders cekimi
   workflow_dispatch:         # elle de tetiklenebilsin
 
 # Kosu, kendi reposuna yazacak. Baska hicbir izin yok.
@@ -38,7 +38,9 @@ jobs:
         run: |
           git config user.name  "divergence-collector"
           git config user.email "actions@users.noreply.github.com"
-          git add raw/
+          # state/ de islenmeli: su isareti orada tutuluyor. Kaybolursa bir
+          # sonraki kosu her marketi "ilk kez" sanar ve tekrar yazar.
+          git add raw/ state/
           if git diff --staged --quiet; then
             echo "Degisiklik yok — islenecek bir sey bulunamadi."
             exit 0
