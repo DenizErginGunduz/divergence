@@ -1,45 +1,49 @@
 #!/usr/bin/env python3
 """
-collect.py — DIVERGENCE ESZAMANLI TOPLAYICI
+collect.py v2 — DIVERGENCE TOPLAYICI, OLAY BAZLI
 
-Neden var: D-037. Deribit `get_book_summary` yalnizca ANLIK durumu verir;
-5 Agustos'un put zinciri geri getirilemedi. Kacirilan gun kalici olarak kayiptir.
-Bu betik her calistiginda uc tarafi da ayni pencerede yakalar ve HAM haliyle saklar.
+v1 her kosuda her marketin son 100 islemini yeniden sakliyordu. Olcum:
+106 market, ~10.600 islem, 7,3 MB — ve medyan markette 8 saatte yalnizca ~3 yeni
+islem oluyor. Yani dosyanin neredeyse tamami kopyaydi.
 
-Tasarim kararlari (gerekcesiyle):
+v2 uc seyi degistiriyor. Ucu de "sonradan eklemesi pahali" oldugu icin simdi:
 
-1) ESZAMANLILIK ONCE GELIR. D-015'te 8 dakikalik kayma olculen farki %33 oynatmisti.
-   Bu yuzden once TUM cagrilar yapilir, sonra diske yazilir. Yazma islemi
-   cagrilarin arasina girmez. Her dosyaya kendi cekim ani damgalanir.
+  1) OLAY BAZLI DEPOLAMA
+     Islemler transactionHash ile tekillenir; yalnizca YENI olanlar eklenir.
+     Boylece hangi hizda cekersek cekelim ayni depoya yaziyoruz. Anlik izleyici
+     sonradan devreye girdiginde format degistirmeye gerek kalmaz.
 
-2) HAM VERI DEGISTIRILMEDEN SAKLANIR (proje kurali 2). Hicbir alan silinmez,
-   yeniden adlandirilmaz, yuvarlanmaz. Metodoloji degisecek; ham veriden
-   yeniden hesaplayabilmeliyiz.
+  2) KAPSAM KAYDI
+     Her cekim "bu marketi hangi zaman araliginda gordum" bilgisini yazar.
+     Bu olmadan sonra "islem yok" ile "biz bakmiyorduk" ayirt edilemez.
+     Bildirim urununde bu ayrim her seydir: sessizlik bilgi sanilir.
 
-3) KISMI YAZMA YOK. Bir taraf duserse o kosu ISARETLENIR ama digerleri yine de
-   yazilir — cunku eksik gun, hic gun olmamasindan iyidir. Eksiklik _meta.json
-   icinde acikca durur, sessizce gizlenmez.
+  3) BOSLUK TESPITI + SAYFALAMA
+     79 market 100 sinirina dayanmisti; oncesinde gormedigimiz islemler olabilir.
+     Bir onceki su isaretinden geriye ulasamazsak BOSLUK bayragi konur ve
+     sayfalama ile kapatilmaya calisilir.
+     NOT: data-api'nin offset destegi DOGRULANMADI. Bu yuzden betik varsaymaz —
+     denemeyi yapar, sonucu `sayfalama_calisti` alanina yazar. Ilk kosu bize soyler.
 
-4) SIR YOK. Deribit, Polymarket gamma ve data-api anahtarsiz calisir
-   (D-038 ve DATA_SOURCES'ta CANLI-DOGRULANDI). GitHub Actions kendi reposuna
-   yazmak icin hazir GITHUB_TOKEN kullanir. Kurulmasi gereken hicbir gizli deger yok.
+Degismeyen kurallar: eszamanlilik once gelir (D-015), ham veri alanlari
+degistirilmez (kural 2), eksik asama gizlenmez (kural 6).
 """
-import json, os, sys, time, datetime, urllib.request, urllib.error
+import json, gzip, os, sys, time, datetime, urllib.request
 
-UA = {'User-Agent': 'divergence-research/0.1 (+github)'}
+UA = {'User-Agent': 'divergence-research/0.2 (+github)'}
 GAMMA = 'https://gamma-api.polymarket.com'
 DATA = 'https://data-api.polymarket.com'
 DERIBIT = 'https://www.deribit.com/api/v2/public'
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# D-034: V1 olculen evren BTC + ETH. Digerleri urunde gorunur ama sayi uretmez,
-# o yuzden burada da toplanmaz — kapsam genisletmesi olmasin (proje kurali 5).
-VARLIKLAR = ['bitcoin', 'ethereum']
+VARLIKLAR = ['bitcoin', 'ethereum']          # D-034: V1 olculen evren
 DERIBIT_PARA = ['BTC', 'ETH']
+SAYFA = 100                                  # data-api limit
+MAX_SAYFA = 6                                # bosluk kapatma denemesi ust siniri
+HOLDERS_SAATI = 5                            # pozisyon sahipleri gunde BIR kez (05 UTC)
 
 
 def get(url, timeout=30, deneme=3):
-    """Tek GET + geri cekilmeli yeniden deneme. Hata yutulmaz, yukari tasinir."""
     son = None
     for i in range(deneme):
         try:
@@ -52,79 +56,150 @@ def get(url, timeout=30, deneme=3):
     raise RuntimeError('%s -> %s' % (url[:90], str(son)[:120]))
 
 
-# ============================ CEKIM ============================
-# Bu blok bittikten SONRA diske yazilir. Arada I/O yok ki pencere dar kalsin.
-t_basla = time.time()
+def yaz_gz(yol, veri):
+    os.makedirs(os.path.dirname(yol), exist_ok=True)
+    with gzip.open(yol, 'wt', encoding='utf-8') as f:
+        json.dump(veri, f, ensure_ascii=False, separators=(',', ':'))
+    return os.path.getsize(yol)
+
+
+t0_hepsi = time.time()
 zaman = datetime.datetime.now(datetime.timezone.utc)
 DAMGA = zaman.strftime('%Y-%m-%dT%H%MZ')
 GUN = zaman.strftime('%Y-%m-%d')
 
-kova = {}
-hatalar = {}
-zamanlar = {}
+kova, hatalar, sureler = {}, {}, {}
 
 
 def asama(ad, fn):
-    """Bir asamayi calistir, suresini ve hatasini kaydet. Cokme, isaretle."""
-    t0 = time.time()
+    t = time.time()
     try:
         kova[ad] = fn()
-        zamanlar[ad] = round(time.time() - t0, 2)
     except Exception as e:
         hatalar[ad] = str(e)[:300]
-        zamanlar[ad] = round(time.time() - t0, 2)
         print('  ! %s BASARISIZ: %s' % (ad, str(e)[:140]), file=sys.stderr)
+    sureler[ad] = round(time.time() - t, 2)
 
 
-# --- 1. Deribit opsiyon zinciri: call VE put (D-032/D-035: put sart) ---
+# ---------------- su isareti (watermark) ----------------
+# Her market icin en son gordugumuz islem ani + o andaki hash'ler.
+# Hash listesi yalnizca SINIR anindakileri tutar; durum dosyasi boyle sisimez.
+WM_YOL = os.path.join(ROOT, 'state', 'watermark.json')
+try:
+    with open(WM_YOL, encoding='utf-8') as f:
+        WM = json.load(f)
+except Exception:
+    WM = {}
+
+
+# ---------------- 1. Deribit: call + put, iki para ----------------
 def deribit():
     out = {}
-    for para in DERIBIT_PARA:
-        out[para] = {
+    for p in DERIBIT_PARA:
+        out[p] = {
             'book_summary': get('%s/get_book_summary_by_currency?currency=%s&kind=option'
-                                % (DERIBIT, para), timeout=60),
-            'index': get('%s/get_index_price?index_name=%s_usd'
-                         % (DERIBIT, para.lower())),
+                                % (DERIBIT, p), timeout=60),
+            'index': get('%s/get_index_price?index_name=%s_usd' % (DERIBIT, p.lower())),
         }
     return out
 
 
-# --- 2. Polymarket merdivenleri (kesif: etiketli liste) ---
+# ---------------- 2. Polymarket merdivenleri ----------------
 def polymarket_events():
-    out = {}
-    for v in VARLIKLAR:
-        out[v] = get('%s/events?tag_slug=%s&closed=false&limit=200'
-                     % (GAMMA, v), timeout=60)
-    return out
+    return {v: get('%s/events?tag_slug=%s&closed=false&limit=200' % (GAMMA, v),
+                   timeout=60) for v in VARLIKLAR}
 
 
-# --- 3. Polymarket akisi: cuzdan bazinda islemler (D-038) ---
-def polymarket_akis():
-    """Merdiven marketlerinin conditionId'leri uzerinden islem akisi.
-    D-016: etiketli sorgu onbellekli olabilir; akis icin dogrudan market bazli
-    sorgu kullaniliyor, o yuzden burada conditionId'ler event'lerden aliniyor."""
-    cids, out = [], {}
-    for v, evs in (kova.get('polymarket_events') or {}).items():
-        for e in (evs or []):
-            for m in (e.get('markets') or []):
-                if m.get('conditionId'):
-                    cids.append(m['conditionId'])
-    cids = list(dict.fromkeys(cids))[:120]        # tekille, makul sinirla
-    out['_condition_ids'] = cids
-    out['trades'] = {}
-    for c in cids:
+asama('deribit', deribit)
+asama('polymarket_events', polymarket_events)
+PENCERE = round(time.time() - t0_hepsi, 2)      # D-015: iki fiyat tarafi arasi kayma
+
+
+# ---------------- 3. Akis: olay bazli, boslukla birlikte ----------------
+def _yeni_mi(t, wm):
+    """Bu islem su isaretinden sonra mi? Sinir anindaki beraberlikler hash ile ayrilir."""
+    ts = int(t.get('timestamp') or 0)
+    if ts > wm['ts']:
+        return True
+    return ts == wm['ts'] and t.get('transactionHash') not in wm['hashes']
+
+
+def akis(cids):
+    yeni, kapsam = [], []
+    for cid in cids:
+        wm = WM.get(cid) or {'ts': 0, 'hashes': []}
+        ilk_kez = wm['ts'] == 0
+        toplandi, sayfa_no, sayfalama_calisti, gorulen = [], 0, None, set()
         try:
-            out['trades'][c] = get('%s/trades?market=%s&limit=100' % (DATA, c), timeout=25)
+            while sayfa_no < MAX_SAYFA:
+                url = '%s/trades?market=%s&limit=%d' % (DATA, cid, SAYFA)
+                if sayfa_no:
+                    url += '&offset=%d' % (sayfa_no * SAYFA)
+                s = get(url, timeout=25)
+                if not isinstance(s, list) or not s:
+                    break
+                h = {x.get('transactionHash') for x in s}
+                if sayfa_no:
+                    # Sayfalama gercekten yeni kayit getiriyor mu? OLC, varsayma.
+                    sayfalama_calisti = len(h - gorulen) > 0
+                    if not sayfalama_calisti:
+                        break
+                gorulen |= h
+                toplandi += s
+                if len(s) < SAYFA:
+                    break
+                # Ilk kosuda geriye kazmaya calisma: baslangic noktamiz burasi.
+                if ilk_kez:
+                    break
+                # Su isaretine ulastiysak yeter.
+                if min(int(x.get('timestamp') or 0) for x in s) <= wm['ts']:
+                    break
+                sayfa_no += 1
+            time.sleep(0.12)
         except Exception as e:
-            out['trades'][c] = {'_hata': str(e)[:150]}
-        time.sleep(0.12)                          # nazik ol, rate limit yeme
-    return out
+            kapsam.append({'market': cid, 'hata': str(e)[:150]})
+            continue
+
+        n = [t for t in toplandi if _yeni_mi(t, wm)]
+        yeni += n
+        ts_hepsi = [int(t.get('timestamp') or 0) for t in toplandi if t.get('timestamp')]
+        en_eski = min(ts_hepsi) if ts_hepsi else None
+        en_yeni = max(ts_hepsi) if ts_hepsi else None
+        limit_doldu = len(toplandi) >= SAYFA
+        # BOSLUK: sinira dayandik AMA onceki su isaretine geri ulasamadik.
+        bosluk = bool(limit_doldu and not ilk_kez and en_eski is not None
+                      and en_eski > wm['ts'])
+        kapsam.append({
+            'market': cid, 'cekim_utc': zaman.isoformat(),
+            'donen': len(toplandi), 'yeni': len(n), 'sayfa': sayfa_no + 1,
+            'en_eski_ts': en_eski, 'en_yeni_ts': en_yeni,
+            'onceki_su_isareti': wm['ts'], 'limit_doldu': limit_doldu,
+            'sayfalama_calisti': sayfalama_calisti,
+            'ilk_kez': ilk_kez,
+            # ilk kosuda "bosluk" kavrami anlamsiz: baslangic noktasi burasi.
+            'BOSLUK': bosluk,
+        })
+        if en_yeni is not None:
+            WM[cid] = {'ts': en_yeni,
+                       'hashes': [t.get('transactionHash') for t in toplandi
+                                  if int(t.get('timestamp') or 0) == en_yeni]}
+    return {'yeni_islemler': yeni, 'kapsam': kapsam}
 
 
-# --- 4. Pozisyon sahipleri: yogunlasma olcumu icin ---
-def polymarket_holders():
+cids = []
+for _v, evs in (kova.get('polymarket_events') or {}).items():
+    for e in (evs or []):
+        for m in (e.get('markets') or []):
+            if m.get('conditionId'):
+                cids.append(m['conditionId'])
+cids = list(dict.fromkeys(cids))
+asama('akis', lambda: akis(cids))
+
+
+# ---------------- 4. Pozisyon sahipleri: gunde bir kez ----------------
+def holders():
     out = {}
-    for c in ((kova.get('polymarket_flow') or {}).get('_condition_ids') or [])[:60]:
+    for c in cids[:80]:
         try:
             out[c] = get('%s/holders?market=%s&limit=100' % (DATA, c), timeout=25)
         except Exception as e:
@@ -133,48 +208,80 @@ def polymarket_holders():
     return out
 
 
-print('DIVERGENCE toplayici — %s' % zaman.isoformat())
-asama('deribit', deribit)                      # once turev: en hizli degisen taraf
-asama('polymarket_events', polymarket_events)
-t_fiyat_penceresi = round(time.time() - t_basla, 2)   # fiyat taraflari arasi kayma
-asama('polymarket_flow', polymarket_akis)      # akis daha yavas, fiyattan SONRA
-asama('polymarket_holders', polymarket_holders)
+holders_gun_yolu = os.path.join(ROOT, 'raw', 'holders', GUN)
+if not os.path.isdir(holders_gun_yolu) or zaman.hour == HOLDERS_SAATI:
+    asama('holders', holders)
+else:
+    sureler['holders'] = 'atlandi (gunde bir kez)'
 
-# ============================ YAZMA ============================
+
+# ---------------- YAZMA ----------------
 yazildi = []
-for ad, veri in kova.items():
-    d = os.path.join(ROOT, 'raw', ad, GUN)
-    os.makedirs(d, exist_ok=True)
-    p = os.path.join(d, '%s_%s.json' % (ad, DAMGA))
-    with open(p, 'w', encoding='utf-8') as f:
-        json.dump(veri, f, ensure_ascii=False, separators=(',', ':'))
-    yazildi.append({'dosya': os.path.relpath(p, ROOT),
-                    'bayt': os.path.getsize(p), 'asama': ad})
 
-meta = {
-    'snapshot_utc': zaman.isoformat(),
-    'toplam_saniye': round(time.time() - t_basla, 2),
-    # KRITIK ALAN: iki fiyat tarafi arasindaki kayma. D-015 geregi ekranda
-    # gosterilecek; bu deger buyukse o kosunun farklari guvenilmez.
-    'fiyat_penceresi_saniye': t_fiyat_penceresi,
-    'asama_sureleri': zamanlar,
-    'hatalar': hatalar,
-    'tam_mi': len(hatalar) == 0,
-    'dosyalar': yazildi,
-    'varliklar': VARLIKLAR,
-    'not': 'Ham yanitlar degistirilmeden saklandi (proje kurali 2).',
+
+def kaydet(ad, veri):
+    p = os.path.join(ROOT, 'raw', ad, GUN, '%s_%s.json.gz' % (ad, DAMGA))
+    yazildi.append({'dosya': os.path.relpath(p, ROOT), 'bayt': yaz_gz(p, veri)})
+
+
+if 'deribit' in kova:
+    kaydet('deribit', kova['deribit'])
+if 'polymarket_events' in kova:
+    kaydet('polymarket_events', kova['polymarket_events'])
+if 'holders' in kova:
+    kaydet('holders', kova['holders'])
+
+akis_sonuc = kova.get('akis') or {'yeni_islemler': [], 'kapsam': []}
+
+# Yeni islemler: gunluk NDJSON'a EKLENIR. Ham alanlar aynen korunur (kural 2).
+nd = os.path.join(ROOT, 'raw', 'events', 'trades', '%s.ndjson' % GUN)
+os.makedirs(os.path.dirname(nd), exist_ok=True)
+with open(nd, 'a', encoding='utf-8') as f:
+    for t in akis_sonuc['yeni_islemler']:
+        f.write(json.dumps(t, ensure_ascii=False, separators=(',', ':')) + '\n')
+yazildi.append({'dosya': os.path.relpath(nd, ROOT), 'bayt': os.path.getsize(nd)})
+
+kp = os.path.join(ROOT, 'raw', 'coverage', GUN, 'coverage_%s.json' % DAMGA)
+os.makedirs(os.path.dirname(kp), exist_ok=True)
+with open(kp, 'w', encoding='utf-8') as f:
+    json.dump(akis_sonuc['kapsam'], f, ensure_ascii=False, indent=1)
+yazildi.append({'dosya': os.path.relpath(kp, ROOT), 'bayt': os.path.getsize(kp)})
+
+os.makedirs(os.path.dirname(WM_YOL), exist_ok=True)
+with open(WM_YOL, 'w', encoding='utf-8') as f:
+    json.dump(WM, f, ensure_ascii=False, separators=(',', ':'))
+
+K = akis_sonuc['kapsam']
+sayfalama = [k.get('sayfalama_calisti') for k in K if k.get('sayfalama_calisti') is not None]
+ozet = {
+    'market': len(K),
+    'yeni_islem': len(akis_sonuc['yeni_islemler']),
+    'limit_dolan': sum(1 for k in K if k.get('limit_doldu')),
+    'BOSLUKLU': sum(1 for k in K if k.get('BOSLUK')),
+    'ilk_kez': sum(1 for k in K if k.get('ilk_kez')),
+    'sayfalama_denendi': len(sayfalama),
+    'sayfalama_calisti': sum(1 for x in sayfalama if x),
 }
-md = os.path.join(ROOT, 'raw', '_meta', GUN)
-os.makedirs(md, exist_ok=True)
-with open(os.path.join(md, 'meta_%s.json' % DAMGA), 'w', encoding='utf-8') as f:
+meta = {'snapshot_utc': zaman.isoformat(),
+        'toplam_saniye': round(time.time() - t0_hepsi, 2),
+        'fiyat_penceresi_saniye': PENCERE,      # D-015: kucuk olmali
+        'asama_sureleri': sureler, 'hatalar': hatalar,
+        'tam_mi': len(hatalar) == 0, 'akis_ozeti': ozet,
+        'dosyalar': yazildi, 'varliklar': VARLIKLAR, 'surum': 2}
+mp = os.path.join(ROOT, 'raw', '_meta', GUN, 'meta_%s.json' % DAMGA)
+os.makedirs(os.path.dirname(mp), exist_ok=True)
+with open(mp, 'w', encoding='utf-8') as f:
     json.dump(meta, f, ensure_ascii=False, indent=1)
 
-print('  fiyat penceresi : %.2f sn   (D-015: dar olmali)' % t_fiyat_penceresi)
+print('DIVERGENCE v2 — %s' % zaman.isoformat())
+print('  fiyat penceresi : %.2f sn' % PENCERE)
 print('  toplam sure     : %.2f sn' % meta['toplam_saniye'])
-print('  yazilan dosya   : %d' % len(yazildi))
+print('  akis: %(market)d market | %(yeni_islem)d YENI islem | limit dolan %(limit_dolan)d'
+      ' | BOSLUKLU %(BOSLUKLU)d | ilk kez %(ilk_kez)d' % ozet)
+print('  sayfalama: %d denendi, %d calisti  <- data-api offset destegi BU SATIRDAN okunur'
+      % (ozet['sayfalama_denendi'], ozet['sayfalama_calisti']))
 for y in yazildi:
-    print('    %-58s %8.1f KB' % (y['dosya'], y['bayt'] / 1024))
+    print('    %-52s %8.1f KB' % (y['dosya'], y['bayt'] / 1024))
 if hatalar:
-    print('  EKSIK ASAMALAR  : %s' % ', '.join(hatalar))
-    print('  (kosu yine de kaydedildi — eksik gun, hic gun olmamasindan iyidir)')
+    print('  EKSIK ASAMALAR : %s' % ', '.join(hatalar))
 sys.exit(0)
