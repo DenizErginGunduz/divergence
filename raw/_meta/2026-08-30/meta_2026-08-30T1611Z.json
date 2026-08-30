@@ -1,0 +1,40 @@
+{
+ "snapshot_utc": "2026-08-30T16:11:09.523608+00:00",
+ "toplam_saniye": 48.05,
+ "fiyat_penceresi_saniye": 0.75,
+ "asama_sureleri": {
+  "deribit": 0.59,
+  "polymarket_events": 0.16,
+  "polymarket_flow": 29.4,
+  "polymarket_holders": 17.53
+ },
+ "hatalar": {},
+ "tam_mi": true,
+ "dosyalar": [
+  {
+   "dosya": "raw/deribit/2026-08-30/deribit_2026-08-30T1611Z.json",
+   "bayt": 836032,
+   "asama": "deribit"
+  },
+  {
+   "dosya": "raw/polymarket_events/2026-08-30/polymarket_events_2026-08-30T1611Z.json",
+   "bayt": 3328577,
+   "asama": "polymarket_events"
+  },
+  {
+   "dosya": "raw/polymarket_flow/2026-08-30/polymarket_flow_2026-08-30T1611Z.json",
+   "bayt": 7508353,
+   "asama": "polymarket_flow"
+  },
+  {
+   "dosya": "raw/polymarket_holders/2026-08-30/polymarket_holders_2026-08-30T1611Z.json",
+   "bayt": 1958567,
+   "asama": "polymarket_holders"
+  }
+ ],
+ "varliklar": [
+  "bitcoin",
+  "ethereum"
+ ],
+ "not": "Ham yanitlar degistirilmeden saklandi (proje kurali 2)."
+}
