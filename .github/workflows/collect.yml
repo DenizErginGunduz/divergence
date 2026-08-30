@@ -1,0 +1,49 @@
+name: collect
+
+# Neden bu saatler: orta/uzun vade merdivenlerle calisiyoruz (D-019), saniye
+# cozunurlugune ihtiyacimiz yok. Gunde uc kosu; biri ABD acilisi oncesi, biri
+# kapanis sonrasi, biri Asya seansinda. Boylece gunluk sekil de yakalanir.
+on:
+  schedule:
+    - cron: '0 13 * * *'    # 13:00 UTC — ABD acilisindan once
+    - cron: '0 21 * * *'    # 21:00 UTC — ABD kapanisindan sonra
+    - cron: '0 5  * * *'    # 05:00 UTC — Asya seansi
+  workflow_dispatch:         # elle de tetiklenebilsin
+
+# Kosu, kendi reposuna yazacak. Baska hicbir izin yok.
+permissions:
+  contents: write
+
+concurrency:
+  group: collect
+  cancel-in-progress: false   # bir kosu digerini kesmesin; her snapshot degerli
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # Bagimlilik YOK. Betik yalnizca standart kutuphane kullaniyor;
+      # boylece kirilacak bir paket zinciri de yok.
+      - name: Snapshot al
+        run: python collector/collect.py
+
+      - name: Repoya isle
+        run: |
+          git config user.name  "divergence-collector"
+          git config user.email "actions@users.noreply.github.com"
+          git add raw/
+          if git diff --staged --quiet; then
+            echo "Degisiklik yok — islenecek bir sey bulunamadi."
+            exit 0
+          fi
+          git commit -m "snapshot $(date -u +'%Y-%m-%dT%H:%MZ')"
+          # Baska bir kosu araya girmis olabilir; once cek sonra it.
+          git pull --rebase --autostash origin ${GITHUB_REF_NAME}
+          git push
