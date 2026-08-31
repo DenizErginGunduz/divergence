@@ -43,17 +43,12 @@ SAYFA = 100                                  # data-api limit
 MAX_SAYFA = 6                                # bosluk kapatma denemesi ust siniri
 HOLDERS_SAATI = 5                            # pozisyon sahipleri gunde BIR kez (05 UTC)
 
-# Kalshi serileri. Liste 2026-08-30'da /series?category=Crypto sorgusundan
-# DOGRULANARAK cikarildi (BTC veya ETH etiketli 20 seri). Katalog her gun
-# yeniden cekiliyor ki yeni seri eklenirse fark edelim.
-KALSHI_KRIPTO = ['KXBTCMAXY','KXBTCMAXD','BTCMAXM','BTCMINY','KXBTCMINMON',
- 'KXBTCYEAR','KXBTCMAX100','KXBTCMAX125','KXBTCMAX150','KXBTC2026250',
- 'KXBTC2025100','KXBTC50VS100','KXBTC75VS100','KXBTCMAX100INAUG','KXBTCETHATH',
- 'KXETHMAXM','KXETHMAXMON','KXETHATH','KXETHEU','ETH']
-# Endeks/emtia: HENUZ OLCUM KAPSAMINDA DEGIL (D-062 askida). Yalnizca gozlem
-# amacli toplaniyor cunku veri geri getirilemez. Kapsam kararindan once
-# hicbir sayi uretilmeyecek.
-KALSHI_GOZLEM = ['KXINXEOYCLOSE','INX','KXINXZ','KXGOLD']
+# Kalshi seri listesi ELLE SABITLENMEZ (D-063). Ilk denemede listeyi kesik bir
+# katalog yanitindan cikardim ve 62 BTC/ETH serisinin 42'sini kacirdim -- aralarinda
+# tam aradigimiz yillik TERMINAL kontratlar da vardi. Artik her kosuda katalogdan
+# TURETILIYOR; kaynak degisirse biz de degisiriz.
+KALSHI_GOZLEM_DESEN = r'S&P|SPX|Nasdaq|NDX|Dow|DJIA|gold|silver|oil|crude|WTI|Brent'
+KALSHI_SERI_UST_SINIR = 90        # kosu suresini sinirla
 
 
 def get(url, timeout=30, deneme=3):
@@ -125,16 +120,35 @@ def polymarket_events():
 
 # ---------------- 3. Kalshi (D-056) ----------------
 def kalshi():
-    """Seri katalogu + izlenen serilerin TUM marketleri.
+    """Katalog -> izlenecek seriler -> o serilerin TUM marketleri.
+
     status filtresi YOK: cozulmus marketler de gelsin. Cozulme sonucu
-    kalibrasyon/Brier veri setinin ta kendisi ve sonradan geri alinamaz."""
-    out = {'katalog': {}, 'marketler': {}, 'gozlem': {}}
+    kalibrasyon/Brier veri setinin ta kendisi ve sonradan geri alinamaz.
+
+    Seri listesi katalogdan turetilir (D-063):
+      olculen  = BTC veya ETH etiketli her seri
+      gozlem   = Financials icinde endeks/emtia deseni tutan seriler
+                 (kapsam karari verilene kadar sayi uretilmez)
+    """
+    out = {'katalog': {}, 'marketler': {}, 'gozlem': {}, 'secim': {}}
     for kat in ('Crypto', 'Financials'):
         try:
             out['katalog'][kat] = get('%s/series?category=%s' % (KALSHI, kat), timeout=45)
         except Exception as e:
             out['katalog'][kat] = {'_hata': str(e)[:150]}
-    def seri(t):
+
+    def seriler(kat, sec):
+        d = out['katalog'].get(kat) or {}
+        return [x.get('ticker') for x in (d.get('series') or []) if x.get('ticker') and sec(x)]
+
+    kripto = seriler('Crypto', lambda x: bool({'BTC', 'ETH'} & set(x.get('tags') or [])))
+    gozlem = seriler('Financials', lambda x: bool(re.search(
+        KALSHI_GOZLEM_DESEN, (x.get('title') or '') + ' ' + ' '.join(x.get('tags') or []), re.I)))
+    kripto = kripto[:KALSHI_SERI_UST_SINIR]
+    gozlem = gozlem[:KALSHI_SERI_UST_SINIR // 3]
+    out['secim'] = {'kripto': kripto, 'gozlem': gozlem}
+
+    def markets(t):
         sayfa, imlec, hepsi = 0, '', []
         while sayfa < 5:
             u = '%s/markets?series_ticker=%s&limit=200' % (KALSHI, t)
@@ -148,18 +162,14 @@ def kalshi():
                 break
             sayfa += 1
         return hepsi
-    for t in KALSHI_KRIPTO:
-        try:
-            out['marketler'][t] = seri(t)
-        except Exception as e:
-            out['marketler'][t] = {'_hata': str(e)[:150]}
-        time.sleep(0.10)
-    for t in KALSHI_GOZLEM:
-        try:
-            out['gozlem'][t] = seri(t)
-        except Exception as e:
-            out['gozlem'][t] = {'_hata': str(e)[:150]}
-        time.sleep(0.10)
+
+    for kova_ad, liste in (('marketler', kripto), ('gozlem', gozlem)):
+        for t in liste:
+            try:
+                out[kova_ad][t] = markets(t)
+            except Exception as e:
+                out[kova_ad][t] = {'_hata': str(e)[:150]}
+            time.sleep(0.08)
     return out
 
 
@@ -352,6 +362,14 @@ meta = {'snapshot_utc': zaman.isoformat(),
         'kaynak_anlari_saniye': ANLAR,          # ucuncu kaynagin kaymasi da gorunur
         'asama_sureleri': sureler, 'hatalar': hatalar,
         'tam_mi': len(hatalar) == 0, 'akis_ozeti': ozet,
+        'kalshi_ozeti': (lambda k: None if not k else {
+            'katalog': {a: len((b or {}).get('series') or []) for a, b in k['katalog'].items()},
+            'izlenen_kripto_seri': len(k['secim']['kripto']),
+            'izlenen_gozlem_seri': len(k['secim']['gozlem']),
+            'market_donen_seri': sum(1 for v in k['marketler'].values() if isinstance(v, list) and v),
+            'toplam_market': sum(len(v) for v in k['marketler'].values() if isinstance(v, list)),
+            'gozlem_market': sum(len(v) for v in k['gozlem'].values() if isinstance(v, list)),
+        })(kova.get('kalshi')),
         'dosyalar': yazildi, 'varliklar': VARLIKLAR, 'surum': 2}
 mp = os.path.join(ROOT, 'raw', '_meta', GUN, 'meta_%s.json' % DAMGA)
 os.makedirs(os.path.dirname(mp), exist_ok=True)
