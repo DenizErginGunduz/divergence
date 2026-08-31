@@ -34,6 +34,7 @@ UA = {'User-Agent': 'divergence-research/0.2 (+github)'}
 GAMMA = 'https://gamma-api.polymarket.com'
 DATA = 'https://data-api.polymarket.com'
 DERIBIT = 'https://www.deribit.com/api/v2/public'
+KALSHI = 'https://external-api.kalshi.com/trade-api/v2'
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 VARLIKLAR = ['bitcoin', 'ethereum']          # D-034: V1 olculen evren
@@ -41,6 +42,18 @@ DERIBIT_PARA = ['BTC', 'ETH']
 SAYFA = 100                                  # data-api limit
 MAX_SAYFA = 6                                # bosluk kapatma denemesi ust siniri
 HOLDERS_SAATI = 5                            # pozisyon sahipleri gunde BIR kez (05 UTC)
+
+# Kalshi serileri. Liste 2026-08-30'da /series?category=Crypto sorgusundan
+# DOGRULANARAK cikarildi (BTC veya ETH etiketli 20 seri). Katalog her gun
+# yeniden cekiliyor ki yeni seri eklenirse fark edelim.
+KALSHI_KRIPTO = ['KXBTCMAXY','KXBTCMAXD','BTCMAXM','BTCMINY','KXBTCMINMON',
+ 'KXBTCYEAR','KXBTCMAX100','KXBTCMAX125','KXBTCMAX150','KXBTC2026250',
+ 'KXBTC2025100','KXBTC50VS100','KXBTC75VS100','KXBTCMAX100INAUG','KXBTCETHATH',
+ 'KXETHMAXM','KXETHMAXMON','KXETHATH','KXETHEU','ETH']
+# Endeks/emtia: HENUZ OLCUM KAPSAMINDA DEGIL (D-062 askida). Yalnizca gozlem
+# amacli toplaniyor cunku veri geri getirilemez. Kapsam kararindan once
+# hicbir sayi uretilmeyecek.
+KALSHI_GOZLEM = ['KXINXEOYCLOSE','INX','KXINXZ','KXGOLD']
 
 
 def get(url, timeout=30, deneme=3):
@@ -110,9 +123,55 @@ def polymarket_events():
                    timeout=60) for v in VARLIKLAR}
 
 
-asama('deribit', deribit)
-asama('polymarket_events', polymarket_events)
-PENCERE = round(time.time() - t0_hepsi, 2)      # D-015: iki fiyat tarafi arasi kayma
+# ---------------- 3. Kalshi (D-056) ----------------
+def kalshi():
+    """Seri katalogu + izlenen serilerin TUM marketleri.
+    status filtresi YOK: cozulmus marketler de gelsin. Cozulme sonucu
+    kalibrasyon/Brier veri setinin ta kendisi ve sonradan geri alinamaz."""
+    out = {'katalog': {}, 'marketler': {}, 'gozlem': {}}
+    for kat in ('Crypto', 'Financials'):
+        try:
+            out['katalog'][kat] = get('%s/series?category=%s' % (KALSHI, kat), timeout=45)
+        except Exception as e:
+            out['katalog'][kat] = {'_hata': str(e)[:150]}
+    def seri(t):
+        sayfa, imlec, hepsi = 0, '', []
+        while sayfa < 5:
+            u = '%s/markets?series_ticker=%s&limit=200' % (KALSHI, t)
+            if imlec:
+                u += '&cursor=%s' % imlec
+            d = get(u, timeout=30)
+            m = d.get('markets') or []
+            hepsi += m
+            imlec = d.get('cursor') or ''
+            if not imlec or not m:
+                break
+            sayfa += 1
+        return hepsi
+    for t in KALSHI_KRIPTO:
+        try:
+            out['marketler'][t] = seri(t)
+        except Exception as e:
+            out['marketler'][t] = {'_hata': str(e)[:150]}
+        time.sleep(0.10)
+    for t in KALSHI_GOZLEM:
+        try:
+            out['gozlem'][t] = seri(t)
+        except Exception as e:
+            out['gozlem'][t] = {'_hata': str(e)[:150]}
+        time.sleep(0.10)
+    return out
+
+
+# ---- ESZAMANLILIK: uc kaynagin da kendi ani ayri kaydediliyor (D-015) ----
+# Kalshi ~20 cagri suruyor; pencereyi buyutuyor. Gizlemek yerine OLCUYORUZ:
+# hangi ikili arasindaki kaymanin ne oldugu sonradan hesaplanabilsin.
+ANLAR = {}
+ANLAR['baslangic'] = 0.0
+asama('deribit', deribit);            ANLAR['deribit_bitis'] = round(time.time()-t0_hepsi, 2)
+asama('polymarket_events', polymarket_events); ANLAR['polymarket_bitis'] = round(time.time()-t0_hepsi, 2)
+PENCERE = ANLAR['polymarket_bitis']             # Deribit <-> Polymarket kaymasi
+asama('kalshi', kalshi);              ANLAR['kalshi_bitis'] = round(time.time()-t0_hepsi, 2)
 
 
 # ---------------- 3. Akis: olay bazli, boslukla birlikte ----------------
@@ -248,6 +307,8 @@ if 'polymarket_events' in kova:
     kaydet('polymarket_events', kova['polymarket_events'])
 if 'holders' in kova:
     kaydet('holders', kova['holders'])
+if 'kalshi' in kova:
+    kaydet('kalshi', kova['kalshi'])
 
 akis_sonuc = kova.get('akis') or {'yeni_islemler': [], 'kapsam': []}
 
@@ -287,7 +348,8 @@ ozet = {
 }
 meta = {'snapshot_utc': zaman.isoformat(),
         'toplam_saniye': round(time.time() - t0_hepsi, 2),
-        'fiyat_penceresi_saniye': PENCERE,      # D-015: kucuk olmali
+        'fiyat_penceresi_saniye': PENCERE,      # Deribit <-> Polymarket
+        'kaynak_anlari_saniye': ANLAR,          # ucuncu kaynagin kaymasi da gorunur
         'asama_sureleri': sureler, 'hatalar': hatalar,
         'tam_mi': len(hatalar) == 0, 'akis_ozeti': ozet,
         'dosyalar': yazildi, 'varliklar': VARLIKLAR, 'surum': 2}
