@@ -47,7 +47,10 @@ HOLDERS_SAATI = 5                            # pozisyon sahipleri gunde BIR kez 
 # katalog yanitindan cikardim ve 62 BTC/ETH serisinin 42'sini kacirdim -- aralarinda
 # tam aradigimiz yillik TERMINAL kontratlar da vardi. Artik her kosuda katalogdan
 # TURETILIYOR; kaynak degisirse biz de degisiriz.
-KALSHI_GOZLEM_DESEN = r'S&P|SPX|Nasdaq|NDX|Dow|DJIA|gold|silver|oil|crude|WTI|Brent'
+# Kelime siniri SART: ilk surumde 'Dow' deseni 'downloads' kelimesine takildi ve
+# gozlem kovasi Netflix/Disney+ uygulama indirme marketleriyle doldu.
+KALSHI_GOZLEM_DESEN = (r'S&P 500|SPX|Nasdaq|NDX|DJIA|Dow Jones'
+                       r'|\bgold\b|\bsilver\b|\boil\b|\bcrude\b|\bWTI\b|\bBrent\b')
 KALSHI_SERI_UST_SINIR = 90        # kosu suresini sinirla
 
 
