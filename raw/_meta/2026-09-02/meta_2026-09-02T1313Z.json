@@ -1,0 +1,68 @@
+{
+ "snapshot_utc": "2026-09-02T13:13:05.089192+00:00",
+ "toplam_saniye": 158.93,
+ "fiyat_penceresi_saniye": 1.5,
+ "kaynak_anlari_saniye": {
+  "baslangic": 0.0,
+  "deribit_bitis": 1.13,
+  "polymarket_bitis": 1.5,
+  "kalshi_bitis": 32.34
+ },
+ "asama_sureleri": {
+  "deribit": 1.13,
+  "polymarket_events": 0.37,
+  "kalshi": 30.84,
+  "akis": 125.79,
+  "holders": "atlandi (gunde bir kez)"
+ },
+ "hatalar": {},
+ "tam_mi": true,
+ "akis_ozeti": {
+  "market": 430,
+  "kapsam_disi_market": 251,
+  "yeni_islem": 4677,
+  "limit_dolan": 121,
+  "BOSLUKLU": 0,
+  "ilk_kez": 57,
+  "sayfalama_denendi": 8,
+  "sayfalama_calisti": 8
+ },
+ "kalshi_ozeti": {
+  "katalog": {
+   "Crypto": 274,
+   "Financials": 1050
+  },
+  "izlenen_kripto_seri": 62,
+  "izlenen_gozlem_seri": 30,
+  "market_donen_seri": 22,
+  "toplam_market": 6246,
+  "gozlem_market": 3016
+ },
+ "dosyalar": [
+  {
+   "dosya": "raw/deribit/2026-09-02/deribit_2026-09-02T1313Z.json.gz",
+   "bayt": 72777
+  },
+  {
+   "dosya": "raw/polymarket_events/2026-09-02/polymarket_events_2026-09-02T1313Z.json.gz",
+   "bayt": 319975
+  },
+  {
+   "dosya": "raw/kalshi/2026-09-02/kalshi_2026-09-02T1313Z.json.gz",
+   "bayt": 574480
+  },
+  {
+   "dosya": "raw/events/trades/2026-09-02/trades_2026-09-02T1313Z.ndjson.gz",
+   "bayt": 445808
+  },
+  {
+   "dosya": "raw/coverage/2026-09-02/coverage_2026-09-02T1313Z.json",
+   "bayt": 155389
+  }
+ ],
+ "varliklar": [
+  "bitcoin",
+  "ethereum"
+ ],
+ "surum": 2
+}
