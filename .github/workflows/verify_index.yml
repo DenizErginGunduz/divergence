@@ -1,0 +1,62 @@
+name: verify-index
+
+# TEK AMAC: yfinance endeks opsiyon zincirini GitHub Actions kosucusundan
+# cekebiliyor mu? Kullanicinin ev baglantisinda calisti (^SPX 54 vade), ama
+# Actions bir veri merkezi ve Yahoo veri merkezi IP'lerini engelliyor olabilir --
+# daha once Colab'dan 5/5 basarisiz olmustuk.
+#
+# Toplayiciya DOKUNMUYOR. Calisan boru hattini bir deney icin riske atmiyoruz.
+# Sonuc olumluysa endeks kolu ayri bir asama olarak eklenir.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: yfinance kur
+        run: pip install -q yfinance
+
+      - name: Endeks opsiyon zincirini dene
+        run: |
+          python - <<'PY'
+          import yfinance as yf, traceback
+
+          def dene(s):
+              t = yf.Ticker(s)
+              v = t.options
+              if not v:
+                  return 'vade listesi BOS'
+              hedef = v[min(len(v) - 1, 8)]
+              c = t.option_chain(hedef)
+              ks = sorted(set(c.calls['strike']) | set(c.puts['strike']))
+              spot = None
+              try:
+                  spot = t.fast_info.get('lastPrice')
+              except Exception:
+                  pass
+              return ('vade=%d, secilen=%s, call=%d put=%d, strike %s..%s, spot=%s'
+                      % (len(v), hedef, len(c.calls), len(c.puts),
+                         ks[0] if ks else '-', ks[-1] if ks else '-', spot))
+
+          basarili = 0
+          for s in ['^SPX', '^XSP', '^NDX', 'SPY', 'QQQ', 'GLD']:
+              try:
+                  print('[OK   ] %-6s %s' % (s, dene(s)))
+                  basarili += 1
+              except Exception as e:
+                  print('[HATA ] %-6s %s' % (s, str(e)[:160]))
+
+          print()
+          print('BASARILI: %d / 6' % basarili)
+          print('Okuma: ^SPX veya ^NDX calisiyorsa endeks kolu Actions uzerinde kurulabilir.')
+          print('Hicbiri calismiyorsa Yahoo veri merkezi IP engeli var demektir;')
+          print('o zaman ya Finnhub/Polygon anahtarli kaynak, ya da endeks kolu')
+          print('kullanicinin makinesinde ayri bir toplayiciya birakilir.')
+          PY
