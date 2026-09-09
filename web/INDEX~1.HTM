@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Divergence</title>
+<!--
+  DESIGN.md iskeleti birebir:
+    [0]   bulgu seridi        — donmez, elle kaydirilir, her kart kaynagini tasir
+    [0.5] notable right now   — secim kurali hesaplanir, bossa gizlenir
+    [1]   varlik kartlari     — gezinme buradan baslar
+    [2]   merdiven listesi    — satir = merdiven
+    [3]   basamak tablosu     — YERINDE acilir
+    [4]   detay karti         — YERINDE acilir, kisit seridi ile
+
+  Token blogu :root icinde. Tema geldiginde SADECE orasi degisir.
+  Veri arsivden CANLI okunur; sabit sayi yok (serit kartlarindaki
+  "recorded" olanlar haric — onlar tarih ve karar numarasi tasir).
+-->
+<style>
+:root{
+  /* ---------- TOKEN KATMANI ---------- */
+  --bg:#14110f; --surface:#181411; --surface-2:#1c1713; --border:#2a231d;
+  --line:#241e19;
+  --text:#f0ece6; --text-2:#c9c0b4; --text-3:#9c8f7e; --text-4:#5a5148;
+  --accent:#e8a33d;
+  --ok:#7fb069; --warn:#c98a2e; --muted:#5a5148;
+  --yes-bg:#1e2a1e; --yes:#8fd18f; --no-bg:#2a1e1e; --no:#d18f8f;
+  --font:'Inter var','Inter',system-ui,-apple-system,sans-serif;
+  --radius:7px; --gap:8px; --row:38px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;
+  font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased;
+  padding:26px 24px 60px;max-width:1200px;margin:0 auto}
+.num{text-align:right} .t12{font-size:12px} .t11{font-size:11px} .t10{font-size:10px}
+.dim{color:var(--text-3)} .dim2{color:var(--text-4)} .w5{font-weight:500}
+.lab{font-size:10px;letter-spacing:.14em;color:var(--text-3)}
+
+/* ---- KUNYE (masthead) ---- */
+.mast{margin:-26px -24px 26px;background:var(--bg)}
+.rule{height:3px;background:var(--accent)}
+.mastin{padding:24px 24px 0;max-width:1200px;margin:0 auto}
+.mtop{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+.wordmark{font-size:42px;font-weight:200;letter-spacing:.14em;color:var(--text);line-height:1}
+.slogan{font-size:18px;font-weight:400;color:var(--text-3);margin-top:11px;letter-spacing:-.005em}
+.slogan .pm{color:var(--accent);font-weight:500}
+.slogan .op{color:var(--text-2);font-weight:500}
+.dateline{display:flex;margin-top:22px;border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);font-size:10px;letter-spacing:.1em;color:var(--text-3)}
+.dateline div{padding:9px 0}
+/* ---- yapiskan bant ---- */
+#band{position:fixed;top:0;left:0;right:0;z-index:50;background:var(--bg);
+  opacity:0;pointer-events:none;transition:opacity .18s ease}
+#band.on{opacity:1;pointer-events:auto}
+#band .rule{height:2px}
+.bandin{display:flex;align-items:center;gap:14px;padding:11px 24px;
+  border-bottom:1px solid var(--border);max-width:1200px;margin:0 auto}
+.bandwm{font-size:15px;font-weight:200;letter-spacing:.14em;color:var(--text)}
+@media(max-width:720px){
+  .wordmark{font-size:30px} .slogan{font-size:15px}
+  .dateline{flex-wrap:wrap} .dateline div{flex:1 1 50%!important;text-align:left!important}
+}
+
+/* [0] bulgu seridi */
+#strip{display:flex;gap:11px;overflow-x:auto;padding-bottom:10px;margin-bottom:26px;
+  scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.fcard{min-width:214px;max-width:214px;border:1px solid var(--border);border-radius:var(--radius);
+  padding:14px 15px;background:var(--surface);flex-shrink:0}
+.fcard .n{font-size:31px;font-weight:300;color:var(--accent);line-height:1;letter-spacing:-.02em}
+.fcard .b{font-size:12px;font-weight:500;margin:7px 0 6px}
+.fcard .t{font-size:11px;color:var(--text-3);line-height:1.55}
+.fcard .k{font-size:10px;color:var(--text-4);margin-top:9px;padding-top:7px;border-top:1px solid var(--line)}
+
+/* [0.5] notable — market karti konvansiyonu */
+#notable{margin-bottom:26px}
+#ngrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(238px,1fr));gap:11px}
+.ncard{border:1px solid var(--border);border-radius:var(--radius);padding:13px 14px;
+  background:var(--surface);cursor:pointer;transition:border-color .12s}
+.ncard:hover{border-color:#3a3026}
+.ncard .q{font-size:12px;color:var(--text);line-height:1.45;margin-bottom:11px;min-height:35px}
+.chips2{display:flex;gap:6px;margin-bottom:10px}
+.oc{flex:1;border-radius:4px;padding:6px 9px}
+.oc .k{font-size:9px} .oc .v{font-size:15px}
+.oc.yes{background:var(--yes-bg)} .oc.yes .k{color:#6d8a6d} .oc.yes .v{color:var(--yes)}
+.oc.no{background:var(--no-bg)}   .oc.no .k{color:#8a6d6d}  .oc.no .v{color:var(--no)}
+.nfoot{border-top:1px solid var(--line);padding-top:8px;display:flex;align-items:baseline}
+
+/* [1] varlik kartlari */
+#chips{display:flex;gap:6px;margin-bottom:13px;flex-wrap:wrap}
+.chip{font-size:12px;padding:4px 11px;border-radius:4px;color:var(--text-3);cursor:pointer;user-select:none}
+.chip:hover{color:var(--text-2)} .chip.on{background:var(--border);color:var(--text)}
+#cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px;margin-bottom:8px}
+.acard{border:1px solid var(--border);border-radius:var(--radius);padding:13px 15px;
+  background:var(--surface);cursor:pointer;transition:border-color .12s}
+.acard:hover{border-color:#3a3026}
+.acard.sel{border-color:var(--accent)}
+.acard.none{opacity:.66}
+.icon{width:23px;height:23px;border-radius:50%;background:var(--surface-2);display:flex;
+  align-items:center;justify-content:center;font-size:9px;font-weight:500;color:var(--text-3);flex-shrink:0}
+.an{display:flex;align-items:center;gap:7px;font-size:11px;margin-bottom:3px}
+.an .st{width:9px;flex-shrink:0} .an .lb{width:96px;flex-shrink:0}
+
+/* [2][3] tablolar */
+.sect{font-size:10px;letter-spacing:.14em;color:var(--text-3);margin:26px 0 9px}
+table{width:100%;border-collapse:collapse}
+th{font-size:10px;font-weight:400;color:var(--text-3);text-align:left;letter-spacing:.04em;
+  padding:0 9px 7px;border-bottom:1px solid var(--border);white-space:nowrap}
+th.num{text-align:right}
+td{font-size:12px;padding:0 9px;height:var(--row);border-bottom:1px solid var(--line);
+  color:var(--text-2);vertical-align:middle}
+tr.clk{cursor:pointer} tr.clk:hover td{background:var(--surface)}
+tr.quiet td{color:var(--text-4)} tr.open td{background:var(--surface)}
+.bar{position:relative;height:12px;min-width:74px}
+.bar .band{position:absolute;left:0;top:3px;height:6px;background:#2f2822;border-radius:2px}
+.bar .gap{position:absolute;left:0;top:4px;height:4px;border-radius:2px}
+.badge{font-size:9px;letter-spacing:.04em;padding:2px 6px;border-radius:3px;border:1px solid;white-space:nowrap}
+.b-free{color:var(--ok);border-color:#2f4a26} .b-model{color:var(--warn);border-color:#4a3a12}
+.b-none{color:var(--text-4);border-color:var(--border)}
+
+/* [4] detay */
+.detail{border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;
+  margin:3px 0 10px;background:var(--surface-2);max-width:580px}
+.big{display:flex;gap:28px;margin:13px 0 15px}
+.big div div:first-child{font-size:10px;letter-spacing:.05em;color:var(--text-3)}
+.big div div:last-child{font-size:23px;font-weight:400}
+.checks{border-top:1px solid var(--border);padding-top:10px;font-size:11px;color:var(--text-3);line-height:1.85}
+.empty{color:var(--text-4);font-size:12px;padding:14px 0}
+#err{color:var(--warn);font-size:12px;padding:12px 0}
+</style>
+</head>
+<body>
+
+<div id="band"><div class="rule"></div><div class="bandin">
+  <svg width="54" height="22" viewBox="0 0 124 50" style="flex-shrink:0">
+    <path d="M4 25 L44 25" stroke="#9c8f7e" stroke-width="3.5" fill="none"/>
+    <path d="M44 25 C 70 25, 76 8, 120 4" stroke="#e8a33d" stroke-width="4" fill="none"/>
+    <path d="M44 25 C 70 25, 76 42, 120 46" stroke="#5a5148" stroke-width="4" fill="none"/>
+  </svg>
+  <span class="bandwm">DIVERGENCE</span>
+  <span id="bandmeta" class="t10" style="margin-left:auto;letter-spacing:.09em;color:var(--text-4)"></span>
+</div></div>
+
+<div class="mast"><div class="rule"></div><div class="mastin">
+  <div class="mtop">
+    <svg width="124" height="50" viewBox="0 0 124 50" style="flex-shrink:0">
+      <path d="M4 25 L44 25" stroke="#9c8f7e" stroke-width="2" fill="none"/>
+      <path d="M44 25 C 70 25, 76 8, 120 4" stroke="#e8a33d" stroke-width="2.5" fill="none"/>
+      <path d="M44 25 C 70 25, 76 42, 120 46" stroke="#5a5148" stroke-width="2.5" fill="none"/>
+      <circle cx="44" cy="25" r="3.5" fill="#14110f" stroke="#e8a33d" stroke-width="2"/>
+    </svg>
+    <div>
+      <div class="wordmark">DIVERGENCE</div>
+      <div class="slogan">Where <span class="pm">prediction markets</span>
+        and <span class="op">options</span> disagree</div>
+    </div>
+  </div>
+  <div class="dateline">
+    <div id="dl-no"   style="flex:1">NO. —</div>
+    <div id="dl-date" style="flex:2">loading archive…</div>
+    <div id="dl-src"  style="flex:2.4">KALSHI · POLYMARKET · DERIBIT</div>
+    <div id="dl-sync" style="flex:2;text-align:right">SYNC — · ARCHIVE —</div>
+  </div>
+</div></div>
+
+<div class="lab" style="margin-bottom:9px">WHAT WE FOUND · measured, not claimed · scroll →</div>
+<div id="strip"></div>
+
+<div id="notable"></div>
+
+<div class="lab" style="margin-bottom:9px">ASSETS</div>
+<div id="chips"></div>
+<div id="cards"></div>
+
+<div id="panel"></div>
+<div id="err"></div>
+
+<script>
+/* ===================== ICERIK KATMANI — veri, kod degil ===================== */
+const VARLIKLAR=[
+ {a:'BTC', l:'Bitcoin',    c:'Crypto',      i:'BTC', para:'BTC'},
+ {a:'ETH', l:'Ethereum',   c:'Crypto',      i:'ETH', para:'ETH'},
+ {a:'SPX', l:'S&P 500',    c:'Indices',     i:'SPX'},
+ {a:'NDX', l:'Nasdaq-100', c:'Indices',     i:'NDX'},
+ {a:'WTI', l:'Crude oil',  c:'Commodities', i:'WTI'},
+ {a:'GOLD',l:'Gold',       c:'Commodities', i:'AU'},
+ {a:'TSLA',l:'Tesla',      c:'Equities',    i:'TSLA'}];
+/* Serit kartlari. src:'live' -> arsivden hesaplanir. src:'rec' -> kayitli olcum,
+   tarih ve karar numarasi ZORUNLU. Elle yazilmis cumle yasak. */
+const SERIT=[
+ {id:'tail',  src:'live', b:'Tail premium',
+  t:'What prediction markets charge for the least likely outcome, versus what the option chain implies.'},
+ {id:'costs', src:'rec',  n:'0/44', b:'Survives costs', k:'measured 2026-08-31 · D-049',
+  t:'Gaps that beat trading friction and measurement uncertainty. Three replication methods, none survived.'},
+ {id:'rep',   src:'rec',  n:'3',    b:'Independent setups', k:'D-045 · D-046 · D-066',
+  t:'The same shape on Polymarket short-dated, on the long-horizon touch bound, and on Kalshi year-end buckets.'},
+ {id:'sync',  src:'live', b:'Sync window',
+  t:'Time between reading the option chain and the prediction market. An 8-minute gap once moved a result by 33%.'},
+ {id:'catch', src:'rec',  n:'13%',  b:'Caught by a constraint', k:'measured 2026-08-31 · D-067',
+  t:'A density that summed to 1.13 instead of 1. Every digital looked perfect alone — only the sum exposed it.'},
+ {id:'mkts',  src:'live', b:'Markets tracked',
+  t:'Across three venues, captured in one synchronised run and archived unchanged.'}];
+
+const REPO='https://raw.githubusercontent.com/DenizErginGunduz/divergence/main/';
+const API ='https://api.github.com/repos/DenizErginGunduz/divergence/contents/';
+
+/* ===================== VERI ===================== */
+async function gz(p){const r=await fetch(REPO+p+'?cb='+Date.now());
+ if(!r.ok) throw new Error(p+' → '+r.status);
+ return JSON.parse(await new Response(r.body.pipeThrough(new DecompressionStream('gzip'))).text());}
+async function son(kl){const g=await (await fetch(API+kl+'?cb='+Date.now())).json();
+ if(!Array.isArray(g)||!g.length) throw new Error(kl);
+ const gun=g.map(x=>x.name).sort().pop();
+ const f=await (await fetch(API+kl+'/'+gun+'?cb='+Date.now())).json();
+ return kl+'/'+gun+'/'+f.map(x=>x.name).sort().pop();}
+
+/* ===================== HESAP ===================== */
+const kus=(o,K)=>{const ks=Object.keys(o).map(Number).sort((a,b)=>a-b);
+ const lo=ks.filter(k=>k<K),hi=ks.filter(k=>k>K);
+ return (lo.length&&hi.length)?[lo[lo.length-1],hi[0]]:null;};
+function zincir(D,p){const idx=D[p].index.result.index_price,ch={};
+ for(const b of (D[p].book_summary.result||D[p].book_summary)){
+  const q=b.instrument_name.split('-'); if(q.length!==4)continue;
+  ((ch[q[1]]||={})[q[3]]||={})[+q[2]]={mark:(b.mark_price||0)*idx,
+   bid:b.bid_price?b.bid_price*idx:null, ask:b.ask_price?b.ask_price*idx:null};}
+ return {ch,idx};}
+function fwd(ch,e,idx){const C=ch[e].C,P=ch[e].P,v=[];
+ for(const k of Object.keys(C).map(Number)) if(P&&P[k]&&k>.85*idx&&k<1.2*idx) v.push(k+C[k].mark-P[k].mark);
+ v.sort((a,b)=>a-b); return v.length?v[Math.floor(v.length/2)]:null;}
+function dij(ch,e,K,F,idx){const t=K<F?'P':'C',o=ch[e][t]; if(!o)return null;
+ const br=kus(o,K); if(!br)return null; const[a,b]=br,g=b-a,A=o[a],B=o[b];
+ const p=t==='C'?(A.mark-B.mark)/g:1-(B.mark-A.mark)/g;
+ const se=(A.bid!=null&&A.ask!=null&&B.bid!=null&&B.ask!=null)
+  ?Math.sqrt(((A.ask-A.bid)/2)**2+((B.ask-B.bid)/2)**2)/g:null;
+ const uc=x=>Math.min(.0003*idx,.125*x);
+ return {p,se,fee:(uc(A.mark)+uc(B.mark))/g,cift:[a,b]};}
+const MON={JAN:0,FEB:1,MAR:2,APR:3,MAY:4,JUN:5,JUL:6,AUG:7,SEP:8,OCT:9,NOV:10,DEC:11};
+const van=l=>{const m=l.match(/^(\d+)([A-Z]{3})(\d{2})$/);
+ return m?Date.UTC(2000+ +m[3],MON[m[2]],+m[1],8,0,0):null;};
+const kisa=v=>v>=1000?'$'+(v/1000).toFixed(v%1000?1:0).replace(/\.0$/,'')+'k':'$'+Math.round(v);
+const c2=v=>v==null?'—':(v*100).toFixed(2)+'¢';
+const f2=v=>v==null?'—':v.toLocaleString('en-US',{maximumFractionDigits:2});
+
+function kovalar(KA,D,seri,para){
+ const M=(KA.marketler[seri]||[]).filter(m=>m.status==='active'); if(!M.length)return null;
+ const {ch,idx}=zincir(D,para), TP=Date.parse(M[0].close_time);
+ const vs=Object.keys(ch).filter(e=>ch[e].C&&ch[e].P).map(l=>({l,t:van(l)}))
+   .filter(x=>x.t).sort((a,b)=>a.t-b.t);
+ const alt=vs.filter(x=>x.t<=TP).pop(); if(!alt)return null;
+ const F=fwd(ch,alt.l,idx); if(!F)return null;
+ const S=M.map(m=>({tip:m.strike_type,floor:m.floor_strike,cap:m.cap_strike,
+   bid:+m.yes_bid_dollars,ask:+m.yes_ask_dollars,oi:Math.round(+m.open_interest_fp||0)}))
+   .sort((a,b)=>((a.floor??a.cap)-(b.floor??b.cap)));
+ const rows=[]; let top=0,neg=0;
+ for(const m of S){
+  let lo=null,hi=null,et='';
+  if(m.tip==='less'){hi=Math.round(m.cap); et='below '+kisa(m.cap);}
+  else if(m.tip==='greater'){lo=Math.round(m.floor+.01); et='above '+kisa(m.floor);}
+  else{lo=Math.round(m.floor); hi=Math.round(m.cap+.01); et=kisa(m.floor)+' – '+kisa(m.cap);}
+  const dL=lo!=null?dij(ch,alt.l,lo,F,idx):{p:1,se:0,fee:0};
+  const dH=hi!=null?dij(ch,alt.l,hi,F,idx):{p:0,se:0,fee:0};
+  const pm=(m.bid+m.ask)/2, mk=m.ask-m.bid;
+  if(!dL||!dH){rows.push({et,pm,mk,oi:m.oi,sessiz:'outside option strike range'});continue;}
+  const opt=dL.p-dH.p; top+=opt; if(opt<0)neg++;
+  const se=(dL.se==null||dH.se==null)?null:Math.sqrt(dL.se**2+dH.se**2);
+  const surt=dL.fee+dH.fee+mk/2, esik=(se==null?0:1.96*se)+surt;
+  rows.push({et,pm,opt,fark:pm-opt,se,surt,esik,mk,oi:m.oi,
+    oran:opt>0?pm/opt:null, asiyor:Math.abs(pm-opt)>esik, cift:[dL.cift,dH.cift]});
+ }
+ return {rows,vade:alt.l,TP,F,idx,top,neg,seri,
+   pmBid:S.reduce((s,x)=>s+x.bid,0), pmAsk:S.reduce((s,x)=>s+x.ask,0)};
+}
+
+/* ===================== DURUM ===================== */
+let S={sinif:'All', varlik:null, merdiven:null, basamak:null,
+       KA:null, D:null, hesap:{}, seriler:{}, meta:{}};
+
+/* ===================== CIZIM ===================== */
+function serit(){
+  const h=S.hesap.BTC;
+  const en = h ? h.rows.filter(r=>r.oran).reduce((p,c)=>c.oran>p.oran?c:p,{oran:0}) : null;
+  const mkts = S.KA ? Object.values(S.KA.marketler).reduce((s,v)=>s+(Array.isArray(v)?v.length:0),0) : null;
+  document.getElementById('strip').innerHTML=SERIT.map(f=>{
+    let n=f.n,k=f.k;
+    if(f.src==='live'){
+      if(f.id==='tail'){ n=en&&en.oran?en.oran.toFixed(1)+'×':'—';
+        k=en&&en.et?'live · BTC '+en.et:'live'; }
+      if(f.id==='sync'){ n=(S.meta.pencere??'—')+'s'; k='live · three sources, one run'; }
+      if(f.id==='mkts'){ n=mkts?mkts.toLocaleString('en-US'):'—'; k='live · Kalshi crypto series'; }
+    }
+    return `<div class="fcard"><div class="n">${n??'—'}</div>
+      <div class="b">${f.b}</div><div class="t">${f.t}</div>
+      <div class="k">${k??''}</div></div>`;}).join('');
+}
+function notable(){
+  const el=document.getElementById('notable');
+  const hepsi=[];
+  for(const [a,h] of Object.entries(S.hesap))
+    for(const r of h.rows) if(!r.sessiz&&r.oran) hepsi.push({a,r,h});
+  let sec=hepsi.filter(x=>x.r.asiyor).sort((a,b)=>Math.abs(b.r.fark)-Math.abs(a.r.fark));
+  let etiket='exceeds trading costs';
+  if(!sec.length){ sec=hepsi.sort((a,b)=>b.r.oran-a.r.oran); etiket='within trading costs'; }
+  sec=sec.slice(0,4);
+  if(!sec.length){ el.innerHTML=''; return; }
+  el.innerHTML=`<div class="lab" style="margin-bottom:9px">NOTABLE RIGHT NOW · ${etiket}</div>
+    <div id="ngrid">${sec.map(x=>nkart(x)).join('')}</div>`;
+  el.querySelectorAll('.ncard').forEach(e=>e.onclick=()=>{
+    S.varlik=e.dataset.a; S.merdiven=null; S.basamak=null; ciz();
+    document.getElementById('panel').scrollIntoView({behavior:'smooth',block:'start'});});
+}
+function nkart(x){
+  const r=x.r, ad={BTC:'Bitcoin',ETH:'Ethereum'}[x.a]||x.a;
+  // kova etiketini okunur bir soruya cevir
+  const soru = r.et.startsWith('above') ? `${ad} ${r.et} at year-end`
+             : r.et.startsWith('below') ? `${ad} ${r.et} at year-end`
+             : `${ad} between ${r.et.replace(' – ',' and ')} at year-end`;
+  return `<div class="ncard" data-a="${x.a}">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:9px">
+      <span class="icon">${x.a}</span>
+      <span class="t11 dim2">Kalshi</span>
+      <span class="t10 dim2" style="margin-left:auto">OI ${r.oi.toLocaleString('en-US')}</span></div>
+    <div class="q">${soru}</div>
+    <div class="chips2">
+      <div class="oc yes"><div class="k">YES</div><div class="v">${c2(r.pm)}</div></div>
+      <div class="oc no"><div class="k">NO</div><div class="v">${c2(1-r.pm)}</div></div></div>
+    <div class="nfoot">
+      <span class="t10" style="color:var(--text-3);letter-spacing:.04em">OPTIONS IMPLY</span>
+      <span class="t12 dim" style="margin-left:auto">${c2(r.opt)}</span>
+      <span class="t12" style="margin-left:9px;color:${r.oran>1.5?'var(--accent)':'var(--text-3)'}">${r.oran.toFixed(1)}×</span>
+    </div>
+    <div class="t10 dim2" style="margin-top:6px">gap ${(Math.abs(r.fark)/r.esik).toFixed(1)}× band${r.asiyor?'':' · inside band'}</div>
+  </div>`;
+}
+function cipler(){
+  const l=['All',...new Set(VARLIKLAR.map(v=>v.c))];
+  document.getElementById('chips').innerHTML=l.map(x=>
+    `<span class="chip ${x===S.sinif?'on':''}" data-s="${x}">${x}</span>`).join('');
+  document.querySelectorAll('#chips .chip').forEach(e=>e.onclick=()=>{
+    S.sinif=e.dataset.s; S.varlik=null; S.merdiven=null; S.basamak=null; ciz();});
+}
+const NOKTA={live:['var(--ok)','●'],partial:['var(--warn)','◐'],none:['var(--text-4)','○']};
+function analiz(v){
+  const h=S.hesap[v.a], o=[];
+  if(h) o.push({l:'Pricing',s:'live',d:`${h.rows.filter(r=>!r.sessiz).length}/${h.rows.length} buckets · model-free`});
+  else if(v.a==='SPX'||v.a==='NDX') o.push({l:'Pricing',s:'partial',d:'option chain verified · venue pending'});
+  else if(v.a==='WTI'||v.a==='GOLD') o.push({l:'Pricing',s:'none',d:'ETF proxy only — carry / roll error'});
+  else o.push({l:'Pricing',s:'none',d:'ladder too thin — spread'});
+  const f=v.c==='Crypto'||v.a==='TSLA';
+  o.push({l:'Flow',s:f?'live':'none',d:f?'wallet-resolved':'no on-chain venue'});
+  const x=v.c==='Crypto'||v.a==='WTI'||v.a==='GOLD';
+  o.push({l:'Cross-venue',s:x?'live':'none',d:x?'Kalshi + Polymarket':'single venue'});
+  return o;
+}
+function kartlar(){
+  const l=VARLIKLAR.filter(v=>S.sinif==='All'||v.c===S.sinif);
+  document.getElementById('cards').innerHTML=l.map(v=>{
+    const a=analiz(v), canli=a.filter(x=>x.s==='live').length, h=S.hesap[v.a];
+    const ser=(S.seriler[v.a]||[]).length;
+    return `<div class="acard ${canli?'':'none'} ${v.a===S.varlik?'sel':''}" data-a="${v.a}">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">
+        <span class="icon">${v.i}</span><span class="w5" style="font-size:15px">${v.a}</span>
+        <span class="t11 dim">${v.l}</span>
+        <span class="t12 num" style="margin-left:auto;color:var(--text-2)">${h?f2(h.idx):'—'}</span></div>
+      <div class="t11 dim2" style="margin-bottom:10px">${ser?ser+' ladders listed':'&nbsp;'}</div>
+      ${a.map(x=>{const c=NOKTA[x.s];
+        return `<div class="an"><span class="st" style="color:${c[0]}">${c[1]}</span>
+          <span class="lb" style="color:${x.s==='none'?'var(--text-4)':'var(--text-2)'}">${x.l}</span>
+          <span class="dim2">${x.d}</span></div>`;}).join('')}
+    </div>`;}).join('');
+  document.querySelectorAll('.acard').forEach(e=>e.onclick=()=>{
+    S.varlik=S.varlik===e.dataset.a?null:e.dataset.a; S.merdiven=null; S.basamak=null; ciz();});
+}
+/* [2] merdiven listesi */
+function panel(){
+  const p=document.getElementById('panel'); p.innerHTML='';
+  if(!S.varlik) return;
+  const ser=S.seriler[S.varlik]||[];
+  if(!ser.length){ p.innerHTML=`<div class="empty">No ladders listed for ${S.varlik} in this snapshot.</div>`; return; }
+  p.innerHTML=`<div class="sect">${S.varlik} · LADDERS</div>
+   <table><thead><tr>
+     <th style="width:210px">LADDER</th><th style="width:88px">TYPE</th>
+     <th class="num" style="width:66px">RUNGS</th>
+     <th class="num" style="width:86px">MEASURABLE</th>
+     <th class="num" style="width:96px">OPEN INT</th>
+     <th style="width:104px">EXPIRY</th><th style="width:110px">EVIDENCE</th>
+   </tr></thead><tbody>${ser.map(s=>mSatir(s)).join('')}</tbody></table>
+   <div id="rungs"></div>`;
+  p.querySelectorAll('tr.clk').forEach(e=>e.onclick=()=>{
+    S.merdiven=S.merdiven===e.dataset.s?null:e.dataset.s; S.basamak=null; ciz();});
+  if(S.merdiven && S.hesap[S.varlik] && S.hesap[S.varlik].seri===S.merdiven) basamaklar();
+}
+function mSatir(s){
+  const h=(S.hesap[S.varlik]&&S.hesap[S.varlik].seri===s.t)?S.hesap[S.varlik]:null;
+  const ac=S.merdiven===s.t;
+  if(!h) return `<tr class="quiet"><td>${s.baslik}</td><td>${s.tip}</td>
+    <td class="num">${s.n}</td><td class="num">—</td>
+    <td class="num">${s.oi.toLocaleString('en-US')}</td><td>${s.vade}</td>
+    <td><span class="badge b-none">not terminal</span></td></tr>`;
+  const olc=h.rows.filter(r=>!r.sessiz).length;
+  return `<tr class="clk ${ac?'open':''}" data-s="${s.t}">
+    <td style="color:var(--text)">${s.baslik}</td><td>terminal</td>
+    <td class="num">${h.rows.length}</td>
+    <td class="num" style="color:${olc/h.rows.length>.8?'var(--ok)':'var(--warn)'}">${olc}/${h.rows.length}</td>
+    <td class="num">${s.oi.toLocaleString('en-US')}</td><td>${s.vade}</td>
+    <td><span class="badge b-free">MODEL-FREE</span></td></tr>`;
+}
+/* [3] basamak tablosu */
+function basamaklar(){
+  const h=S.hesap[S.varlik], t=Math.abs(h.top-1)<.05&&h.neg===0;
+  document.getElementById('rungs').innerHTML=`
+    <div class="sect">RUNGS · vs Deribit ${h.vade}</div>
+    <div class="t11 dim2" style="margin-bottom:10px">
+      forward ${f2(h.F)} · option bucket sum
+      <span style="color:${t?'var(--ok)':'var(--warn)'}">${h.top.toFixed(4)}</span> ·
+      prediction bid/ask sum ${h.pmBid.toFixed(3)} / ${h.pmAsk.toFixed(3)} ·
+      negative buckets <span style="color:${h.neg?'var(--warn)':'var(--ok)'}">${h.neg}</span></div>
+    <table><thead><tr>
+      <th style="width:140px">OUTCOME</th>
+      <th class="num" style="width:88px">PREDICTION</th>
+      <th class="num" style="width:88px">OPTIONS IMPLY</th>
+      <th class="num" style="width:62px">RATIO</th>
+      <th style="width:126px">GAP vs BAND</th>
+      <th class="num" style="width:88px">OPEN INT</th>
+    </tr></thead><tbody>${h.rows.map((r,i)=>bSatir(r,i)).join('')}</tbody></table>`;
+  document.querySelectorAll('#rungs tr.clk').forEach(e=>e.onclick=()=>{
+    S.basamak=S.basamak===+e.dataset.i?null:+e.dataset.i; ciz();});
+}
+function bSatir(r,i){
+  if(r.sessiz) return `<tr class="quiet"><td>${r.et}</td><td class="num">${c2(r.pm)}</td>
+    <td class="num">—</td><td class="num">—</td>
+    <td class="t11">not measurable · ${r.sessiz}</td>
+    <td class="num">${r.oi.toLocaleString('en-US')}</td></tr>`;
+  const w=Math.min(100,Math.abs(r.fark)/.03*100), bw=Math.min(100,r.esik/.03*100), ac=S.basamak===i;
+  return `<tr class="clk ${ac?'open':''}" data-i="${i}">
+    <td style="color:var(--text)">${r.et}</td>
+    <td class="num">${c2(r.pm)}</td><td class="num dim">${c2(r.opt)}</td>
+    <td class="num" style="color:${r.oran>1.5?'var(--accent)':'var(--text-3)'}">${r.oran?r.oran.toFixed(1)+'×':'—'}</td>
+    <td><div class="bar"><div class="band" style="width:${bw}%"></div>
+      <div class="gap" style="width:${w}%;background:${r.asiyor?'var(--accent)':'#4a4137'}"></div></div></td>
+    <td class="num">${r.oi.toLocaleString('en-US')}</td></tr>`
+    + (ac?`<tr><td colspan="6" style="padding:0">${detay(r)}</td></tr>`:'');
+}
+/* [4] detay */
+function detay(r){
+  const h=S.hesap[S.varlik], kat=r.esik>0?(Math.abs(r.fark)/r.esik).toFixed(1):'—';
+  return `<div class="detail">
+    <div style="display:flex;align-items:baseline;gap:10px">
+      <span class="w5">${S.varlik} ${r.et}</span>
+      <span class="t11 dim">year-end · ${Math.round((h.TP-Date.now())/864e5)}d</span>
+      <span class="badge b-free" style="margin-left:auto">MODEL-FREE</span></div>
+    <div class="t11 dim2">Kalshi bucket · Deribit ${h.vade} digitals</div>
+    <div class="big">
+      <div><div>PREDICTION</div><div>${c2(r.pm)}</div></div>
+      <div><div>OPTIONS IMPLY</div><div class="dim">${c2(r.opt)}</div></div>
+      <div><div>RICHER BY</div><div style="color:var(--accent)">${r.oran?r.oran.toFixed(1)+'×':'—'}</div></div>
+    </div>
+    <div class="t10 dim" style="letter-spacing:.05em;margin-bottom:5px">GAP vs UNCERTAINTY + FRICTION</div>
+    <div class="bar" style="height:20px;margin-bottom:5px">
+      <div class="band" style="top:6px;height:9px;width:${Math.min(100,r.esik/.03*100)}%"></div>
+      <div class="gap" style="top:8px;height:5px;width:${Math.min(100,Math.abs(r.fark)/.03*100)}%;
+        background:${r.asiyor?'var(--accent)':'#4a4137'}"></div></div>
+    <div class="t11 dim" style="display:flex;margin-bottom:12px">
+      <span>band ${c2(r.esik)}</span>
+      <span style="margin-left:auto">gap ${c2(Math.abs(r.fark))} —
+        <span style="color:var(--text)">${kat}× band</span></span></div>
+    <div class="checks">
+      <div>uncertainty ${c2(r.se)} · friction ${c2(r.surt)} · prediction spread ${c2(r.mk)}</div>
+      <div>bucket set sums to
+        <span style="color:${Math.abs(h.top-1)<.05?'var(--ok)':'var(--warn)'}">${h.top.toFixed(4)}</span>
+        · negative buckets <span style="color:${h.neg?'var(--warn)':'var(--ok)'}">${h.neg}</span></div>
+      <div>option strikes used: ${r.cift?r.cift.map(c=>c?'['+c.join(', ')+']':'—').join(' / '):'—'}</div>
+      <div>sync window <span style="color:var(--ok)">${S.meta.pencere??'—'}s</span>
+        · open interest ${r.oi.toLocaleString('en-US')}</div>
+      <div style="color:var(--warn)">expiry gap ${Math.round((h.TP-van(h.vade))/864e5)}d —
+        options slightly narrow, biases the gap upward</div>
+      <div style="color:var(--warn)">index mismatch: venue index vs Deribit index — unmeasured</div>
+      <div class="dim2">reference: collecting — archive started 2026-08-30</div>
+    </div></div>`;
+}
+function ciz(){ serit(); notable(); cipler(); kartlar(); panel(); }
+
+/* Kunye alanlari. NO. = arsivdeki snapshot sayisi — uydurma surum numarasi degil. */
+function kunye(){
+  const an=(S.meta.an||'').replace('T',' ').slice(0,16);
+  const no=S.meta.no?String(S.meta.no).padStart(3,'0'):'—';
+  document.getElementById('dl-no').textContent='NO. '+no;
+  document.getElementById('dl-date').textContent=an?an+'Z':'—';
+  document.getElementById('dl-sync').textContent=
+    'SYNC '+(S.meta.pencere??'—')+'s · ARCHIVE '+(S.meta.gun??'—')+'d';
+  document.getElementById('bandmeta').textContent=
+    'NO. '+no+' · '+(an?an.slice(11):'—')+'Z · SYNC '+(S.meta.pencere??'—')+'s';
+}
+addEventListener('scroll',()=>{
+  document.getElementById('band').classList.toggle('on', scrollY>170);
+},{passive:true});
+
+/* ===================== BASLAT ===================== */
+(async()=>{
+ try{
+  const [pk,pd]=await Promise.all([son('raw/kalshi'),son('raw/deribit')]);
+  const [KA,D]=await Promise.all([gz(pk),gz(pd)]);
+  S.KA=KA; S.D=D;
+  try{
+   const mg=await (await fetch(API+'raw/_meta?cb='+Date.now())).json();
+   const gun=mg.map(x=>x.name).sort().pop();
+   const mf=await (await fetch(API+'raw/_meta/'+gun+'?cb='+Date.now())).json();
+   const m=await (await fetch(REPO+'raw/_meta/'+gun+'/'+mf.map(x=>x.name).sort().pop()+'?cb='+Date.now())).json();
+   S.meta={pencere:m.fiyat_penceresi_saniye, an:m.snapshot_utc, gun:mg.length};
+   // NO. = arsivdeki toplam snapshot sayisi
+   try{
+    const sayilar=await Promise.all(mg.map(async d=>{
+     const f=await (await fetch(API+'raw/_meta/'+d.name+'?cb='+Date.now())).json();
+     return Array.isArray(f)?f.length:0;}));
+    S.meta.no=sayilar.reduce((a,b)=>a+b,0);
+   }catch(e){}
+  }catch(e){}
+  // olculebilir terminal merdivenler
+  for(const [a,seri,para] of [['BTC','KXBTCY','BTC'],['ETH','KXETHY','ETH']]){
+   try{const h=kovalar(KA,D,seri,para); if(h) S.hesap[a]=h;}catch(e){console.warn(a,e);}
+  }
+  // merdiven listesi: o varligin TUM canli Kalshi serileri
+  const kat=(KA.katalog&&KA.katalog.Crypto&&KA.katalog.Crypto.series)||[];
+  const bilgi=Object.fromEntries(kat.map(x=>[x.ticker,x]));
+  for(const [t,v] of Object.entries(KA.marketler||{})){
+   if(!Array.isArray(v)) continue;
+   const akt=v.filter(m=>m.status==='active'); if(!akt.length) continue;
+   const tg=(bilgi[t]&&bilgi[t].tags)||[];
+   const a=tg.includes('BTC')?'BTC':(tg.includes('ETH')?'ETH':null); if(!a) continue;
+   const uz=akt.map(m=>Date.parse(m.close_time)).filter(Boolean);
+   (S.seriler[a] ||= []).push({t, baslik:(bilgi[t]&&bilgi[t].title)||t,
+     tip:(bilgi[t]&&bilgi[t].frequency)||'—', n:akt.length,
+     oi:Math.round(akt.reduce((s,m)=>s+(+m.open_interest_fp||0),0)),
+     vade:uz.length?new Date(Math.max(...uz)).toISOString().slice(0,10):'—'});
+  }
+  for(const k in S.seriler) S.seriler[k].sort((a,b)=>b.oi-a.oi);
+  kunye();
+  ciz();
+ }catch(e){
+  document.getElementById('err').textContent='archive read failed: '+e.message;
+  document.getElementById('dl-date').textContent='archive unavailable'; ciz();
+ }
+})();
+</script>
+</body>
+</html>
