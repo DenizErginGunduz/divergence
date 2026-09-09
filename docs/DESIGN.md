@@ -118,7 +118,33 @@ lisansı `DATA_SOURCES.md`'ye yazılır.
 
 ---
 
-## 5. Üç seviyeli açılma
+## 5. Sayfa sırası ve açılma
+
+### 5.0 Üstteki iki şerit — gezinme değil, cevap
+
+**[0] Bulgu şeridi (findings strip).** Sayfanın en üstünde, "bu araç ne buldu"
+sorusunun cevabı. Yatay, **elle kaydırılan**, dönmeyen.
+
+- **Dönmez.** Otomatik karusel bir kalıp hatasıdır: kullanıcıların çoğu ikinci
+  kartı hiç görmez. En iyi bulgumuzu zamanlayıcının arkasına koyamayız.
+- **İçeriği daima hesaplanır**, elle yazılmaz. Her kart bir ölçümden türer ve
+  veri değişince kart da değişir. Elle yazılmış bir cümle buraya sızarsa
+  şerit slogan panosuna döner.
+- Her kart **bağımsız anlamlı** olmak zorunda; sıralamaya bağımlı olamaz.
+
+**[0.5] Notable right now.** Varlık kartlarının hemen üstünde üç-dört satırlık
+vitrin. Gezinme değil, somut örnek.
+
+- Adı **"notable"**, "opportunities" veya "signals" DEĞİL. Vitrin mantığı
+  zamanla fırsat listesine kayar; isim bunu engelleyen ilk settir.
+- **Seçim kuralı yazılıdır ve hesaplanır:** farkı sürtünme+belirsizlik bandını
+  aşan satırlar; hiçbiri aşmıyorsa en yüksek orana sahip olanlar, ve o durumda
+  satırın yanına "within trading costs" etiketi konur.
+- Boşsa gizlenir; doldurmak için eşik gevşetilmez.
+
+### 5.1 Açılma
+
+
 
 ```
 [1] Varlık kartları        ızgara · filtre çipleri kalıcı
