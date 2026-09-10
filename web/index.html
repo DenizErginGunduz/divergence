@@ -37,8 +37,29 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
 .dim{color:var(--text-3)} .dim2{color:var(--text-4)} .w5{font-weight:500}
 .lab{font-size:10px;letter-spacing:.14em;color:var(--text-3)}
 
+/* ---- tam genislik (full-bleed) ----
+   body max-width:1200px tasiyor; asagidaki yardimci onun disina cikar.
+   --sbw = dikey kaydirma cubugunun genisligi, JS olcer. 100vw kaydirma
+   cubugunu da saydigi icin cikarilmazsa yatay tasma olusur. */
+.bleed{width:calc(100vw - var(--sbw,0px));
+  margin-left:calc(50% - (100vw - var(--sbw,0px))/2)}
+/* slider icerigi solda 1200px'lik icerik hizasindan baslar, saga ekran kenarina tasar */
+.bleedpad{padding-left:max(24px,calc((100vw - var(--sbw,0px) - 1200px)/2 + 24px));
+  padding-right:max(24px,calc((100vw - var(--sbw,0px) - 1200px)/2 + 24px))}
+
+/* ---- yatay slider sarmalayici ---- */
+.swrap{position:relative;margin-bottom:26px}
+.sarr{position:absolute;top:0;bottom:10px;width:46px;border:0;cursor:pointer;z-index:5;
+  color:var(--text-2);font-size:26px;line-height:1;opacity:0;transition:opacity .15s;
+  display:flex;align-items:center;justify-content:center}
+.swrap:hover .sarr{opacity:.9}
+.sarr:hover{color:var(--accent)}
+.sarr.sl{left:0;background:linear-gradient(90deg,var(--bg) 45%,transparent)}
+.sarr.sr{right:0;background:linear-gradient(270deg,var(--bg) 45%,transparent)}
+.sarr[hidden]{display:none}
+
 /* ---- KUNYE (masthead) ---- */
-.mast{margin:-26px -24px 26px;background:var(--bg)}
+.mast{margin-top:-26px;margin-bottom:26px;background:var(--bg)}
 .rule{height:3px;background:var(--accent)}
 .mastin{padding:24px 24px 0;max-width:1200px;margin:0 auto}
 .mtop{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
@@ -63,7 +84,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
 }
 
 /* [0] bulgu seridi */
-#strip{display:flex;gap:11px;overflow-x:auto;padding-bottom:10px;margin-bottom:26px;
+#strip{display:flex;gap:11px;overflow-x:auto;padding-bottom:10px;scroll-behavior:smooth;
   scrollbar-width:thin;scrollbar-color:var(--border) transparent}
 .fcard{min-width:214px;max-width:214px;border:1px solid var(--border);border-radius:var(--radius);
   padding:14px 15px;background:var(--surface);flex-shrink:0}
@@ -73,11 +94,16 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
 .fcard .k{font-size:10px;color:var(--text-4);margin-top:9px;padding-top:7px;border-top:1px solid var(--line)}
 
 /* [0.5] notable — market karti konvansiyonu */
-#notable{margin-bottom:26px}
-#ngrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(238px,1fr));gap:11px}
-.ncard{border:1px solid var(--border);border-radius:var(--radius);padding:13px 14px;
-  background:var(--surface);cursor:pointer;transition:border-color .12s}
+#notable{margin-bottom:0}
+#ngrid{display:flex;gap:11px;overflow-x:auto;padding-bottom:10px;scroll-behavior:smooth;
+  scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.ncard{min-width:262px;max-width:262px;flex-shrink:0;
+  border:1px solid var(--border);border-radius:var(--radius);padding:13px 14px;
+  background:var(--surface);cursor:pointer;transition:border-color .12s,opacity .12s}
 .ncard:hover{border-color:#3a3026}
+/* esigi asmayan kart: yerinde durur, soluk gosterilir (PRODUCT.md 5) */
+.ncard.soft{opacity:.6}
+.ncard.soft:hover{opacity:1}
 .ncard .q{font-size:12px;color:var(--text);line-height:1.45;margin-bottom:11px;min-height:35px}
 .chips2{display:flex;gap:6px;margin-bottom:10px}
 .oc{flex:1;border-radius:4px;padding:6px 9px}
@@ -141,7 +167,7 @@ tr.quiet td{color:var(--text-4)} tr.open td{background:var(--surface)}
   <span id="bandmeta" class="t10" style="margin-left:auto;letter-spacing:.09em;color:var(--text-4)"></span>
 </div></div>
 
-<div class="mast"><div class="rule"></div><div class="mastin">
+<div class="mast bleed"><div class="rule"></div><div class="mastin">
   <div class="mtop">
     <svg width="124" height="50" viewBox="0 0 124 50" style="flex-shrink:0">
       <path d="M4 25 L44 25" stroke="#9c8f7e" stroke-width="2" fill="none"/>
@@ -163,7 +189,7 @@ tr.quiet td{color:var(--text-4)} tr.open td{background:var(--surface)}
   </div>
 </div></div>
 
-<div class="lab" style="margin-bottom:9px">WHAT WE FOUND · measured, not claimed · scroll →</div>
+<div class="lab" style="margin-bottom:9px">WHAT WE FOUND · measured, not claimed</div>
 <div id="strip"></div>
 
 <div id="notable"></div>
@@ -297,10 +323,15 @@ function notable(){
   const hepsi=[];
   for(const [a,h] of Object.entries(S.hesap))
     for(const r of h.rows) if(!r.sessiz&&r.oran) hepsi.push({a,r,h});
-  let sec=hepsi.filter(x=>x.r.asiyor).sort((a,b)=>Math.abs(b.r.fark)-Math.abs(a.r.fark));
-  let etiket='exceeds trading costs';
-  if(!sec.length){ sec=hepsi.sort((a,b)=>b.r.oran-a.r.oran); etiket='within trading costs'; }
-  sec=sec.slice(0,4);
+  /* Esik GEVSETILMEZ (DESIGN.md 5.0). Asanlar once, band icinde kalanlar
+     arkada ve soluk. Slider'i doldurmak icin yalnizca gosterim siniri buyudu;
+     secim kurali ayni kaldi ve her kart kendi durumunu ustunde tasiyor. */
+  const asan=hepsi.filter(x=> x.r.asiyor).sort((a,b)=>Math.abs(b.r.fark)-Math.abs(a.r.fark));
+  const band=hepsi.filter(x=>!x.r.asiyor).sort((a,b)=>b.r.oran-a.r.oran);
+  const sec=[...asan,...band].slice(0,12);
+  const etiket = asan.length
+    ? `${asan.length} exceed trading costs · rest inside band`
+    : 'none exceed trading costs · ranked by ratio';
   if(!sec.length){ el.innerHTML=''; return; }
   el.innerHTML=`<div class="lab" style="margin-bottom:9px">NOTABLE RIGHT NOW · ${etiket}</div>
     <div id="ngrid">${sec.map(x=>nkart(x)).join('')}</div>`;
@@ -314,7 +345,7 @@ function nkart(x){
   const soru = r.et.startsWith('above') ? `${ad} ${r.et} at year-end`
              : r.et.startsWith('below') ? `${ad} ${r.et} at year-end`
              : `${ad} between ${r.et.replace(' – ',' and ')} at year-end`;
-  return `<div class="ncard" data-a="${x.a}">
+  return `<div class="ncard${r.asiyor?'':' soft'}" data-a="${x.a}">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:9px">
       <span class="icon">${x.a}</span>
       <span class="t11 dim2">Kalshi</span>
@@ -477,7 +508,39 @@ function detay(r){
       <div class="dim2">reference: collecting — archive started 2026-08-30</div>
     </div></div>`;
 }
-function ciz(){ serit(); notable(); cipler(); kartlar(); panel(); }
+/* Kaydirma cubugu genisligini olcup --sbw'ye yazar. .bleed bunu 100vw'den
+   cikarir; cikarmazsak tam genislikteki bloklar yatay tasma yaratir. */
+function sbwOlc(){
+  document.documentElement.style.setProperty('--sbw',
+    (window.innerWidth - document.documentElement.clientWidth)+'px');
+}
+sbwOlc(); addEventListener('resize', sbwOlc);
+
+/* Tek slider bileseni; iki serit de bunu kullanir.
+   Sarmalayici ekler, kenarlara ok koyar, sona gelince basa doner.
+   OTOMATIK donme yok (DESIGN.md 5.0) — donus yalnizca tiklamayla olur.
+   Icerik sigiyorsa oklar gizlenir; "daha var" yalani soylenmez. */
+function slider(el){
+  if(!el || el.dataset.sld) return; el.dataset.sld='1';
+  const w=document.createElement('div'); w.className='swrap bleed';
+  el.parentNode.insertBefore(w, el); w.appendChild(el);
+  el.classList.add('bleedpad');
+  const mk=(c,t,ad)=>{ const b=document.createElement('button');
+    b.className='sarr '+c; b.type='button'; b.textContent=t;
+    b.setAttribute('aria-label',ad); w.appendChild(b); return b; };
+  const L=mk('sl','‹','previous'), R=mk('sr','›','next');
+  const adim=()=>Math.max(240, el.clientWidth*0.8);
+  const son =()=>el.scrollWidth-el.clientWidth;
+  R.onclick=()=>{ el.scrollLeft>=son()-4 ? el.scrollTo({left:0}) : el.scrollBy({left:adim()}); };
+  L.onclick=()=>{ el.scrollLeft<=4 ? el.scrollTo({left:son()}) : el.scrollBy({left:-adim()}); };
+  const tazele=()=>{ const kaydirilir=son()>4; L.hidden=!kaydirilir; R.hidden=!kaydirilir; };
+  tazele(); addEventListener('resize',tazele);
+  if(window.ResizeObserver) new ResizeObserver(tazele).observe(el);
+}
+
+function ciz(){ serit(); notable(); cipler(); kartlar(); panel();
+  slider(document.getElementById('strip'));
+  slider(document.getElementById('ngrid')); }
 
 /* Kunye alanlari. NO. = arsivdeki snapshot sayisi — uydurma surum numarasi degil. */
 function kunye(){
