@@ -379,6 +379,64 @@ os.makedirs(os.path.dirname(mp), exist_ok=True)
 with open(mp, 'w', encoding='utf-8') as f:
     json.dump(meta, f, ensure_ascii=False, indent=1)
 
+# ---------------- isaretci (state/latest.json) ----------------
+# Sayfa en yeni anlik goruntuyu bulmak icin GitHub contents API'sini listeliyordu.
+# Kimliksiz sinir saatte 60. Sayac ayrica HER arsiv gunu icin ayri listeleme
+# yaptigindan maliyet gunde bir artiyordu: 12 gunde yukleme basina ~18 cagri,
+# yani ziyaretci basina saatte ~3 sayfa acilisi. Sonra site "archive unavailable"
+# gosteriyordu. Bu dosya o listelemelerin yerine geciyor; sayfa tek bir raw
+# dosyasi okuyor ve API cagrisi sifira iniyor. raw.githubusercontent.com'da
+# boyle bir sinir yok (yalnizca ~5 dakikalik CDN onbellegi, 3 saatlik kosuda
+# sorun degil). Karar: D-070.
+def _rel(p):
+    return os.path.relpath(p, ROOT).replace(os.sep, '/')
+
+yollar = {}
+for y in yazildi:
+    d = y['dosya'].replace(os.sep, '/')
+    for ad in ('kalshi', 'deribit', 'polymarket_events'):
+        if d.startswith('raw/%s/' % ad):
+            yollar[ad] = d
+
+# Arsiv sayaci diskten sayilir. Sayfanin gun basina bir API listelemesi
+# yapmasinin tek sebebi buydu.
+meta_kok = os.path.join(ROOT, 'raw', '_meta')
+gunluk = {}
+if os.path.isdir(meta_kok):
+    for g in sorted(os.listdir(meta_kok)):
+        gp = os.path.join(meta_kok, g)
+        if os.path.isdir(gp):
+            gunluk[g] = len([x for x in os.listdir(gp) if x.endswith('.json')])
+
+gun_listesi = sorted(gunluk)
+isaretci = {
+    'surum': 1,
+    'snapshot_utc': zaman.isoformat(),
+    'gun': GUN,
+    'damga': DAMGA,
+    'fiyat_penceresi_saniye': PENCERE,
+    'tam_mi': len(hatalar) == 0,
+    'yollar': yollar,
+    'meta_yolu': _rel(mp),
+    'arsiv': {
+        'gun_sayisi': len(gunluk),
+        'anlik_goruntu_sayisi': sum(gunluk.values()),
+        'ilk_gun': gun_listesi[0] if gun_listesi else None,
+        'son_gun': gun_listesi[-1] if gun_listesi else None,
+        'gunluk': gunluk,
+    },
+}
+ip = os.path.join(ROOT, 'state', 'latest.json')
+os.makedirs(os.path.dirname(ip), exist_ok=True)
+with open(ip, 'w', encoding='utf-8') as f:
+    json.dump(isaretci, f, ensure_ascii=False, indent=1)
+yazildi.append({'dosya': _rel(ip), 'bayt': os.path.getsize(ip)})
+
+# Isaretci eksik akis varsa sessizce gecmesin: sayfa o akisi okuyamaz.
+for _ad in ('kalshi', 'deribit'):
+    if _ad not in yollar:
+        hatalar.append('isaretci_eksik_%s' % _ad)
+
 print('DIVERGENCE v2 — %s' % zaman.isoformat())
 print('  fiyat penceresi : %.2f sn' % PENCERE)
 print('  toplam sure     : %.2f sn' % meta['toplam_saniye'])
