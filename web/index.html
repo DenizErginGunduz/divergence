@@ -40,23 +40,25 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
 /* ---- tam genislik (full-bleed) ----
    body max-width:1200px tasiyor; asagidaki yardimci onun disina cikar.
    --vw = kaydirma cubugu HARIC kullanilabilir genislik, JS olcer.
-   100vw cubugu da saydigi icin dogrudan kullanilmaz; yatay tasma yapardi. */
+   100vw cubugu da saydigi icin dogrudan kullanilmaz; yatay tasma yapardi.
+   YALNIZCA kunye kullanir. Icerik bloklari 1200px icinde kalir: ekran ucuna
+   kadar uzayan seritler okunurlugu dusuruyordu (D-069). */
 .bleed{width:var(--vw,100%);
   margin-left:calc(50% - var(--vw,100%)/2)}
-/* slider icerigi solda 1200px'lik icerik hizasindan baslar, saga ekran kenarina tasar */
-.bleedpad{padding-left:max(24px,calc((var(--vw,100%) - 1200px)/2 + 24px));
-  padding-right:max(24px,calc((var(--vw,100%) - 1200px)/2 + 24px))}
 
-/* ---- yatay slider sarmalayici ---- */
+/* ---- yatay slider sarmalayici ----
+   Oklar ekranin ucunda degil, icerik kenarindaki boslukta durur. */
 .swrap{position:relative;margin-bottom:26px}
-.sarr{position:absolute;top:0;bottom:10px;width:46px;border:0;cursor:pointer;z-index:5;
-  color:var(--text-2);font-size:26px;line-height:1;opacity:0;transition:opacity .15s;
+.sarr{position:absolute;top:50%;transform:translateY(-50%);
+  width:30px;height:30px;border-radius:50%;cursor:pointer;z-index:5;
+  border:1px solid var(--border);background:var(--surface-2);color:var(--text-2);
+  font-size:15px;line-height:1;opacity:0;transition:opacity .15s,border-color .12s;
   display:flex;align-items:center;justify-content:center}
-.swrap:hover .sarr{opacity:.9}
-.sarr:hover{color:var(--accent)}
-.sarr.sl{left:0;background:linear-gradient(90deg,var(--bg) 45%,transparent)}
-.sarr.sr{right:0;background:linear-gradient(270deg,var(--bg) 45%,transparent)}
+.swrap:hover .sarr{opacity:1}
+.sarr:hover{color:var(--accent);border-color:#3a3026}
+.sarr.sl{left:-14px} .sarr.sr{right:-14px}
 .sarr[hidden]{display:none}
+@media(max-width:720px){ .sarr{display:none} }
 
 /* ---- KUNYE (masthead) ---- */
 .mast{margin-top:-26px;margin-bottom:26px;background:var(--bg)}
@@ -84,10 +86,13 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
 }
 
 /* [0] bulgu seridi */
-#strip{display:flex;gap:11px;overflow-x:auto;padding-bottom:10px;scroll-behavior:smooth;
-  scrollbar-width:thin;scrollbar-color:var(--border) transparent}
-.fcard{min-width:214px;max-width:214px;border:1px solid var(--border);border-radius:var(--radius);
-  padding:14px 15px;background:var(--surface);flex-shrink:0}
+/* Serit GRID'dir, slider degil (D-069). Dort bulgu tek satirda durur;
+   dar ekranda ikiye, sonra teke iner. Kaydirma yok, kesilme yok. */
+#strip{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:26px}
+.fcard{min-width:0;border:1px solid var(--border);border-radius:var(--radius);
+  padding:14px 15px;background:var(--surface)}
+@media(max-width:1000px){ #strip{grid-template-columns:repeat(2,1fr)} }
+@media(max-width:600px){ #strip{grid-template-columns:1fr} }
 .fcard .n{font-size:31px;font-weight:300;color:var(--accent);line-height:1;letter-spacing:-.02em}
 .fcard .b{font-size:12px;font-weight:500;margin:7px 0 6px}
 .fcard .t{font-size:11px;color:var(--text-3);line-height:1.55}
@@ -220,12 +225,13 @@ const SERIT=[
   t:'Gaps that beat trading friction and measurement uncertainty. Three replication methods, none survived.'},
  {id:'rep',   src:'rec',  n:'3',    b:'Independent setups', k:'D-045 · D-046 · D-066',
   t:'The same shape on Polymarket short-dated, on the long-horizon touch bound, and on Kalshi year-end buckets.'},
- {id:'sync',  src:'live', b:'Sync window',
-  t:'Time between reading the option chain and the prediction market. An 8-minute gap once moved a result by 33%.'},
  {id:'catch', src:'rec',  n:'13%',  b:'Caught by a constraint', k:'measured 2026-08-31 · D-067',
-  t:'A density that summed to 1.13 instead of 1. Every digital looked perfect alone — only the sum exposed it.'},
- {id:'mkts',  src:'live', b:'Markets tracked',
-  t:'Across three venues, captured in one synchronised run and archived unchanged.'}];
+  t:'A density that summed to 1.13 instead of 1. Every digital looked perfect alone — only the sum exposed it.'}];
+/* Dort kart tek satirda duruyor; serit grid oldu, slider degil (D-069).
+   Cikarilan ikisi docs/BACKLOG.md B-010'da bekliyor:
+   - sync window : degeri kunye seridinde zaten var, kart olarak tekrardi
+   - markets tracked : kapsam sayisi, bulgu degil
+   Serit ileride slider'a donerse ikisi de geri eklenir. */
 
 const REPO='https://raw.githubusercontent.com/DenizErginGunduz/divergence/main/';
 const API ='https://api.github.com/repos/DenizErginGunduz/divergence/contents/';
@@ -305,14 +311,11 @@ let S={sinif:'All', varlik:null, merdiven:null, basamak:null,
 function serit(){
   const h=S.hesap.BTC;
   const en = h ? h.rows.filter(r=>r.oran).reduce((p,c)=>c.oran>p.oran?c:p,{oran:0}) : null;
-  const mkts = S.KA ? Object.values(S.KA.marketler).reduce((s,v)=>s+(Array.isArray(v)?v.length:0),0) : null;
   document.getElementById('strip').innerHTML=SERIT.map(f=>{
     let n=f.n,k=f.k;
     if(f.src==='live'){
       if(f.id==='tail'){ n=en&&en.oran?en.oran.toFixed(1)+'×':'—';
         k=en&&en.et?'live · BTC '+en.et:'live'; }
-      if(f.id==='sync'){ n=(S.meta.pencere??'—')+'s'; k='live · three sources, one run'; }
-      if(f.id==='mkts'){ n=mkts?mkts.toLocaleString('en-US'):'—'; k='live · Kalshi crypto series'; }
     }
     return `<div class="fcard"><div class="n">${n??'—'}</div>
       <div class="b">${f.b}</div><div class="t">${f.t}</div>
@@ -527,9 +530,8 @@ if(window.ResizeObserver) new ResizeObserver(genislikOlc).observe(document.docum
    Icerik sigiyorsa oklar gizlenir; "daha var" yalani soylenmez. */
 function slider(el){
   if(!el || el.dataset.sld) return; el.dataset.sld='1';
-  const w=document.createElement('div'); w.className='swrap bleed';
+  const w=document.createElement('div'); w.className='swrap';
   el.parentNode.insertBefore(w, el); w.appendChild(el);
-  el.classList.add('bleedpad');
   const mk=(c,t,ad)=>{ const b=document.createElement('button');
     b.className='sarr '+c; b.type='button'; b.textContent=t;
     b.setAttribute('aria-label',ad); w.appendChild(b); return b; };
@@ -552,8 +554,7 @@ function slider(el){
 }
 
 function ciz(){ serit(); notable(); cipler(); kartlar(); panel();
-  slider(document.getElementById('strip'));
-  slider(document.getElementById('ngrid')); }
+  slider(document.getElementById('ngrid')); }   /* serit grid, slider degil */
 
 /* Kunye alanlari. NO. = arsivdeki snapshot sayisi — uydurma surum numarasi degil. */
 function kunye(){
