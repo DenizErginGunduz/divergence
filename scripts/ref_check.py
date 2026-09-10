@@ -48,24 +48,29 @@ def kendi_testi():
     Yesil kalan ama hicbir seyi yakalamayan bir denetleyici, denetleyici degildir.
     CI'da once bu kosar: yakalama yetenegi kanitlanmadan asil denetim anlamsiz.
     """
-    ornek_karar = ('## D-001 — gercek karar\n'
-                   '## D-002 — KAYIT KAYIP\n'
-                   'govde metni\n')
-    ornek_metin = 'burada D-001, D-002 ve tanimsiz D-999 aniliyor\n'
+    # Ornek numaralar PARCALI kuruluyor: kaynakta duz bir numara yazsaydi
+    # denetleyici kendi test verisini gercek bir atif sanip kendini kirardi.
+    # Tam olarak bu oldu — ilk surum CI'da patladi. Aracin calistiginin kaniti,
+    # ama test verisi uretim verisine benzememeli.
+    P = 'D-'
+    ornek_karar = ('## %s001 — gercek karar\n'
+                   '## %s002 — KAYIT KAYIP\n'
+                   'govde metni\n') % (P, P)
+    ornek_metin = 'burada %s001, %s002 ve tanimsiz %s999 aniliyor\n' % (P, P, P)
 
     tanimli = set(TANIM.findall(ornek_karar))
     kayip = set(KAYIP.findall(ornek_karar))
-    atif = {'D-' + m.group(1) for m in ATIF.finditer(ornek_metin)}
+    atif = {P + m.group(1) for m in ATIF.finditer(ornek_metin)}
     asili = sorted(a for a in atif if a not in tanimli)
 
     sorun = []
-    if tanimli != {'D-001', 'D-002'}:
+    if tanimli != {P + '001', P + '002'}:
         sorun.append('tanim taninmadi: %s' % sorted(tanimli))
-    if kayip != {'D-002'}:
+    if kayip != {P + '002'}:
         sorun.append('KAYIT KAYIP taninmadi: %s' % sorted(kayip))
-    if atif != {'D-001', 'D-002', 'D-999'}:
+    if atif != {P + '001', P + '002', P + '999'}:
         sorun.append('atif taranmadi: %s' % sorted(atif))
-    if asili != ['D-999']:
+    if asili != [P + '999']:
         sorun.append('asili referans YAKALANMADI: %s' % asili)
 
     if sorun:
