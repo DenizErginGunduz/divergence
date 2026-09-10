@@ -27,6 +27,11 @@ jobs:
         with:
           python-version: '3.12'
 
+      # Once denetleyicinin YAKALAYABILDIGINI kanitla. Hicbir seyi yakalamayan
+      # bir denetleyici de yesil kalir; o yuzden bu adim asil denetimden once.
+      - name: Denetleyicinin kendi testi
+        run: python scripts/ref_check.py --kendi-testi
+
       # Asili referans varsa cikis 1 -> kosu kirmizi.
       # KAYIT KAYIP yer tutuculari hata degil; sayilir ve loglanir.
       - name: Karar referanslarini denetle
