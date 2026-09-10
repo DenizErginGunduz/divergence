@@ -1,0 +1,33 @@
+name: ref-check
+
+# Karar referanslarini denetler: belgelerde veya arayuzde anilan her D-XXX
+# numarasinin DECISIONS.md'de bir karsiligi olmali.
+#
+# Neden var: arayuzdeki bulgu kartlari "D-049", "D-045 · D-046 · D-066" basiyordu
+# ama o kararlar hic yazilmamisti. Ekran var olmayan kayitlara atif yapiyordu ve
+# bunu kod degil, bir insan fark etti. Bu is akisi ayni seyin sessizce
+# tekrarlanmasini engelliyor.
+#
+# Toplayiciya dokunmaz, ag erisimi istemez, saniyeler surer.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  ref-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # Asili referans varsa cikis 1 -> kosu kirmizi.
+      # KAYIT KAYIP yer tutuculari hata degil; sayilir ve loglanir.
+      - name: Karar referanslarini denetle
+        run: python scripts/ref_check.py --liste
