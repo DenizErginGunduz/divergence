@@ -531,8 +531,16 @@ function slider(el){
   const L=mk('sl','‹','previous'), R=mk('sr','›','next');
   const adim=()=>Math.max(240, el.clientWidth*0.8);
   const son =()=>el.scrollWidth-el.clientWidth;
-  R.onclick=()=>{ el.scrollLeft>=son()-4 ? el.scrollTo({left:0}) : el.scrollBy({left:adim()}); };
-  L.onclick=()=>{ el.scrollLeft<=4 ? el.scrollTo({left:son()}) : el.scrollBy({left:-adim()}); };
+  /* Hedef ayri tutulur. Yumusak kaydirma ucarken el.scrollLeft bayat okunuyor;
+     uzun seritte "sondayim" durumu gorulemiyor ve basa donus kaciyordu.
+     Kaydirma durduktan 140ms sonra hedef gercek konumdan tazelenir. */
+  let hedef=0, bosalt=0;
+  el.addEventListener('scroll',()=>{ clearTimeout(bosalt);
+    bosalt=setTimeout(()=>{ hedef=el.scrollLeft; },140); },{passive:true});
+  R.onclick=()=>{ hedef = hedef>=son()-4 ? 0 : Math.min(son(), hedef+adim());
+    el.scrollTo({left:hedef}); };
+  L.onclick=()=>{ hedef = hedef<=4 ? son() : Math.max(0, hedef-adim());
+    el.scrollTo({left:hedef}); };
   const tazele=()=>{ const kaydirilir=son()>4; L.hidden=!kaydirilir; R.hidden=!kaydirilir; };
   tazele(); addEventListener('resize',tazele);
   if(window.ResizeObserver) new ResizeObserver(tazele).observe(el);
