@@ -515,14 +515,23 @@ function detay(r){
    ResizeObserver sart: cubugun sonradan belirmesi veya kaybolmasi resize
    olayi uretmez, yalnizca html elemaninin genisligini degistirir. Olcum
    bayat kalirsa full-bleed bloklar birkac piksel kayik hizalanir. */
+let sonVw = -1;
 function genislikOlc(){
-  const de=document.documentElement;
-  de.style.setProperty('--vw', de.clientWidth+'px');
+  const g = document.documentElement.clientWidth;
+  if (g === sonVw) return;                 // degismediyse stile dokunma
+  sonVw = g;
+  document.documentElement.style.setProperty('--vw', g+'px');
 }
 genislikOlc();
 addEventListener('resize', genislikOlc);
 addEventListener('orientationchange', genislikOlc);
 if(window.ResizeObserver) new ResizeObserver(genislikOlc).observe(document.documentElement);
+/* Son emniyet. OLCULDU: bazi ortamlarda viewport degisimi hicbir bildirim
+   uretmiyor — resize de, html/body uzerindeki ResizeObserver da, visualViewport
+   da sessiz kaldi, clientWidth 1385'ten 885'e dustugu halde. Olcum bayatlarsa
+   kunye seridi yanlis genislikte cizilir. Yarim saniyede bir tek tamsayi
+   okumak ucuz; deger degismediyse hicbir sey yazilmaz. */
+setInterval(genislikOlc, 500);
 
 /* Tek slider bileseni; iki serit de bunu kullanir.
    Sarmalayici ekler, kenarlara ok koyar, sona gelince basa doner.
