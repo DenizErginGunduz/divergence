@@ -497,3 +497,47 @@ aynısını geri getiriyor.
 Bu kararı yazarken görüldü: `DECISIONS.md` D-043'te bitiyor, D-044–D-068
 hiç yazılmamış. Sitedeki bulgu kartları D-045/D-046/D-049/D-066/D-067'ye atıf
 yapıyor; bu kayıtlar şu an repoda yok. Ayrı bir iş olarak kapatılmalı.
+
+## D-070 — Sayfa GitHub contents API'sinden koparildi
+**Tarih:** 2026-09-10
+
+Site ziyaretcide "archive unavailable" gosteriyordu. Once bunu kendi dogrulama
+isteklerime bagladim; eksik teshisti. Olculdu:
+
+Sayfa en yeni anlik goruntuyu **klasor listeleyerek** buluyordu, cunku
+`raw.githubusercontent.com` dizin listeleyemiyor. Maliyet:
+
+| cagri | adet |
+|---|---|
+| `son('raw/kalshi')` | 2 |
+| `son('raw/deribit')` | 2 |
+| `raw/_meta` + gun listesi | 2 |
+| **NO. sayaci: her arsiv gunu icin bir listeleme** | **gun sayisi kadar** |
+
+12 gunluk arsivde yukleme basina **~18 cagri**. GitHub'in kimliksiz siniri
+saatte 60 → **ziyaretci basina ~3 sayfa acilisi**. Daha kotusu: sayac gun
+basina bir cagri ekledigi icin **maliyet her gun artiyordu**. Bu bir kota
+kazasi degil, tasarim kusuruydu.
+
+### Karar
+Toplayici her kosuda `state/latest.json` yaziyor: uc akisin en yeni dosya
+yolu, senkron penceresi, snapshot zamani ve arsiv sayaci (gun sayisi, toplam
+anlik goruntu, gun basina dagilim — hepsi diskten sayiliyor). Sayfa bu tek
+dosyayi okuyor.
+
+**Olculdu:** 18 cagri → **0**. Sayfa 3 ham istek yapiyor (isaretci + kalshi.gz
++ deribit.gz). Kunye dogru: `NO. 038 · 2026-09-10 13:12Z · SYNC 0.85s ·
+ARCHIVE 12d`. `raw.githubusercontent.com`da boyle bir sinir yok; yalnizca
+~5 dakikalik CDN onbellegi var, 3 saatlik kosu icin sorunsuz.
+
+Eski API yolu **yedek olarak duruyor**: isaretci yoksa veya surumu taninmazsa
+sayfa eski davranisa donuyor. Boylece toplayici kosmadan once de calisir.
+
+`state/latest.json`in ilk surumu elle uretildi (D-070 bir sonraki kosuyu
+beklemeden devreye girsin diye); bundan sonrasini toplayici uzeriine yaziyor.
+Toplayici ayrica isaretcide kalshi veya deribit yolu olusmazsa `hatalar`
+listesine yaziyor — sessizce eksik isaretci uretmesin.
+
+### Neden onemli
+Bu kusur tam da portfolyo degerini vuran turdendi: siteyi acan kisi olcum
+titizligini degil, bos bir ekran goruyordu. Ve kendi kendine kotulesiyordu.
