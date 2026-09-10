@@ -39,13 +39,13 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
 
 /* ---- tam genislik (full-bleed) ----
    body max-width:1200px tasiyor; asagidaki yardimci onun disina cikar.
-   --sbw = dikey kaydirma cubugunun genisligi, JS olcer. 100vw kaydirma
-   cubugunu da saydigi icin cikarilmazsa yatay tasma olusur. */
-.bleed{width:calc(100vw - var(--sbw,0px));
-  margin-left:calc(50% - (100vw - var(--sbw,0px))/2)}
+   --vw = kaydirma cubugu HARIC kullanilabilir genislik, JS olcer.
+   100vw cubugu da saydigi icin dogrudan kullanilmaz; yatay tasma yapardi. */
+.bleed{width:var(--vw,100%);
+  margin-left:calc(50% - var(--vw,100%)/2)}
 /* slider icerigi solda 1200px'lik icerik hizasindan baslar, saga ekran kenarina tasar */
-.bleedpad{padding-left:max(24px,calc((100vw - var(--sbw,0px) - 1200px)/2 + 24px));
-  padding-right:max(24px,calc((100vw - var(--sbw,0px) - 1200px)/2 + 24px))}
+.bleedpad{padding-left:max(24px,calc((var(--vw,100%) - 1200px)/2 + 24px));
+  padding-right:max(24px,calc((var(--vw,100%) - 1200px)/2 + 24px))}
 
 /* ---- yatay slider sarmalayici ---- */
 .swrap{position:relative;margin-bottom:26px}
@@ -508,13 +508,18 @@ function detay(r){
       <div class="dim2">reference: collecting — archive started 2026-08-30</div>
     </div></div>`;
 }
-/* Kaydirma cubugu genisligini olcup --sbw'ye yazar. .bleed bunu 100vw'den
-   cikarir; cikarmazsak tam genislikteki bloklar yatay tasma yaratir. */
-function sbwOlc(){
-  document.documentElement.style.setProperty('--sbw',
-    (window.innerWidth - document.documentElement.clientWidth)+'px');
+/* Kullanilabilir genisligi (kaydirma cubugu haric) olcup --vw'ye yazar.
+   ResizeObserver sart: cubugun sonradan belirmesi veya kaybolmasi resize
+   olayi uretmez, yalnizca html elemaninin genisligini degistirir. Olcum
+   bayat kalirsa full-bleed bloklar birkac piksel kayik hizalanir. */
+function genislikOlc(){
+  const de=document.documentElement;
+  de.style.setProperty('--vw', de.clientWidth+'px');
 }
-sbwOlc(); addEventListener('resize', sbwOlc);
+genislikOlc();
+addEventListener('resize', genislikOlc);
+addEventListener('orientationchange', genislikOlc);
+if(window.ResizeObserver) new ResizeObserver(genislikOlc).observe(document.documentElement);
 
 /* Tek slider bileseni; iki serit de bunu kullanir.
    Sarmalayici ekler, kenarlara ok koyar, sona gelince basa doner.
