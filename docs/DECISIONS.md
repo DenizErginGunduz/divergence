@@ -528,7 +528,12 @@ dosyayi okuyor.
 **Olculdu:** 18 cagri → **0**. Sayfa 3 ham istek yapiyor (isaretci + kalshi.gz
 + deribit.gz). Kunye dogru: `NO. 038 · 2026-09-10 13:12Z · SYNC 0.85s ·
 ARCHIVE 12d`. `raw.githubusercontent.com`da boyle bir sinir yok; yalnizca
-~5 dakikalik CDN onbellegi var, 3 saatlik kosu icin sorunsuz.
+~5 dakikalik CDN onbellegi var; toplayici gunde uc kez kosuyor
+(05:00 / 13:00 / 21:00 UTC, 8 saat arayla) — sorunsuz.
+
+**Duzeltme (2026-09-11):** bu kayit ilk yazildiginda kosu araligi "3 saat"
+diye gecmisti; olculmemis, varsayilmisti. Gercek aralik 8 saat. Denetimde
+yakalandi ve duzeltildi — kaydin kendisi de olcume tabidir.
 
 Eski API yolu **yedek olarak duruyor**: isaretci yoksa veya surumu taninmazsa
 sayfa eski davranisa donuyor. Boylece toplayici kosmadan once de calisir.
