@@ -1,0 +1,72 @@
+{
+ "snapshot_utc": "2026-09-10T05:16:04.404148+00:00",
+ "toplam_saniye": 154.44,
+ "fiyat_penceresi_saniye": 0.81,
+ "kaynak_anlari_saniye": {
+  "baslangic": 0.0,
+  "deribit_bitis": 0.64,
+  "polymarket_bitis": 0.81,
+  "kalshi_bitis": 30.51
+ },
+ "asama_sureleri": {
+  "deribit": 0.64,
+  "polymarket_events": 0.17,
+  "kalshi": 29.7,
+  "akis": 100.12,
+  "holders": 22.35
+ },
+ "hatalar": {},
+ "tam_mi": true,
+ "akis_ozeti": {
+  "market": 446,
+  "kapsam_disi_market": 253,
+  "yeni_islem": 1878,
+  "limit_dolan": 139,
+  "BOSLUKLU": 0,
+  "ilk_kez": 71,
+  "sayfalama_denendi": 2,
+  "sayfalama_calisti": 2
+ },
+ "kalshi_ozeti": {
+  "katalog": {
+   "Crypto": 274,
+   "Financials": 1066
+  },
+  "izlenen_kripto_seri": 62,
+  "izlenen_gozlem_seri": 30,
+  "market_donen_seri": 22,
+  "toplam_market": 6220,
+  "gozlem_market": 3155
+ },
+ "dosyalar": [
+  {
+   "dosya": "raw/deribit/2026-09-10/deribit_2026-09-10T0516Z.json.gz",
+   "bayt": 66610
+  },
+  {
+   "dosya": "raw/polymarket_events/2026-09-10/polymarket_events_2026-09-10T0516Z.json.gz",
+   "bayt": 323793
+  },
+  {
+   "dosya": "raw/holders/2026-09-10/holders_2026-09-10T0516Z.json.gz",
+   "bayt": 634629
+  },
+  {
+   "dosya": "raw/kalshi/2026-09-10/kalshi_2026-09-10T0516Z.json.gz",
+   "bayt": 571504
+  },
+  {
+   "dosya": "raw/events/trades/2026-09-10/trades_2026-09-10T0516Z.ndjson.gz",
+   "bayt": 191234
+  },
+  {
+   "dosya": "raw/coverage/2026-09-10/coverage_2026-09-10T0516Z.json",
+   "bayt": 160722
+  }
+ ],
+ "varliklar": [
+  "bitcoin",
+  "ethereum"
+ ],
+ "surum": 2
+}
