@@ -1,19 +1,19 @@
 {
  "surum": 1,
- "snapshot_utc": "2026-09-10T13:12:39.122976+00:00",
+ "snapshot_utc": "2026-09-10T21:14:47.140660+00:00",
  "gun": "2026-09-10",
- "damga": "2026-09-10T1312Z",
- "fiyat_penceresi_saniye": 0.85,
+ "damga": "2026-09-10T2114Z",
+ "fiyat_penceresi_saniye": 0.88,
  "tam_mi": true,
  "yollar": {
-  "kalshi": "raw/kalshi/2026-09-10/kalshi_2026-09-10T1312Z.json.gz",
-  "deribit": "raw/deribit/2026-09-10/deribit_2026-09-10T1312Z.json.gz",
-  "polymarket_events": "raw/polymarket_events/2026-09-10/polymarket_events_2026-09-10T1312Z.json.gz"
+  "deribit": "raw/deribit/2026-09-10/deribit_2026-09-10T2114Z.json.gz",
+  "polymarket_events": "raw/polymarket_events/2026-09-10/polymarket_events_2026-09-10T2114Z.json.gz",
+  "kalshi": "raw/kalshi/2026-09-10/kalshi_2026-09-10T2114Z.json.gz"
  },
- "meta_yolu": "raw/_meta/2026-09-10/meta_2026-09-10T1312Z.json",
+ "meta_yolu": "raw/_meta/2026-09-10/meta_2026-09-10T2114Z.json",
  "arsiv": {
   "gun_sayisi": 12,
-  "anlik_goruntu_sayisi": 38,
+  "anlik_goruntu_sayisi": 39,
   "ilk_gun": "2026-08-30",
   "son_gun": "2026-09-10",
   "gunluk": {
@@ -28,8 +28,7 @@
    "2026-09-07": 3,
    "2026-09-08": 3,
    "2026-09-09": 3,
-   "2026-09-10": 2
+   "2026-09-10": 3
   }
- },
- "not": "Bu dosya bir kez elle uretildi (D-070 hemen devreye girsin diye). Bundan sonra collector/collect.py her kosuda uzerine yazar."
+ }
 }
