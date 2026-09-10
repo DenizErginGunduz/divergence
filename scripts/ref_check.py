@@ -42,8 +42,45 @@ def dosyalar():
                 yield tam, os.path.relpath(tam, ROOT).replace(os.sep, '/')
 
 
+def kendi_testi():
+    """Denetleyicinin gercekten HATA verebildigini kanitlar.
+
+    Yesil kalan ama hicbir seyi yakalamayan bir denetleyici, denetleyici degildir.
+    CI'da once bu kosar: yakalama yetenegi kanitlanmadan asil denetim anlamsiz.
+    """
+    ornek_karar = ('## D-001 — gercek karar\n'
+                   '## D-002 — KAYIT KAYIP\n'
+                   'govde metni\n')
+    ornek_metin = 'burada D-001, D-002 ve tanimsiz D-999 aniliyor\n'
+
+    tanimli = set(TANIM.findall(ornek_karar))
+    kayip = set(KAYIP.findall(ornek_karar))
+    atif = {'D-' + m.group(1) for m in ATIF.finditer(ornek_metin)}
+    asili = sorted(a for a in atif if a not in tanimli)
+
+    sorun = []
+    if tanimli != {'D-001', 'D-002'}:
+        sorun.append('tanim taninmadi: %s' % sorted(tanimli))
+    if kayip != {'D-002'}:
+        sorun.append('KAYIT KAYIP taninmadi: %s' % sorted(kayip))
+    if atif != {'D-001', 'D-002', 'D-999'}:
+        sorun.append('atif taranmadi: %s' % sorted(atif))
+    if asili != ['D-999']:
+        sorun.append('asili referans YAKALANMADI: %s' % asili)
+
+    if sorun:
+        print('KENDI TESTI BASARISIZ:')
+        for s in sorun:
+            print('  - %s' % s)
+        return 1
+    print('kendi testi: gecti (asili referans yakalaniyor, KAYIT KAYIP ayirt ediliyor)')
+    return 0
+
+
 def main():
     ayrinti = '--liste' in sys.argv
+    if '--kendi-testi' in sys.argv:
+        return kendi_testi()
 
     kp = os.path.join(ROOT, KARAR_DOSYASI)
     if not os.path.isfile(kp):
@@ -66,9 +103,16 @@ def main():
     asili = sorted(n for n in nerede if n not in tanimli)
     kullanilan_kayip = sorted(n for n in nerede if n in kayip)
 
-    print('taranan dosya   : %d' % sum(1 for _ in dosyalar()))
+    taranan = sum(1 for _ in dosyalar())
+    print('taranan dosya   : %d' % taranan)
     print('tanimli karar   : %d' % len(tanimli))
     print('atif yapilan    : %d' % len(nerede))
+
+    # Bos tarama sessizce yesil kalmasin: yol yanlissa denetim hicbir sey demiyordur.
+    if taranan < 5 or not tanimli:
+        print('\nHATA: tarama bos dondu (dosya=%d, tanim=%d). ROOT yanlis olabilir: %s'
+              % (taranan, len(tanimli), ROOT))
+        return 1
 
     if ayrinti:
         for no in sorted(nerede):
