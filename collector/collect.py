@@ -386,8 +386,9 @@ with open(mp, 'w', encoding='utf-8') as f:
 # yani ziyaretci basina saatte ~3 sayfa acilisi. Sonra site "archive unavailable"
 # gosteriyordu. Bu dosya o listelemelerin yerine geciyor; sayfa tek bir raw
 # dosyasi okuyor ve API cagrisi sifira iniyor. raw.githubusercontent.com'da
-# boyle bir sinir yok (yalnizca ~5 dakikalik CDN onbellegi, 3 saatlik kosuda
-# sorun degil). Karar: D-070.
+# boyle bir sinir yok (yalnizca ~5 dakikalik CDN onbellegi; toplayici gunde uc
+# kez kostugu icin -- 05:00/13:00/21:00 UTC, 8 saat arayla -- sorun degil).
+# Karar: D-070.
 def _rel(p):
     return os.path.relpath(p, ROOT).replace(os.sep, '/')
 
