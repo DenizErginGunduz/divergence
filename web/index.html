@@ -583,10 +583,26 @@ addEventListener('scroll',()=>{
 /* ===================== BASLAT ===================== */
 (async()=>{
  try{
-  const [pk,pd]=await Promise.all([son('raw/kalshi'),son('raw/deribit')]);
+  /* Isaretci once (D-070). state/latest.json tek bir raw dosyasi; API cagrisi yok.
+     Eskiden en yeni anlik goruntu contents API'si listelenerek bulunuyordu ve
+     sayac HER arsiv gunu icin ayri listeleme yapiyordu — maliyet gunde bir
+     artiyordu: 12 gunde yukleme basina ~18 cagri. Kimliksiz sinir saatte 60,
+     yani ziyaretci basina ~3 sayfa acilisi, sonrasi "archive unavailable". */
+  let pk, pd, ptr=null;
+  try{
+   const r=await fetch(REPO+'state/latest.json?cb='+Date.now());
+   if(r.ok){ const j=await r.json();
+    if(j&&j.surum===1&&j.yollar&&j.yollar.kalshi&&j.yollar.deribit) ptr=j; }
+  }catch(e){}
+  if(ptr){ pk=ptr.yollar.kalshi; pd=ptr.yollar.deribit; }
+  else{ /* yedek: toplayici isaretciyi henuz yazmadiysa eski yol calisir */
+   [pk,pd]=await Promise.all([son('raw/kalshi'),son('raw/deribit')]); }
   const [KA,D]=await Promise.all([gz(pk),gz(pd)]);
   S.KA=KA; S.D=D;
-  try{
+  if(ptr){
+   S.meta={pencere:ptr.fiyat_penceresi_saniye, an:ptr.snapshot_utc,
+           gun:(ptr.arsiv||{}).gun_sayisi, no:(ptr.arsiv||{}).anlik_goruntu_sayisi};
+  }else try{
    const mg=await (await fetch(API+'raw/_meta?cb='+Date.now())).json();
    const gun=mg.map(x=>x.name).sort().pop();
    const mf=await (await fetch(API+'raw/_meta/'+gun+'?cb='+Date.now())).json();
