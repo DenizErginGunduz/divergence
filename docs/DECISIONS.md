@@ -459,3 +459,41 @@ Yüklü: `.github/`, `collector/`, `raw/`, `state/`.
 **Eksik: `README.md`, `docs/`, `scripts/`, `.gitignore`.**
 İlk yükleme denemesinde dosyalar düz geldiği için commit edilmemişti.
 Portfolyo değeri README ve docs'ta olduğu için bu eksik kapatılmalı.
+
+## D-069 — Şerit grid oldu, tam genişlik yalnızca künyede kaldı
+**Tarih:** 2026-09-10
+
+Ekranı ekran ucuna kadar uzayan yatay şeritlerle kurmuştuk. Kullanıcı kararı:
+okunurluğu düşürdü. Geri alındı, ama tamamen değil:
+
+- **Künye çizgisi** tam genişlikte kalır. Çizginin okunabilirlik maliyeti yok.
+- **Bulgu şeridi** grid'e döndü (4 sütun → dar ekranda 2 → 1). Kaydırma yok.
+  Altı bulgu dörde indi; çıkarılan ikisi `BACKLOG.md` B-010'da.
+- **Notable** slider kaldı ama 1200px içerik genişliği içinde. Oklar ekran
+  ucunda değil, içerik kenarındaki boşlukta.
+
+### Ölçülen iki kusur
+
+**1. Yumuşak kaydırma sırasında `scrollLeft` bayat okunuyor.**
+Uzun şeritte ok tıklaması "sondayım" durumunu göremiyor, başa dönüş kaçıyordu.
+Hedef ayrı bir değişkende tutuluyor, kaydırma durduktan 140ms sonra gerçek
+konumdan tazeleniyor. Ölçüm: 2702px'lik şeritte tıklama sonrası konum 1 saniye
+sonra hâlâ 489'du; animasyon bitene kadar beklenince 2702 okundu.
+
+**2. Viewport değişimi hiçbir bildirim üretmeyebiliyor.**
+`--vw` (kaydırma çubuğu hariç kullanılabilir genişlik) bayatlayınca künye
+şeridi yanlış genişlikte çizildi — mobil testte etiketler x=24, kartlar x=32.
+Sonra ölçüldü ki `resize`, `html` **ve** `body` üzerindeki ResizeObserver,
+`visualViewport.resize` — dördü de sessiz kalırken clientWidth 1385'ten 885'e
+düştü. Tek bir bildirim mekanizmasına güvenilemiyor.
+
+Çözüm: dört dinleyici korunuyor, üstüne 500ms'lik bir emniyet turu eklendi;
+değer değişmediyse stile hiç dokunulmuyor. Saf CSS alternatifi (`100vw` +
+`overflow-x:clip`) denendi ve **elendi**: 100vw kaydırma çubuğunu da saydığı
+için künye içeriği yarım çubuk kadar kayıyor — düzeltmeye çalıştığımız hatanın
+aynısını geri getiriyor.
+
+### Not
+Bu kararı yazarken görüldü: `DECISIONS.md` D-043'te bitiyor, D-044–D-068
+hiç yazılmamış. Sitedeki bulgu kartları D-045/D-046/D-049/D-066/D-067'ye atıf
+yapıyor; bu kayıtlar şu an repoda yok. Ayrı bir iş olarak kapatılmalı.
