@@ -30,6 +30,32 @@ Katman 4 çalışmadan başlanmamalı.
 
 ## B-006 — Alış-satış makası eşiği
 Hangi makasın üstünde "gösterme" denecek? Ölçülen fark makastan küçükse sayı yanıltır.
+
+## B-007, B-008, B-009 — konuşmada geçti, buraya yazılmadı
+Gerçek zamanlı cüzdan izleyici + bildirim, Polymarket `clob/prices-history`
+parametreleri ve COT verisi sohbette bu numaralarla anıldı ama madde olarak
+girilmemiş. Numaralar çakışmasın diye boş bırakıldı; yazan kişi doldursun.
+
+## B-010 — Bulgu şeridinden çıkarılan iki kart
+Şerit slider'ken altı bulgu taşıyordu. Sonsuza kayan şerit okunurluğu düşürdüğü
+için grid'e çevrildi ve dört karta indirildi (D-069). Çıkarılan ikisi:
+
+**Sync window** (`id:'sync'`, canlı)
+> Time between reading the option chain and the prediction market.
+> An 8-minute gap once moved a result by 33%.
+
+Kart olarak çıkarıldı çünkü değer künye şeridinde `SYNC 0.81s` olarak zaten
+görünüyor; ekranda ikinci kez yer kaplıyordu. Ölçüm kaybolmadı, kart kayboldu.
+
+**Markets tracked** (`id:'mkts'`, canlı, `S.KA.marketler` toplamı)
+> Across three venues, captured in one synchronised run and archived unchanged.
+
+Çıkarıldı çünkü bu bir kapsam sayısı, bulgu değil. "Ne kadar çok izliyoruz"
+diyor, "ne ölçtük" demiyor. Kalan dört kart bir anlatı kuruyor: ne bulduk →
+maliyeti aşıyor mu → sağlam mı → yanılmadığımızı nereden biliyoruz.
+
+Şerit ileride tek kartlık otomatik dönen slider'a çevrilirse ikisi de geri
+eklenir; `serit()` içindeki canlı dal kodları da o zaman geri gelmeli.
 **Karar verildi D-021** — makas ≤ 0,02 ve mid < 0,99. Ayrıca D-033: tick tabanı.
 
 ## B-007 — Anlık izleyici ve bildirim (2026-08-30)
