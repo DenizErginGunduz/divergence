@@ -49,3 +49,8 @@ jobs:
       # touch ("hit") merdivenleri acikca elenir; vade boslugu raporlanir.
       - name: Polymarket terminal merdivenleri
         run: python scripts/measure_polymarket.py
+
+      # Ucuncu kurulum ve tek MODEL VARSAYAN olcum. En degerli ciktisi
+      # aritmetik ihlaller: touch olasiligi terminalden kucuk olamaz.
+      - name: Uzun ufuk touch siniri
+        run: python scripts/measure_touch.py
