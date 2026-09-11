@@ -21,7 +21,7 @@ betikler artik var olmayan bir dosya duzenini okuyordu (denetim, 2026-09-11).
 Bu betik hesabi ham arsivden yapar, dolayisiyla sonucu kontrol edilebilir.
 
 TEK ANLIK GORUNTU YETMEZ
-D-051: tek bir anlik goruntuden istatistiksel anlamlilik iddia edilemez.
+Tek bir anlik goruntuden istatistiksel anlamlilik iddia edilemez.
 O yuzden butun arsiv taranir ve dagilim raporlanir. Bir basamagin bandi
 astigi an, ertesi kosuda asmayabilir; onemli olan oran degil, kararlilik.
 
