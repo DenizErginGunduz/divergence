@@ -43,7 +43,7 @@ SAYFA = 100                                  # data-api limit
 MAX_SAYFA = 6                                # bosluk kapatma denemesi ust siniri
 HOLDERS_SAATI = 5                            # pozisyon sahipleri gunde BIR kez (05 UTC)
 
-# Kalshi seri listesi ELLE SABITLENMEZ (D-063). Ilk denemede listeyi kesik bir
+# Kalshi seri listesi ELLE SABITLENMEZ. Ilk denemede listeyi kesik bir
 # katalog yanitindan cikardim ve 62 BTC/ETH serisinin 42'sini kacirdim -- aralarinda
 # tam aradigimiz yillik TERMINAL kontratlar da vardi. Artik her kosuda katalogdan
 # TURETILIYOR; kaynak degisirse biz de degisiriz.
@@ -121,14 +121,14 @@ def polymarket_events():
                    timeout=60) for v in VARLIKLAR}
 
 
-# ---------------- 3. Kalshi (D-056) ----------------
+# ---------------- 3. Kalshi ----------------
 def kalshi():
     """Katalog -> izlenecek seriler -> o serilerin TUM marketleri.
 
     status filtresi YOK: cozulmus marketler de gelsin. Cozulme sonucu
     kalibrasyon/Brier veri setinin ta kendisi ve sonradan geri alinamaz.
 
-    Seri listesi katalogdan turetilir (D-063):
+    Seri listesi katalogdan turetilir:
       olculen  = BTC veya ETH etiketli her seri
       gozlem   = Financials icinde endeks/emtia deseni tutan seriler
                  (kapsam karari verilene kadar sayi uretilmez)
