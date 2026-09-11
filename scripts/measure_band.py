@@ -40,6 +40,7 @@ import re
 import sys
 
 from arsiv import anlik_goruntu, anlar, ozet, Eksik
+from kararlilik import Kararlilik
 
 SERILER = [('BTC', 'KXBTCY', 'BTC'), ('ETH', 'KXETHY', 'ETH')]
 
@@ -167,27 +168,30 @@ def basamaklar(KA, D, seri, para):
             lo = round(m['floor_strike'])
             hi = round(m['cap_strike'] + .01)   # kova siniri: D-067 duzeltmesi
 
+        etiket = m.get('ticker') or ('%s-%s' % (lo, hi))
         dL = dijital(ch, vade, lo, F, idx) if lo is not None else {'p': 1, 'se': 0, 'fee': 0}
         dH = dijital(ch, vade, hi, F, idx) if hi is not None else {'p': 0, 'se': 0, 'fee': 0}
         pm = (float(m['yes_bid_dollars']) + float(m['yes_ask_dollars'])) / 2
         mk = float(m['yes_ask_dollars']) - float(m['yes_bid_dollars'])
         if not dL or not dH:
-            satirlar.append({'sessiz': 'strike araligi disinda', 'pm': pm, 'mk': mk})
+            satirlar.append({'etiket': etiket, 'sessiz': 'strike araligi disinda',
+                             'pm': pm, 'mk': mk})
             continue
         opt = dL['p'] - dH['p']
         se = None if (dL['se'] is None or dH['se'] is None) else \
             math.sqrt(dL['se'] ** 2 + dH['se'] ** 2)
         surt = dL['fee'] + dH['fee'] + mk / 2
         esik = (0 if se is None else 1.96 * se) + surt
-        satirlar.append({'pm': pm, 'opt': opt, 'fark': pm - opt, 'se': se,
-                         'surt': surt, 'esik': esik, 'mk': mk,
+        satirlar.append({'etiket': etiket, 'pm': pm, 'opt': opt, 'fark': pm - opt,
+                         'se': se, 'surt': surt, 'esik': esik, 'mk': mk,
                          'asiyor': abs(pm - opt) > esik})
     return {'satirlar': satirlar, 'vade': vade, 'F': F, 'idx': idx,
             'toplam': sum(r['opt'] for r in satirlar if 'opt' in r)}
 
 
-def kosu(damga):
-    """Tek anlik goruntu icin iki serinin band sonucu."""
+def kosu(damga, kar=None):
+    """Tek anlik goruntu icin iki serinin band sonucu.
+    kar: Kararlilik sayaci — ayni basamagin kosular boyunca davranisini izler."""
     g = anlik_goruntu(damga)
     cikti = {'damga': damga, 'pencere': g.pencere, 'seriler': {}}
     for varlik, seri, para in SERILER:
@@ -200,6 +204,9 @@ def kosu(damga):
             cikti['seriler'][varlik] = {'hata': 'merdiven yok'}
             continue
         olculen = [r for r in h['satirlar'] if 'opt' in r]
+        if kar is not None:
+            for r in olculen:
+                kar.ekle('%s:%s' % (varlik, r.get('etiket')), r['asiyor'])
         cikti['seriler'][varlik] = {
             'basamak': len(h['satirlar']),
             'olculen': len(olculen),
@@ -224,10 +231,11 @@ def main():
         hepsi = hepsi[-son:]
 
     o = ozet()
+    kar = Kararlilik()
     sonuclar = []
     for d in hepsi:
         try:
-            sonuclar.append(kosu(d))
+            sonuclar.append(kosu(d, kar))
         except Eksik as e:
             sonuclar.append({'damga': d, 'hata': str(e)})
 
@@ -261,10 +269,11 @@ def main():
         print('%-18s %6s  %s %s' % (s['damga'], s['pencere'], hucre[0], hucre[1]))
 
     print('-' * 74)
-    print('TOPLAM: %d / %d basamak bandi asti' % (top_asan, top_olculen))
+    print('TOPLAM: %d / %d basamak-gozlemi bandi asti' % (top_asan, top_olculen))
     if top_olculen:
         print('        %.1f%% — bu bir oran, firsat sayisi DEGIL.' %
               (100.0 * top_asan / top_olculen))
+    kar.yaz('KARARLILIK — Kalshi kova basamaklari')
     print()
     print('Okuma notu: "asan" = fark, surtunme + 1.96*SE toplamindan buyuk.')
     print('Bandi asmak islenebilir demek degildir; teminat maliyeti, vade')
