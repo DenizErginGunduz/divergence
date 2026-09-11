@@ -44,3 +44,8 @@ jobs:
       # hatalari sayilar degil kisitlar yakaladi (D-067).
       - name: Tuketicilik kisiti olcumu
         run: python scripts/measure_exhaustive.py
+
+      # Ucuncu bagimsiz kurulum: Polymarket gunluk terminal merdivenleri.
+      # touch ("hit") merdivenleri acikca elenir; vade boslugu raporlanir.
+      - name: Polymarket terminal merdivenleri
+        run: python scripts/measure_polymarket.py
