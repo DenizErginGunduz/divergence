@@ -1,21 +1,21 @@
 {
  "surum": 1,
- "snapshot_utc": "2026-09-10T21:14:47.140660+00:00",
- "gun": "2026-09-10",
- "damga": "2026-09-10T2114Z",
- "fiyat_penceresi_saniye": 0.88,
+ "snapshot_utc": "2026-09-11T05:15:53.399285+00:00",
+ "gun": "2026-09-11",
+ "damga": "2026-09-11T0515Z",
+ "fiyat_penceresi_saniye": 1.51,
  "tam_mi": true,
  "yollar": {
-  "deribit": "raw/deribit/2026-09-10/deribit_2026-09-10T2114Z.json.gz",
-  "polymarket_events": "raw/polymarket_events/2026-09-10/polymarket_events_2026-09-10T2114Z.json.gz",
-  "kalshi": "raw/kalshi/2026-09-10/kalshi_2026-09-10T2114Z.json.gz"
+  "deribit": "raw/deribit/2026-09-11/deribit_2026-09-11T0515Z.json.gz",
+  "polymarket_events": "raw/polymarket_events/2026-09-11/polymarket_events_2026-09-11T0515Z.json.gz",
+  "kalshi": "raw/kalshi/2026-09-11/kalshi_2026-09-11T0515Z.json.gz"
  },
- "meta_yolu": "raw/_meta/2026-09-10/meta_2026-09-10T2114Z.json",
+ "meta_yolu": "raw/_meta/2026-09-11/meta_2026-09-11T0515Z.json",
  "arsiv": {
-  "gun_sayisi": 12,
-  "anlik_goruntu_sayisi": 39,
+  "gun_sayisi": 13,
+  "anlik_goruntu_sayisi": 40,
   "ilk_gun": "2026-08-30",
-  "son_gun": "2026-09-10",
+  "son_gun": "2026-09-11",
   "gunluk": {
    "2026-08-30": 4,
    "2026-08-31": 5,
@@ -28,7 +28,8 @@
    "2026-09-07": 3,
    "2026-09-08": 3,
    "2026-09-09": 3,
-   "2026-09-10": 3
+   "2026-09-10": 3,
+   "2026-09-11": 1
   }
  }
 }
