@@ -41,6 +41,7 @@ import sys
 
 from arsiv import anlik_goruntu, anlar, ozet, Eksik
 from measure_band import zincir, forward, dijital, AY
+from kararlilik import Kararlilik
 
 VARLIKLAR = [('BTC', 'bitcoin', 'BTC'), ('ETH', 'ethereum', 'ETH')]
 
@@ -166,6 +167,7 @@ def main():
         hepsi = hepsi[-son:]
 
     o = ozet()
+    kar = Kararlilik()
     print('POLYMARKET TERMINAL MERDIVENLERI — ucuncu bagimsiz kurulum')
     print('arsiv: %(anlik_goruntu_sayisi)d anlik goruntu / %(gun_sayisi)d gun' % o)
     print()
@@ -189,6 +191,11 @@ def main():
             if not olculen:
                 continue
             asan = sum(1 for r in olculen if r['asiyor'])
+            for r in olculen:
+                # kimlik: varlik + merdivenin vadesi + esik. Gunluk merdivenler
+                # her gun yenilendigi icin cogu basamak az sayida gozlenir;
+                # kararlilik ozeti bunu oldugu gibi gosterir.
+                kar.ekle('%s:%s:%g' % (h['varlik'], h['bitis'], r['K']), r['asiyor'])
             top_asan += asan
             top_olculen += len(olculen)
             if abs(h['bosluk_saat']) <= 12:
@@ -202,13 +209,14 @@ def main():
 
     print('-' * 86)
     print()
-    print('TOPLAM     : %d / %d basamak bandi asti' % (top_asan, top_olculen))
+    print('TOPLAM     : %d / %d basamak-gozlemi bandi asti' % (top_asan, top_olculen))
     if top_olculen:
         print('             %.1f%%' % (100.0 * top_asan / top_olculen))
     print('BOSLUK<=12h: %d / %d' % (dar_asan, dar_olculen))
     if dar_olculen:
         print('             %.1f%%  <- vade boslugu kucukken de ayni mi?'
               % (100.0 * dar_asan / dar_olculen))
+    kar.yaz('KARARLILIK — Polymarket gunluk esikleri')
     print()
     print('elenen touch merdiveni: %d  ("hit" sorulari terminal DEGILDIR)' % touch_elenen)
     print()
