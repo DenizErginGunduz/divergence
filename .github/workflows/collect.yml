@@ -34,6 +34,41 @@ jobs:
       - name: Snapshot al
         run: python collector/collect.py
 
+      # Tam arsivi private aynaya it — BUDAMADAN ONCE.
+      # Public repo 14 gunluk kayan pencere tutuyor (veri haklari ve depo boyutu,
+      # bkz. docs/DATA_SOURCES.md). Ayna hicbir seyin kaybolmadigi yer: uzun
+      # seri gerektiren olcumler (farkin kendi tarihine gore konumu, vade
+      # yaklasirken davranis, rejim degisimi) buradan beslenecek.
+      #
+      # ARCHIVE_TOKEN tanimli degilse adim sessizce atlanir; boylece sir
+      # eklenene kadar toplayici bozulmaz.
+      - name: Tam arsivi private aynaya it
+        env:
+          ARCHIVE_TOKEN: ${{ secrets.ARCHIVE_TOKEN }}
+        run: |
+          if [ -z "$ARCHIVE_TOKEN" ]; then
+            echo "ARCHIVE_TOKEN yok — ayna atlandi. Public pencere yine de calisiyor."
+            exit 0
+          fi
+          git clone --quiet --depth 1 \
+            "https://x-access-token:${ARCHIVE_TOKEN}@github.com/DenizErginGunduz/divergence-archive.git" \
+            /tmp/ayna
+          mkdir -p /tmp/ayna/raw /tmp/ayna/state
+          # -n: var olani EZME. Ham veri degismez (kural 2); ayna yalnizca ekler.
+          cp -rn raw/.  /tmp/ayna/raw/  2>/dev/null || true
+          cp -r  state/. /tmp/ayna/state/ 2>/dev/null || true
+          cd /tmp/ayna
+          git config user.name  "divergence-collector"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          if git diff --staged --quiet; then
+            echo "aynada degisiklik yok"
+          else
+            git commit --quiet -m "archive: ${GITHUB_RUN_NUMBER} ($(date -u +%Y-%m-%dT%H%MZ))"
+            git push --quiet
+            echo "ayna guncellendi"
+          fi
+
       - name: Repoya isle
         run: |
           git config user.name  "divergence-collector"
