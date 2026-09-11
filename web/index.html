@@ -221,12 +221,12 @@ const VARLIKLAR=[
 const SERIT=[
  {id:'tail',  src:'live', b:'Tail premium',
   t:'What prediction markets charge for the least likely outcome, versus what the option chain implies.'},
- {id:'costs', src:'rec',  n:'0/44', b:'Survives costs', k:'measured 2026-08-31 · D-049',
-  t:'Gaps that beat trading friction and measurement uncertainty. Three replication methods, none survived.'},
- {id:'rep',   src:'rec',  n:'3',    b:'Independent setups', k:'D-045 · D-046 · D-066',
-  t:'The same shape on Polymarket short-dated, on the long-horizon touch bound, and on Kalshi year-end buckets.'},
- {id:'catch', src:'rec',  n:'13%',  b:'Caught by a constraint', k:'measured 2026-08-31 · D-067',
-  t:'A density that summed to 1.13 instead of 1. Every digital looked perfect alone — only the sum exposed it.'}];
+ {id:'costs', src:'rec',  n:'3/44', b:'Survive costs', k:'measured 2026-09-11 · D-049',
+  t:'Kalshi year-end rungs whose gap beats fees, spread and measurement error — in every one of 34 observations. All three are tails; nothing in the body survives.'},
+ {id:'rep',   src:'rec',  n:'2',    b:'Model-free setups', k:'measured 2026-09-11 · D-045 · D-049',
+  t:'Kalshi year-end buckets and Polymarket dailies, both compared without assuming a model. A third setup exists but its bound is too loose to test anything (D-046).'},
+ {id:'catch', src:'rec',  n:'12.7%',b:'Caught by a constraint', k:'measured 2026-09-11 · D-067',
+  t:'One bucket boundary off by a cent inflated the density by 12.7%. Every digital looked perfect alone — only the requirement that they sum to 1 exposed it.'}];
 /* Dort kart tek satirda duruyor; serit grid oldu, slider degil (D-069).
    Cikarilan ikisi docs/BACKLOG.md B-010'da bekliyor:
    - sync window : degeri kunye seridinde zaten var, kart olarak tekrardi
