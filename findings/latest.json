@@ -1,0 +1,259 @@
+{
+ "arsiv": {
+  "gun_sayisi": 13,
+  "anlik_goruntu_sayisi": 40,
+  "ilk": "2026-08-30T1611Z",
+  "son": "2026-09-11T0515Z"
+ },
+ "uretildi": "scripts/write_findings.py",
+ "olcumler": {
+  "surtunme_bandi_kalshi": {
+   "asan": 105,
+   "olculen": 1496,
+   "oran": 7.0,
+   "yogunluk_ort": 0.9979,
+   "kararlilik": {
+    "farkli_basamak": 44,
+    "toplam_gozlem": 1496,
+    "basamak_basina_gozlem": 34.0,
+    "her_zaman_asan": 3,
+    "bazen_asan": 3,
+    "hic_asmayan": 38,
+    "her_zaman_asanlar": [
+     {
+      "basamak": "BTC:KXBTCY-27JAN0100-T149999.99",
+      "gozlem": 34,
+      "asan": 34
+     },
+     {
+      "basamak": "ETH:KXETHY-27JAN0100-T1000.00",
+      "gozlem": 34,
+      "asan": 34
+     },
+     {
+      "basamak": "ETH:KXETHY-27JAN0100-T4999.99",
+      "gozlem": 34,
+      "asan": 34
+     }
+    ]
+   }
+  },
+  "polymarket_terminal": {
+   "asan": 1030,
+   "olculen": 3795,
+   "oran": 27.1,
+   "bosluk_12h_asan": 787,
+   "bosluk_12h_olculen": 2711,
+   "bosluk_12h_oran": 29.0,
+   "elenen_touch_merdiveni": 677,
+   "kararlilik": {
+    "farkli_basamak": 316,
+    "toplam_gozlem": 3795,
+    "basamak_basina_gozlem": 12.0,
+    "her_zaman_asan": 16,
+    "bazen_asan": 247,
+    "hic_asmayan": 53,
+    "her_zaman_asanlar": [
+     {
+      "basamak": "BTC:2026-08-31:74000",
+      "gozlem": 7,
+      "asan": 7
+     },
+     {
+      "basamak": "BTC:2026-08-31:86000",
+      "gozlem": 3,
+      "asan": 3
+     },
+     {
+      "basamak": "ETH:2026-08-31:2800",
+      "gozlem": 3,
+      "asan": 3
+     },
+     {
+      "basamak": "ETH:2026-09-01:2800",
+      "gozlem": 8,
+      "asan": 8
+     },
+     {
+      "basamak": "ETH:2026-09-02:2700",
+      "gozlem": 11,
+      "asan": 10
+     },
+     {
+      "basamak": "ETH:2026-09-08:2100",
+      "gozlem": 2,
+      "asan": 2
+     },
+     {
+      "basamak": "BTC:2026-09-13:90000",
+      "gozlem": 2,
+      "asan": 2
+     },
+     {
+      "basamak": "ETH:2026-09-13:3000",
+      "gozlem": 2,
+      "asan": 2
+     },
+     {
+      "basamak": "ETH:2026-09-15:2200",
+      "gozlem": 5,
+      "asan": 5
+     },
+     {
+      "basamak": "ETH:2026-09-15:2800",
+      "gozlem": 2,
+      "asan": 2
+     },
+     {
+      "basamak": "BTC:2026-09-16:74000",
+      "gozlem": 2,
+      "asan": 2
+     },
+     {
+      "basamak": "BTC:2026-09-16:82000",
+      "gozlem": 2,
+      "asan": 2
+     },
+     {
+      "basamak": "BTC:2026-09-16:84000",
+      "gozlem": 2,
+      "asan": 2
+     },
+     {
+      "basamak": "ETH:2026-09-16:2200",
+      "gozlem": 2,
+      "asan": 2
+     },
+     {
+      "basamak": "ETH:2026-09-16:2600",
+      "gozlem": 2,
+      "asan": 2
+     },
+     {
+      "basamak": "ETH:2026-09-16:2700",
+      "gozlem": 2,
+      "asan": 2
+     }
+    ]
+   }
+  },
+  "uzun_ufuk_touch": {
+   "olcum": 1812,
+   "aritmetik_ihlal": 3,
+   "oran_2_ustu": 1720,
+   "ihlal_orani": 0.2,
+   "oran_2_ustu_orani": 94.9,
+   "kararlilik": {
+    "farkli_basamak": 89,
+    "toplam_gozlem": 1812,
+    "basamak_basina_gozlem": 20.4,
+    "her_zaman_asan": 65,
+    "bazen_asan": 24,
+    "hic_asmayan": 0,
+    "her_zaman_asanlar": [
+     {
+      "basamak": "BTC:2027-01-01:200000",
+      "gozlem": 39,
+      "asan": 39
+     },
+     {
+      "basamak": "BTC:2027-01-01:190000",
+      "gozlem": 39,
+      "asan": 39
+     },
+     {
+      "basamak": "BTC:2027-01-01:180000",
+      "gozlem": 39,
+      "asan": 39
+     },
+     {
+      "basamak": "BTC:2027-01-01:170000",
+      "gozlem": 39,
+      "asan": 39
+     },
+     {
+      "basamak": "BTC:2027-01-01:160000",
+      "gozlem": 39,
+      "asan": 39
+     },
+     {
+      "basamak": "BTC:2027-01-01:150000",
+      "gozlem": 39,
+      "asan": 39
+     },
+     {
+      "basamak": "BTC:2027-01-01:140000",
+      "gozlem": 39,
+      "asan": 39
+     },
+     {
+      "basamak": "BTC:2027-01-01:130000",
+      "gozlem": 39,
+      "asan": 39
+     },
+     {
+      "basamak": "BTC:2027-01-01:120000",
+      "gozlem": 39,
+      "asan": 39
+     },
+     {
+      "basamak": "BTC:2027-01-01:110000",
+      "gozlem": 39,
+      "asan": 39
+     },
+     {
+      "basamak": "BTC:2027-01-01:100000",
+      "gozlem": 39,
+      "asan": 38
+     },
+     {
+      "basamak": "BTC:2026-09-01:85000",
+      "gozlem": 8,
+      "asan": 8
+     },
+     {
+      "basamak": "BTC:2026-09-01:87500",
+      "gozlem": 7,
+      "asan": 7
+     },
+     {
+      "basamak": "BTC:2026-08-31:86000",
+      "gozlem": 2,
+      "asan": 2
+     },
+     {
+      "basamak": "BTC:2026-08-31:82000",
+      "gozlem": 3,
+      "asan": 3
+     },
+     {
+      "basamak": "BTC:2026-08-31:80000",
+      "gozlem": 3,
+      "asan": 3
+     },
+     {
+      "basamak": "ETH:2027-01-01:3000",
+      "gozlem": 39,
+      "asan": 39
+     },
+     {
+      "basamak": "ETH:2027-01-01:2750",
+      "gozlem": 39,
+      "asan": 39
+     },
+     {
+      "basamak": "ETH:2027-01-01:10000",
+      "gozlem": 39,
+      "asan": 39
+     },
+     {
+      "basamak": "ETH:2027-01-01:8000",
+      "gozlem": 39,
+      "asan": 39
+     }
+    ]
+   },
+   "not": "Terminal MODELSIZ dijitalden geliyor. \"oran>2\" driftsiz Brown sinirinin ustu demek; \"2\" bir sabit degildir (D-031), bu yuzden zayif bir iddiadir. \"oran<1\" ise aritmetik ihlaldir."
+  }
+ }
+}
