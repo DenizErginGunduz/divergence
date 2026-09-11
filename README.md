@@ -125,8 +125,8 @@ measurements, reference checker, terminal UI.
 
 Known gaps, tracked openly:
 
-- Eight decision records are marked `KAYIT KAYIP` in `docs/DECISIONS.md` — cited in
-  the docs but never written down. They are placeholders, not silence.
+- The decision log is being folded into architecture decision records. Numbers that
+  carried no reasoning of their own have been removed rather than renumbered.
 - The archive grows about 4 MB a day. Git is the wrong home for it beyond roughly
   a year.
 - 148 of 446 flow markets hit the fetch limit in the latest run with no gap flagged.
