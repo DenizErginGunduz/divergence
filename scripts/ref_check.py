@@ -10,8 +10,6 @@ Ne yapar:
   1. Repodaki metin dosyalarini tarar, D-\\d{3} bicimindeki her atifi toplar.
   2. DECISIONS.md'deki "## D-XXX" basliklarini tanimli kabul eder.
   3. Tanimi olmayan atif varsa HATA verir (cikis 1).
-  4. Tanimli ama "KAYIT KAYIP" isaretli olanlari ayrica sayar ve listeler;
-     bunlar hata degil, kapatilmayi bekleyen borctur.
 
 Kullanim:
     python scripts/ref_check.py            # denetle
@@ -30,7 +28,6 @@ TARA_UZANTI = {'.md', '.py', '.html', '.yml', '.yaml', '.json', '.txt', '.js', '
 
 ATIF = re.compile(r'\bD-(\d{3})\b')
 TANIM = re.compile(r'^##\s+(D-\d{3})', re.MULTILINE)
-KAYIP = re.compile(r'^##\s+(D-\d{3})\s+—\s+KAYIT KAYIP', re.MULTILINE)
 
 
 def dosyalar():
@@ -54,20 +51,17 @@ def kendi_testi():
     # ama test verisi uretim verisine benzememeli.
     P = 'D-'
     ornek_karar = ('## %s001 — gercek karar\n'
-                   '## %s002 — KAYIT KAYIP\n'
+                   '## %s002 — ikinci karar\n'
                    'govde metni\n') % (P, P)
     ornek_metin = 'burada %s001, %s002 ve tanimsiz %s999 aniliyor\n' % (P, P, P)
 
     tanimli = set(TANIM.findall(ornek_karar))
-    kayip = set(KAYIP.findall(ornek_karar))
     atif = {P + m.group(1) for m in ATIF.finditer(ornek_metin)}
     asili = sorted(a for a in atif if a not in tanimli)
 
     sorun = []
     if tanimli != {P + '001', P + '002'}:
         sorun.append('tanim taninmadi: %s' % sorted(tanimli))
-    if kayip != {P + '002'}:
-        sorun.append('KAYIT KAYIP taninmadi: %s' % sorted(kayip))
     if atif != {P + '001', P + '002', P + '999'}:
         sorun.append('atif taranmadi: %s' % sorted(atif))
     if asili != [P + '999']:
@@ -78,7 +72,7 @@ def kendi_testi():
         for s in sorun:
             print('  - %s' % s)
         return 1
-    print('kendi testi: gecti (asili referans yakalaniyor, KAYIT KAYIP ayirt ediliyor)')
+    print('kendi testi: gecti — asili referans yakalaniyor')
     return 0
 
 
@@ -93,7 +87,6 @@ def main():
         return 1
     kararlar = open(kp, encoding='utf-8').read()
     tanimli = set(TANIM.findall(kararlar))
-    kayip = set(KAYIP.findall(kararlar))
 
     nerede = {}
     for tam, rel in dosyalar():
@@ -106,7 +99,6 @@ def main():
             nerede.setdefault(no, set()).add(rel)
 
     asili = sorted(n for n in nerede if n not in tanimli)
-    kullanilan_kayip = sorted(n for n in nerede if n in kayip)
 
     taranan = sum(1 for _ in dosyalar())
     print('taranan dosya   : %d' % taranan)
@@ -121,20 +113,14 @@ def main():
 
     if ayrinti:
         for no in sorted(nerede):
-            im = ' [KAYIT KAYIP]' if no in kayip else ''
-            print('  %s%s  <- %s' % (no, im, ', '.join(sorted(nerede[no]))))
-
-    if kullanilan_kayip:
-        print('\nKAYIT KAYIP ama anilan (%d) — borc, hata degil:' % len(kullanilan_kayip))
-        for no in kullanilan_kayip:
-            print('  %-7s <- %s' % (no, ', '.join(sorted(nerede[no]))))
+            print('  %s  <- %s' % (no, ', '.join(sorted(nerede[no]))))
 
     if asili:
         print('\nASILI REFERANS (%d) — tanimi yok:' % len(asili))
         for no in asili:
             print('  %-7s <- %s' % (no, ', '.join(sorted(nerede[no]))))
-        print('\nKarar yazilmadan numara anilmaz. DECISIONS.md\'ye ya gercek kayit')
-        print('ya da "## %s — KAYIT KAYIP" yer tutucusu eklenmeli.' % asili[0])
+        print('\nKarar yazilmadan numara anilmaz. Ya kayit yazilir, ya atif')
+        print('kaldirilir. Bilgi tasimayan numara zaten atif degildir.')
         return 1
 
     print('\nasili referans yok.')
