@@ -6,7 +6,7 @@ SORUN
 okunuyor. Yok. Ayni merdivenler 40 anlik goruntude tekrar tekrar olculuyor;
 Kalshi tarafinda gercekte ~44 farkli basamak var, her biri ~35 kez gozlendi.
 Oranin paydasini sismis bir N ile buyutmek, guveni hak edilmemis bicimde
-artirir. Bu, D-051'in ("tek anlik goruntuden anlamlilik cikmaz") diger yuzu:
+artirir. Bu, "tek anlik goruntuden anlamlilik cikmaz" kuralinin diger yuzu:
 tekrarlanan anlik goruntuden de bagimsiz orneklem cikmaz.
 
 DOGRU SORU
