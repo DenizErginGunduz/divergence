@@ -1,0 +1,36 @@
+name: measure
+
+# Olcumleri REPO kosturur, insan degil.
+#
+# Neden: ekrandaki "0/44" ve "%13" gibi kayitli sayilarin repoda yeniden
+# uretilebilir bir yolu yoktu — eski betikler artik var olmayan bir dosya
+# duzenini (raw/_store.json, inventory/*.csv) okuyordu. Denetimde yakalandi.
+#
+# Bundan sonra her olcum ham arsivden hesaplanir ve ciktisi loga yazilir.
+# Ham veri degismedigi icin (kural 2) ayni anlik goruntu her zaman ayni
+# sayiyi verir; yani sonuc tekrarlanabilir ve kontrol edilebilir.
+#
+# Ag erisimi YOK: yalnizca depodaki dosyalar okunur.
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'scripts/**'
+      - '.github/workflows/measure.yml'
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # Once arsiv okuma yolunun calistigini kanitla. Bu adim kirmiziysa
+      # sonraki her olcum anlamsizdir.
+      - name: Arsiv okuma duman testi
+        run: python scripts/arsiv.py
