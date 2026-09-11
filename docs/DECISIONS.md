@@ -563,20 +563,95 @@ bunların çoğu hatırlanmak zorunda değil, **yeniden türetilebilir**.
 Doldurma sırası: önce arayüzde görünenler (D-045, D-046, D-049, D-066, D-067),
 çünkü ekrandaki sayılar onlara dayanıyor.
 
-## D-045 — KAYIT KAYIP
-**Durum:** yazılmamış · **Anıldığı yer:** web/index.html · docs/DECISIONS.md
-**Hatırlanan konu (kayıt değil):** Polymarket kısa vadeli merdivenlerde fiyatlama tezinin doğrulanması
-**Yapılacak:** ham arşivden yeniden ölçülüp bu başlık gerçek kayıtla değiştirilecek.
+## D-045 — Polymarket kısa vadeli terminal merdivenleri ölçüldü
+**Tarih:** 2026-09-11 · **Üreten:** `scripts/measure_polymarket.py` · 40 anlık görüntü / 13 gün
 
-## D-046 — KAYIT KAYIP
-**Durum:** yazılmamış · **Anıldığı yer:** web/index.html · docs/PRODUCT.md
-**Hatırlanan konu (kayıt değil):** Uzun ufukta yalnızca touch sınırının ölçülebilmesi, terminal karşılığının bulunmaması
-**Yapılacak:** ham arşivden yeniden ölçülüp bu başlık gerçek kayıtla değiştirilecek.
+Polymarket'in günlük "X above ___ on [tarih]" merdivenleri, Deribit dijitalleriyle
+karşılaştırıldı. Sonuç ham hâliyle güçlü görünüyor:
 
-## D-049 — KAYIT KAYIP
-**Durum:** yazılmamış · **Anıldığı yer:** web/index.html · docs/PRODUCT.md
-**Hatırlanan konu (kayıt değil):** Sürtünme ve belirsizlik bandı kurulduktan sonra kaç satırın hayatta kaldığı
-**Yapılacak:** ham arşivden yeniden ölçülüp bu başlık gerçek kayıtla değiştirilecek.
+| ölçüm | değer |
+|---|---|
+| bandı aşan basamak-gözlemi | 1030 / 3795 (**%27.1**) |
+| vade boşluğu ≤12 saat olanlar | 787 / 2711 (**%29.0**) |
+| elenen touch merdiveni | 677 |
+
+Vade boşluğu daraldığında oran **düşmüyor**. Yani boşluk bu sonucun sürücüsü değil —
+şüphe ölçüldü ve reddedildi.
+
+**Ama kararlılık dökümü tabloyu bozuyor:** 316 farklı basamağın **247'si "bazen aşan"**.
+Yalnızca 16 basamak her gözlemde aşıyor. Yani %27.1'in büyük kısmı yapı değil gürültü.
+Günlük merdivenler her gün yenilendiği için basamak başına ortalama 12 gözlem var;
+bu da kararlılık yargısını zayıflatıyor.
+
+**Sonuç:** bu kurulum tezi destekliyor ama ham oranın ima ettiğinden çok daha zayıf.
+
+### Çekince
+Polymarket 16:00 UTC'de Binance BTC/USDT kapanışıyla, Deribit 08:00 UTC'de kendi
+endeksiyle çözülüyor. Hem zaman hem çözünürlük kaynağı farkı var.
+
+
+## D-046 — Uzun ufuk touch sınırı ölçüldü; test zayıf çıktı
+**Tarih:** 2026-09-11 · **Üreten:** `scripts/measure_touch.py` · 40 anlık görüntü
+
+Polymarket'in "What price will X hit in 2026?" touch merdivenleri, opsiyondan çıkan
+**modelsiz** terminal dijitaliyle karşılaştırıldı.
+
+| ölçüm | değer |
+|---|---|
+| toplam ölçüm | 1812 |
+| aritmetik ihlal (oran < 1) | 3 (**%0.2**) |
+| oran > 2 | 1720 (**%94.9**) |
+| farklı eşik / her zaman aşan | 89 / 65 |
+
+**%0.2 ihlal iyi haber.** Touch olasılığı terminalden küçük olamaz; boru hattımız
+bozuk olsaydı burada yüzlerce imkânsız değer çıkardı. Bu, ölçüm zincirinin bağımsız
+doğrulaması.
+
+**%94.9 ise tezi desteklemiyor, sınırın yanlış sınır olduğunu gösteriyor.** "2"
+katsayısı driftsiz aritmetik Brown hareketinden geliyor; uzun vadeli derin OTM
+eşiklerde gevşek. D-031 "2 bir sabit değildir" diyordu — ölçüm onu doğruluyor ama
+aynı zamanda testi işlevsiz bırakıyor.
+
+**Sonuç:** bu kurulum tez için **zayıf kanıt**, boru hattı doğrulaması için güçlü.
+
+### Düzeltilen hata
+İlk sürüm terminal'i lognormal modelden alıyordu ve sonucu "aritmetik ihlal" diye
+etiketliyordu; yanlıştı. Lognormal bir modeldir, ona aykırılık modeli çürütür.
+Model terminaliyle ihlal oranı %8.7 çıkıyordu — tamamen modelin kendi hatası.
+Modelsiz dijitale geçilince %0.2'ye düştü.
+
+
+## D-049 — Sürtünme bandı: kaç basamak işlem maliyetini aşıyor
+**Tarih:** 2026-09-11 · **Üreten:** `scripts/measure_band.py` · 40 anlık görüntü / 13 gün
+
+Eşik = 1.96·SE + sürtünme. Sürtünme üç parçalı: Deribit opsiyon ücreti (dayanak
+başına %0.03, opsiyon fiyatının %12.5'iyle sınırlı, iki bacak için), prediction
+makasının yarısı, ve dijitalin iki bacağından gelen ölçüm belirsizliği.
+Polymarket maker ücreti 0 kabul edildi.
+
+Kalshi yıl sonu kovalarında:
+
+| ölçüm | değer |
+|---|---|
+| bandı aşan basamak-gözlemi | 105 / 1496 (**%7.0**) |
+| farklı basamak | 44 (basamak başına 34 gözlem) |
+| **her zaman aşan** | **3** |
+| bazen aşan | 3 |
+| hiç aşmayan | 38 |
+
+Her zaman aşan üçü, 34/34 gözlemle: `BTC > $150k`, `ETH > $5k`, `ETH > $1k`.
+Üçü de **kuyruk**. Gövdede hiçbir basamak bandı aşmıyor.
+
+**Bu, ham oranın söylediğinden daha güçlü bir bulgu.** %7.0 küçük görünüyor ama
+neredeyse tamamı yapısal: aynı üç basamak, her koşuda, istisnasız.
+
+### Eski "0/44" kaydı geri çekildi
+Ekranda "0/44 survives costs" yazıyordu. O sayıyı üreten hiçbir şey repoda yoktu ve
+yeniden üretilemiyordu (denetim, 2026-09-11). Yerine bu ölçüm geçti.
+
+### Bandı aşmak işlenebilir demek değildir
+Teminat maliyeti, vade boşluğu ve çözünürlük kaynağı farkı bu hesaba girmiyor.
+
 
 ## D-051 — KAYIT KAYIP
 **Durum:** yazılmamış · **Anıldığı yer:** docs/PRODUCT.md
@@ -621,12 +696,44 @@ Geri çekilmiş bir kararın kaydı, doğru kararın kaydı kadar önemlidir.
 **Hatırlanan konu (kayıt değil):** D-057’nin geri çekilmesi — KXBTCY/KXETHY serilerinin var olduğu
 **Yapılacak:** ham arşivden yeniden ölçülüp bu başlık gerçek kayıtla değiştirilecek.
 
-## D-066 — KAYIT KAYIP
-**Durum:** yazılmamış · **Anıldığı yer:** web/index.html · docs/PRODUCT.md
-**Hatırlanan konu (kayıt değil):** Kalshi yıl sonu kovalarında uzun ufuk terminal ölçümü
-**Yapılacak:** ham arşivden yeniden ölçülüp bu başlık gerçek kayıtla değiştirilecek.
+## D-066 — Kalshi yıl sonu kovaları uzun ufukta terminal ölçümü sağlıyor
+**Tarih:** 2026-09-11 · **Üreten:** `scripts/measure_band.py`
 
-## D-067 — KAYIT KAYIP
-**Durum:** yazılmamış · **Anıldığı yer:** web/index.html · docs/PRODUCT.md
-**Hatırlanan konu (kayıt değil):** Kova sınırı yuvarlama hatası ve tüketicilik kısıtının onu yakalaması
-**Yapılacak:** ham arşivden yeniden ölçülüp bu başlık gerçek kayıtla değiştirilecek.
+Uzun ufukta Polymarket yalnızca touch soruyordu; touch opsiyondan modelsiz
+çıkarılamaz (D-046). Kalshi'nin `KXBTCY` / `KXETHY` yıl sonu kova merdivenleri bu
+kısıtı kaldırıyor: doğrudan terminal soruyorlar, yani modelsiz karşılaştırılabiliyorlar.
+
+40 anlık görüntüde 44 farklı basamak, kesintisiz ölçülebildi. Tüketicilik kontrolü
+her koşuda tutuyor (yoğunluk toplamı ortalama **0.9979**).
+
+**Önemi:** bu, projenin tek modelsiz uzun ufuk ölçümü. Sonuçları D-049'da.
+
+### Çekince
+Kalshi CF Benchmarks BRTI ile çözülüyor, Deribit kendi endeksiyle. Ayrıca Kalshi
+vadesini geçmeyen en yakın opsiyon vadesi seçiliyor; kalan boşluk sonucu bizim
+lehimize saptırabilir.
+
+
+## D-067 — Kova sınırı hatası ve onu yakalayan kısıt
+**Tarih:** 2026-09-11 · **Üreten:** `scripts/measure_exhaustive.py` · 68 merdiven-anı
+
+Kova merdiveni tüm sonuç uzayını bölüşüyorsa olasılıklar toplamı 1 olmak zorundadır.
+Bu aritmetik, tercih değil. Üç sınır kuralı aynı veriyle karşılaştırıldı:
+
+| kural | ortalama toplam | 1'den sapma |
+|---|---|---|
+| `round(cap + 0.01)` (bugün kullanılan) | 0.9979 | −%0.2 |
+| `round(cap)` (epsilon yok) | 0.9979 | −%0.2 |
+| `round(cap) + 0.01` (epsilon dışarıda) | 1.1271 | **+%12.7** |
+
+Aralık: 1.0835 – 1.1839.
+
+**Ölçüm, kayıtta yazandan daha keskin bir şey söylüyor.** Hata "epsilon unutulmuş"
+değilmiş. Epsilon'un hiç olmaması zararsız; hata, epsilon'un **yuvarlamanın dışında**
+olması. `round(24999.99)+0.01 = 25000.01` bir sonraki kovanın tabanı `25000` ile
+çakışmıyor, dijital kesin eşitsizlikle farklı strike çiftleri seçiyor, bir bölge iki
+kez sayılıyor.
+
+**Asıl ders:** dijitallerin her biri tek tek makul görünüyordu. Hatayı sayı değil
+**kısıt** yakaladı. Bu projede yakalanan hataların çoğu böyle yakalandı.
+
