@@ -1,3 +1,16 @@
+# LEGACY — this script does not run.
+#
+# It reads `raw/_store.json` or `inventory/*.csv`: a local layout from the first
+# weeks of the project. Neither exists in the repository. The archive moved to
+# per-run gzipped snapshots under `raw/<stream>/<date>/`, documented in
+# docs/ARCHIVE_SCHEMA.md.
+#
+# Kept for the reasoning, not the code. What these scripts measured has been
+# re-measured against the archive by the measure_*.py scripts one directory up.
+#
+# Do not repair this file. If you need what it did, write a new measurement on
+# top of scripts/arsiv.py.
+
 #!/usr/bin/env python3
 """
 put_vs_itmcall_test.py — D-032'nin BEDELINI OLC (Polymarket verisi GEREKTIRMEZ)
