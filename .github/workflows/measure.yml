@@ -34,3 +34,8 @@ jobs:
       # sonraki her olcum anlamsizdir.
       - name: Arsiv okuma duman testi
         run: python scripts/arsiv.py
+
+      # Surtunme bandi: fark, islem maliyetini asiyor mu? Butun arsiv taranir,
+      # cunku tek anlik goruntuden anlamlilik iddia edilemez (D-051).
+      - name: Surtunme bandi olcumu
+        run: python scripts/measure_band.py
