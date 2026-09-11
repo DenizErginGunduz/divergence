@@ -438,6 +438,64 @@ for _ad in ('kalshi', 'deribit'):
     if _ad not in yollar:
         hatalar.append('isaretci_eksik_%s' % _ad)
 
+# ---------------- arsiv penceresi ----------------
+# Arsiv KAYAN PENCERE: yalnizca son ARSIV_GUN gun public depoda tutulur.
+# Uc sebep, uc ayri sorun:
+#
+# 1. Veri haklari. Uc platformun sartlari da ham veriyi toplu olarak yeniden
+#    yayinlamayi kisitliyor (Kalshi acikca "archived or cached data sets",
+#    Deribit "publish/forward", Polymarket "redistribute"). Ekosistemdeki
+#    diger araclar veriyi GOSTERIYOR, arsiv olarak dagitmiyor. Surekli buyuyen
+#    bir depo bizi "veri servisi" konumuna sokuyordu; kayan pencere yayinlanan
+#    bulgulari yeniden uretmeye yeten bir arastirma ornegi birakiyor.
+# 2. Depo boyutu. Olculdu: 4.03 MB/gun, yani yilda ~1.44 GB. GitHub'in onerdigi
+#    ust sinir 1 GB. Pencere ile sabit ~56 MB'da kaliyor.
+# 3. Klonlama ve CI suresi, boyutla birlikte buyuyordu.
+#
+# Silinen gunler KAYBOLMUS olmuyor: git gecmisinde duruyorlar ve uzun vadeli
+# arastirma icin ayri bir depoya alinabilirler. Burada tutulmuyorlar, o kadar.
+ARSIV_GUN = 14
+
+def _pencere_uygula():
+    """Son ARSIV_GUN gun disindaki gun klasorlerini siler.
+    Yalnizca YYYY-MM-DD kalibina uyan klasorlere dokunur; baska hicbir seye."""
+    import shutil
+    gun_kalibi = re.compile(r'^\d{4}-\d{2}-\d{2}
+print('  fiyat penceresi : %.2f sn' % PENCERE)
+print('  toplam sure     : %.2f sn' % meta['toplam_saniye'])
+print('  akis: %(market)d merdiven marketi (kapsam disi %(kapsam_disi_market)d) | %(yeni_islem)d YENI islem | limit dolan %(limit_dolan)d'
+      ' | BOSLUKLU %(BOSLUKLU)d | ilk kez %(ilk_kez)d' % ozet)
+print('  sayfalama: %d denendi, %d calisti  <- data-api offset destegi BU SATIRDAN okunur'
+      % (ozet['sayfalama_denendi'], ozet['sayfalama_calisti']))
+for y in yazildi:
+    print('    %-52s %8.1f KB' % (y['dosya'], y['bayt'] / 1024))
+if hatalar:
+    print('  EKSIK ASAMALAR : %s' % ', '.join(hatalar))
+sys.exit(0)
+)
+    silinen = []
+    for akis in os.listdir(os.path.join(ROOT, 'raw')):
+        kok = os.path.join(ROOT, 'raw', akis)
+        if not os.path.isdir(kok):
+            continue
+        # events/trades gibi ic ice yapilar icin bir seviye daha bak
+        koklar = [kok]
+        alt = [os.path.join(kok, d) for d in os.listdir(kok)
+               if os.path.isdir(os.path.join(kok, d)) and not gun_kalibi.match(d)]
+        koklar.extend(alt)
+        for k in koklar:
+            gunler = sorted(d for d in os.listdir(k)
+                            if gun_kalibi.match(d) and os.path.isdir(os.path.join(k, d)))
+            for g in gunler[:-ARSIV_GUN] if len(gunler) > ARSIV_GUN else []:
+                shutil.rmtree(os.path.join(k, g))
+                silinen.append(os.path.relpath(os.path.join(k, g), ROOT).replace(os.sep, '/'))
+    return silinen
+
+_silinen = _pencere_uygula()
+if _silinen:
+    print('  arsiv penceresi : %d gun klasoru silindi (son %d gun tutuluyor)'
+          % (len(_silinen), ARSIV_GUN))
+
 print('DIVERGENCE v2 — %s' % zaman.isoformat())
 print('  fiyat penceresi : %.2f sn' % PENCERE)
 print('  toplam sure     : %.2f sn' % meta['toplam_saniye'])
