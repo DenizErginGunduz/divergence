@@ -1,123 +1,135 @@
 # Divergence
 
-Prediction market'lerin ima ettiği olasılıklarla, listelenmiş türev piyasalarının
-ima ettiği olasılıkları karşılaştıran bir finansal araştırma altyapısı.
+Two markets price the same future event. This measures how far apart they are, and
+how much of that distance survives contact with reality.
 
-Bahis uygulaması değil, otomatik trading botu değil, sinyal servisi değil.
+Prediction markets (Kalshi, Polymarket) quote a probability directly. Listed options
+(Deribit) imply one through the price difference between neighbouring strikes. Same
+question, two answers, no model required to compare them.
 
----
-
-## Soru
-
-Aynı gelecekteki olaya iki ayrı piyasa farklı olasılık veriyor. Neden?
-
-Polymarket'te "BTC eylül sonunda 80.000'in üstünde kapanır mı?" kontratı 44 sente
-işlem görüyor. Aynı olayın Deribit opsiyon zincirinden çıkan risk-nötr olasılığı
-%36. Aradaki 8 puan bir fırsat mı, yoksa teminat maliyeti, komisyon, volatilite
-risk primi ve çözünürlük kuralı farkının toplamı mı?
-
-Bu depo o farkı **ölçmeye** çalışıyor. Cevaplamaya değil.
+Not a betting app, not a trading bot, not a signal service.
 
 ---
 
-## Neden zor
+## The catch that makes this non-trivial
 
-Naif bir karşılaştırma üç yerde sessizce çöker. Üçünü de bu projede ölçtük.
+**Touch is not terminal.** "Will Bitcoin hit $150k this year" asks whether the price
+touches that level at any point. "Will Bitcoin be above $150k on December 31" asks
+where it closes. Touch probability is always greater than or equal to terminal at the
+same level. Options give terminal directly and touch not at all. Confusing the two
+breaks every number downstream, and the two questions sit side by side on the same
+exchange with almost identical wording.
 
-**1. Kontrat tipi karıştırılırsa hesap sistematik olarak bozulur.**
-"Vade içinde 80.000'e değer mi" (*touch*) ile "vadede 80.000'in üstünde kapanır mı"
-(*terminal*) aynı şey değildir. Touch olasılığı her zaman terminalden büyük veya ona
-eşittir. Bu ayrım projenin en hassas noktası ve sınıflandırma yalnızca kural
-metninden yapılıyor, başlıktan değil.
+**Settlement rarely lines up.** Polymarket daily ladders settle on a Binance candle at
+16:00 UTC. Deribit options expire 08:00 UTC on Deribit's own index. Kalshi settles on
+CF Benchmarks. Every comparison carries a time gap and a source mismatch, and the
+honest move is to measure the gap rather than assume it away.
 
-**2. Yanlış enstrümandan olasılık türetilirse sonuç tamamen ters dönebilir.**
-Aşağı yön olasılığını derin ITM call'dan hesaplamak, küçük bir farkı iki büyük
-sayının farkından okumaktır. Ölçtük — hata, zaman değeri payının monoton
-fonksiyonu:
-
-| zaman değeri / fiyat | %86 | %35 | %12 | %4,8 | %1,2 | %0,4 |
-|---|---|---|---|---|---|---|
-| yanlış yol / doğru yol | 1,01 | 1,01 | 1,02 | 1,04 | 1,28 | **2,09** |
-
-Kural: aşağı yön için put zinciri şart. Put yoksa sayı üretilmez.
-
-**3. Skew yok sayılırsa dijital olasılık yanlış çıkar.**
-`P(S_T > K) = −dC/dK` ve `C`, `K`'ya iki yoldan bağlıdır — doğrudan ve IV eğrisi
-üzerinden. `N(d2)` ikinci terimi (`vega · ∂σ/∂K`) atar. BTC aylık zincirinde
-ölçülen bedel: modelsiz hakeme göre ortalama **%54,8** sapma, kanatlarda **%334**.
-Skew terimi eklendiğinde sapma **%1,9**'a düşüyor.
+**A difference is not an opportunity.** Fees, spread, collateral cost, the variance
+risk premium and measurement error all live inside the gap. Most of what looks like
+mispricing is one of those.
 
 ---
 
-## Yöntem
+## What has actually been measured
 
-Dört katman. İlk üçü opsiyon verisi gerektirmez — bu, projenin lisans ve maliyet
-kırılganlığını azaltan ana tasarım kararı.
+Archive: 13 days, 40 snapshots, three venues, collected three times daily since
+2026-08-30. Every number below is regenerated from that archive by a script in this
+repository — nothing is typed in by hand.
 
-| | Katman | Durum |
+| setup | result | strength |
 |---|---|---|
-| 1 | Merdiven → ayrık yoğunluk | doğrulandı (ETH ort. hata 0,0014) |
-| 2 | Vadeli tutarlılık | doğrulandı (put-call paritesinden F, 21 strike'ta %0,146 dağılım) |
-| 3 | Touch primi alt sınırı | doğrulandı (sert alt sınır 19/19) |
-| 4 | Breeden–Litzenberger | veri hazır |
+| Kalshi year-end buckets | 3 of 44 rungs beat the cost band, in 34 of 34 observations each | model-free |
+| Polymarket dailies | 27.1% of rung-observations beat it, but 247 of 316 rungs are inconsistent | model-free, noisy |
+| Long-horizon touch bound | 0.2% arithmetic violations; 94.9% above the 2x bound | model-dependent, weak |
+
+The three Kalshi rungs that survive are all tails: BTC above $150k, ETH above $5k,
+ETH above $1k. Nothing in the body of any distribution survives the cost band.
+
+The touch result is worth reading carefully. A 0.2% violation rate is a pipeline
+validation, not a finding — if the digital calculation were wrong, impossible values
+would show up here in the hundreds. The 94.9% figure does not show mispricing; it
+shows that the driftless reflection bound is the wrong tool for long-dated deep OTM
+strikes. An earlier version of that script compared against a lognormal terminal and
+reported 8.7% "arithmetic violations", which were the model's error, not the market's.
 
 ---
 
-## Bu depoda ne var
+## Running it
+
+Python 3.12. **No dependencies** — standard library only, nothing to install.
+
+```bash
+git clone https://github.com/DenizErginGunduz/divergence.git
+cd divergence
+python scripts/arsiv.py           # reads the archive, prints what it found
+python scripts/write_findings.py  # runs every measurement, writes findings/latest.json
+```
+
+`scripts/README.md` lists what each script asks and how to run it.
+
+Nothing needs network access to reproduce a measurement: the archive is in the
+repository. Only the collector talks to the outside world.
+
+---
+
+## Repository map
 
 ```
-collector/    eşzamanlı toplayıcı — Polymarket merdivenleri + akış, Deribit call/put
-raw/          ham API yanıtları, tarih damgalı, sonradan değiştirilmez
-state/        su işareti — hangi işlemi gördüğümüzün kaydı
-docs/         METHODOLOGY · DATA_SOURCES · DECISIONS · BACKLOG
-scripts/      ölçüm ve doğrulama betikleri
+collector/collect.py   the only thing that fetches from the internet; runs 3x daily in CI
+raw/                   immutable snapshots, never rewritten  (docs/ARCHIVE_SCHEMA.md)
+state/latest.json      pointer to the newest snapshot of each stream
+scripts/               measurements; scripts/legacy/ does not run, by design
+findings/latest.json   measurement output, written by CI
+web/index.html         the terminal, reads the archive live
+docs/                  methodology, data sources, product and design decisions
 ```
 
-Toplayıcı günde üç kez çalışır ve ham JSON'u olduğu gibi işler.
-Anahtar gerekmez: Deribit, Polymarket Gamma ve Polymarket data-api'nin
-kullandığımız uçları anahtarsızdır.
+---
 
-**Neden arşiv:** Deribit yalnızca anlık durumu verir. Bir günü kaçırırsak o günün
-opsiyon zinciri kalıcı olarak kaybolur. 5 Ağustos'un put zincirini geri
-getiremediğimiz için o tarihli bir ölçümü düzeltemedik — arşiv bu yüzden ürünün
-yanında değil, altında duruyor.
+## How this project works
 
-İşlemler `transactionHash` ile tekillenir; her çekim hangi zaman aralığını
-gördüğünü ayrıca kaydeder. Bu olmadan "işlem yok" ile "biz bakmıyorduk"
-ayırt edilemez.
+1. **Nothing is invented.** An endpoint, a price, a rule or a platform's coverage is
+   either measured or written down as unknown.
+2. **Raw data is kept unchanged.** The methodology will change; the ability to
+   recompute from the original bytes must not.
+3. **Settlement rules are quoted in full, never summarised.** The wording decides
+   whether two contracts are comparable.
+4. **Uncertainty is surfaced, not resolved.** A row we cannot measure stays visible
+   and says why.
+5. **Every number on screen traces to a script.** Enforced in CI: `ref_check.py` fails
+   the build if a decision number is cited but never recorded.
+6. **Retractions are recorded like results.** Decisions that turned out wrong stay in
+   the log with the reason.
 
 ---
 
-## Çalışma kuralları
+## Terminology
 
-Bu kurallar rahatlık için değil, hepsi bir hatadan sonra yazıldı.
+Avoided: fair value, true probability, AI probability, edge, signal, arbitrage,
+insider, smart money.
 
-1. **Uydurma yok.** Endpoint, fiyat, kural metni tahmin edilmez. Bilinmiyorsa `UNKNOWN`.
-2. **Ham veri değiştirilmeden saklanır.** Metodoloji değişecek; yeniden hesaplayabilmeliyiz.
-3. **Kural metni birebir alıntılanır**, özetlenmez.
-4. **Kapsam sessizce genişletilmez.** Yeni fikir `docs/BACKLOG.md`'ye yazılır.
-5. **Emin olmadığın sayıyı üretme, uyarı üret.** Ekrandaki her sayı birinin
-   finansal kararını etkileyebilir.
-6. **Belirsizlik çözülmez, yüzeye çıkarılır.**
+Used: prediction-market-implied probability, options-implied risk-neutral probability,
+cross-market probability gap, terminal and touch probability, measurable and not
+measurable, settlement comparability.
 
-### Terminoloji
-
-Kullanılmaz: "gerçek olasılık", "doğru olasılık", "AI olasılığı", "insider",
-"akıllı para".
-
-Kullanılır: prediction-market-implied probability, options-implied risk-neutral
-probability, terminal probability, touch probability, cross-market probability gap,
-büyük işlem, yoğunlaşmış pozisyon, geçmiş çözünürlük performansı.
-
-**Olasılık farkı otomatik olarak arbitraj fırsatı değildir.** Fark; teminat
-maliyeti, komisyon, makas, volatilite risk primi, çözünürlük kaynağı farkı ve
-model hatasından oluşabilir.
+We do not name something we cannot claim. "Edge" and "signal" promise something
+actionable; as far as this has been measured, there isn't one.
 
 ---
 
-## Durum
+## Status
 
-Faz 0 — doğrulama. Uygulama kodu henüz yazılmıyor; amaç karşılaştırılabilir
-kontratların gerçekten var olup olmadığını ölçmek.
+Working: collector (25 of 25 recent runs clean), archive, three model-free
+measurements, reference checker, terminal UI.
 
-Karar geçmişi `docs/DECISIONS.md` içinde, geri çektiğim sonuçlar dahil.
+Known gaps, tracked openly:
+
+- Eight decision records are marked `KAYIT KAYIP` in `docs/DECISIONS.md` — cited in
+  the docs but never written down. They are placeholders, not silence.
+- The archive grows about 4 MB a day. Git is the wrong home for it beyond roughly
+  a year.
+- 148 of 446 flow markets hit the fetch limit in the latest run with no gap flagged.
+  Probably fine, not verified.
+- Assets beyond BTC and ETH are collected but not measured.
+- Documentation is being moved from Turkish to English; some files are still Turkish.
