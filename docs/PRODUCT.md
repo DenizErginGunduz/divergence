@@ -19,7 +19,7 @@ Aynı gelecekteki olaya iki piyasa farklı olasılık veriyor. Bu ürün o fark�
 **ölçüyor** ve **ne kadar güvenilebileceğini** söylüyor.
 
 Söylemediği şey: ne yapman gerektiği. Ölçtük — fark yön olarak gerçek ama
-neredeyse hiçbir yerde işlenebilir değil (D-049, D-054). Fırsat etiketi
+neredeyse hiçbir yerde işlenebilir değil (D-049). Fırsat etiketi
 basmak 44 satırın 44'ünde yanlış olurdu.
 
 ## 2. Hedef kitle — ve çelişkinin çözümü
@@ -47,13 +47,13 @@ listenin taşıyıcı sütunu olamaz.
 
 ### 3.2 Kanıt gücü ufka göre değişir
 Kısa vadede modelsiz dijital; uzun vadede touch sınırı model varsayıyor (D-046).
-Kalshi'nin yıllık terminal kovaları bu kısıtı kriptoda kaldırdı (D-064, D-066)
+Kalshi'nin yıllık terminal kovaları bu kısıtı kriptoda kaldırdı (D-066)
 ama emtia/endekste vekil hatası duruyor.
 → **Her satır kendi kanıt seviyesini taşır.** Aynı sayıymış gibi göstermek yanlış.
 
 ### 3.3 Hiçbir şey işlenebilir çıkmadı
 Dar spread'le 0/44, geniş spread'le 0/25 gerçek hayatta kalan, delta hedge zaten
-dijitali replike etmiyor (D-053, D-054). Kalshi yıllık kovalarında ilk kez 2/26
+dijitali replike etmiyor (ölçüldü: modelsiz dijital replike edilemiyor). Kalshi yıllık kovalarında ilk kez 2/26
 bandı aştı (D-066) — ve o bile vade boşluğu çekincesi taşıyor.
 → **"Alınabilir / satılabilir" etiketi yok.** Bandın kendisi gösterilir: fark,
 belirsizlik, sürtünme, ve neden dokunulmaz olduğu.
@@ -66,7 +66,7 @@ kullanıcıyı sürekli aynı yapısal yöne iter (D-009).
 ### 3.5 Her sayının yanında onu çürütebilecek bir kısıt bulunur
 Bugüne kadar dört hata yakalandı ve **dördünü de sayı değil kısıt yakaladı**:
 kıvrık tırnak, metrik oyunlama, put tarafında yanlış eğri, kova sınırında bir
-kuruş (D-055, D-067). Sonuncusunda dijitaller tek tek kusursuz görünüyordu;
+kuruş (D-067). Sonuncusunda dijitaller tek tek kusursuz görünüyordu;
 yalnızca "tüketici kümenin toplamı 1 olmalı" kısıtı hatayı görünür kıldı.
 → **Bu ürünün tasarım ilkesi.** Ekrandaki her sayının yanında onu yanlışlayabilecek
 bir kontrol durur: toplam, monotonluk, iki yöntemin uyuşması, makas, eşzamanlılık.
@@ -137,7 +137,7 @@ yapıyor: kullanıcı neyin biriktiğini görüyor, ve o birikimin sonunda ne
 geleceğini biliyor.
 
 Arşiv yeterli uzunluğa gelene kadar hiçbir yerde **"istatistiksel olarak
-anlamlı"** denmez (D-051). Betimleyici dil kullanılır.
+anlamlı"** denmez. Betimleyici dil kullanılır.
 
 ---
 
