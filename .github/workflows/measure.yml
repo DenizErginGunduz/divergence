@@ -19,6 +19,9 @@ on:
       - 'scripts/**'
       - '.github/workflows/measure.yml'
 
+permissions:
+  contents: write        # findings/latest.json commit edilecek
+
 jobs:
   measure:
     runs-on: ubuntu-latest
@@ -54,3 +57,21 @@ jobs:
       # aritmetik ihlaller: touch olasiligi terminalden kucuk olamaz.
       - name: Uzun ufuk touch siniri
         run: python scripts/measure_touch.py
+
+      # Sonuclari dosyaya yaz. Log okunmuyor (API yonetici yetkisi istiyor,
+      # arayuz sanallastirilmis); dosya hem okunur hem kalici hem de ekran
+      # bunu okuyacak. Kayit ile ekran boylece ayrilamaz hale geliyor.
+      - name: Bulgulari yaz
+        run: python scripts/write_findings.py
+
+      - name: findings/ degistiyse commit et
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add findings/
+          if git diff --staged --quiet; then
+            echo "findings/ degismedi, commit yok"
+          else
+            git commit -m "findings: olcum sonuclari guncellendi (otomatik)"
+            git push
+          fi
