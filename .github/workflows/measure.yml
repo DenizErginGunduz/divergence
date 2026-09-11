@@ -39,3 +39,8 @@ jobs:
       # cunku tek anlik goruntuden anlamlilik iddia edilemez (D-051).
       - name: Surtunme bandi olcumu
         run: python scripts/measure_band.py
+
+      # Tuketicilik: kova toplami 1 olmak zorunda. Uc sinir kurali karsilastirilir;
+      # hatalari sayilar degil kisitlar yakaladi (D-067).
+      - name: Tuketicilik kisiti olcumu
+        run: python scripts/measure_exhaustive.py
