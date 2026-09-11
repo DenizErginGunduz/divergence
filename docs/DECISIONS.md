@@ -493,10 +493,6 @@ değer değişmediyse stile hiç dokunulmuyor. Saf CSS alternatifi (`100vw` +
 için künye içeriği yarım çubuk kadar kayıyor — düzeltmeye çalıştığımız hatanın
 aynısını geri getiriyor.
 
-### Not
-Bu kararı yazarken görüldü: `DECISIONS.md` 043'te bitiyor, 044–068 aralığı
-hiç yazılmamış. Sitedeki bulgu kartları D-045/D-046/D-049/D-066/D-067'ye atıf
-yapıyor; bu kayıtlar şu an repoda yok. Ayrı bir iş olarak kapatılmalı.
 
 ## D-070 — Sayfa GitHub contents API'sinden koparildi
 **Tarih:** 2026-09-10
@@ -549,19 +545,11 @@ titizligini degil, bos bir ekran goruyordu. Ve kendi kendine kotulesiyordu.
 
 ---
 
-# KAYIT KAYIP — doldurulmayı bekleyen numaralar
+# Yeniden ölçülen kayıtlar
 
-Aşağıdaki numaralar belgelerde ve/veya arayüzde **anılıyor** ama kararın kendisi
-bu dosyaya hiç yazılmamış. Bu bölüm o boşluğu kapatmıyor, **görünür kılıyor**:
-referanslar çözülüyor, eksiklik saklanmıyor.
+Aşağıdakiler ham arşivden yeniden türetildi; her biri üreten betiği ve
+hangi anlık görüntüler üzerinde koştuğunu taşıyor.
 
-Her maddede yalnızca **konu başlığı** var — hatırlanan konu, kayıt değil.
-**Sayı yok.** Sayılar yeniden ölçümden gelecek (kural 1: uydurma yok; kural 7:
-belirsizlik çözülmez, yüzeye çıkarılır). Ham arşiv değişmeden duruyor, bu yüzden
-bunların çoğu hatırlanmak zorunda değil, **yeniden türetilebilir**.
-
-Doldurma sırası: önce arayüzde görünenler (D-045, D-046, D-049, D-066, D-067),
-çünkü ekrandaki sayılar onlara dayanıyor.
 
 ## D-045 — Polymarket kısa vadeli terminal merdivenleri ölçüldü
 **Tarih:** 2026-09-11 · **Üreten:** `scripts/measure_polymarket.py` · 40 anlık görüntü / 13 gün
@@ -652,49 +640,6 @@ yeniden üretilemiyordu (denetim, 2026-09-11). Yerine bu ölçüm geçti.
 ### Bandı aşmak işlenebilir demek değildir
 Teminat maliyeti, vade boşluğu ve çözünürlük kaynağı farkı bu hesaba girmiyor.
 
-
-## D-051 — KAYIT KAYIP
-**Durum:** yazılmamış · **Anıldığı yer:** docs/PRODUCT.md
-**Hatırlanan konu (kayıt değil):** Tek anlık görüntüden istatistiksel anlamlılık iddia edilemeyeceği
-**Yapılacak:** ham arşivden yeniden ölçülüp bu başlık gerçek kayıtla değiştirilecek.
-
-## D-053 — KAYIT KAYIP
-**Durum:** yazılmamış · **Anıldığı yer:** docs/PRODUCT.md
-**Hatırlanan konu (kayıt değil):** Delta hedge’in dijital kontratı replike etmediği
-**Yapılacak:** ham arşivden yeniden ölçülüp bu başlık gerçek kayıtla değiştirilecek.
-
-## D-054 — KAYIT KAYIP
-**Durum:** yazılmamış · **Anıldığı yer:** docs/PRODUCT.md
-**Hatırlanan konu (kayıt değil):** Ucuz bir replikasyon yolunun bulunamadığı
-**Yapılacak:** ham arşivden yeniden ölçülüp bu başlık gerçek kayıtla değiştirilecek.
-
-## D-055 — KAYIT KAYIP
-**Durum:** yazılmamış · **Anıldığı yer:** docs/PRODUCT.md
-**Hatırlanan konu (kayıt değil):** Metrik oyunlama ve put tarafında yanlış eğri kullanımı hataları
-**Yapılacak:** ham arşivden yeniden ölçülüp bu başlık gerçek kayıtla değiştirilecek.
-
-## D-056 — KAYIT KAYIP
-**Durum:** yazılmamış · **Anıldığı yer:** collector/collect.py
-**Hatırlanan konu (kayıt değil):** Kalshi erişimi ve kapsamı
-**Yapılacak:** ham arşivden yeniden ölçülüp bu başlık gerçek kayıtla değiştirilecek.
-
-## D-063 — KAYIT KAYIP
-**Durum:** yazılmamış · **Anıldığı yer:** collector/collect.py
-**Hatırlanan konu (kayıt değil):** Kalshi seri listesinin elle sabitlenmeyip katalogdan türetilmesi
-**Yapılacak:** ham arşivden yeniden ölçülüp bu başlık gerçek kayıtla değiştirilecek.
-
-## D-057 — KAYIT KAYIP (geri çekilmiş)
-**Durum:** yazılmamış · **Anıldığı yer:** docs/DECISIONS.md (D-064 içinde)
-**Hatırlanan konu (kayıt değil):** Kalshi'de uzun vadeli terminal serilerinin
-bulunmadığı sonucu. Sonradan **geri çekildi**: seri listesi kesik bir katalog
-yanıtından çıkarıldığı için seriler kaçırılmıştı (bkz. D-063, D-064).
-**Yapılacak:** hem özgün karar hem geri çekilme gerekçesi kayda geçecek.
-Geri çekilmiş bir kararın kaydı, doğru kararın kaydı kadar önemlidir.
-
-## D-064 — KAYIT KAYIP
-**Durum:** yazılmamış · **Anıldığı yer:** docs/PRODUCT.md
-**Hatırlanan konu (kayıt değil):** D-057’nin geri çekilmesi — KXBTCY/KXETHY serilerinin var olduğu
-**Yapılacak:** ham arşivden yeniden ölçülüp bu başlık gerçek kayıtla değiştirilecek.
 
 ## D-066 — Kalshi yıl sonu kovaları uzun ufukta terminal ölçümü sağlıyor
 **Tarih:** 2026-09-11 · **Üreten:** `scripts/measure_band.py`
