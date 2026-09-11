@@ -40,7 +40,7 @@ import re
 import sys
 
 from arsiv import anlik_goruntu, anlar, ozet, Eksik
-from measure_band import forward, AY
+from measure_band import forward, dijital, AY
 from kararlilik import Kararlilik
 
 VARLIKLAR = [('BTC', 'bitcoin', 'BTC'), ('ETH', 'ethereum', 'ETH')]
@@ -152,22 +152,26 @@ def kosu(damga, kar):
                 A = float(mm.group(0))
                 if A <= F:        # asagi yonlu touch ayri bir hesap, kapsam disi
                     continue
-                o = ch[vade].get('C') or {}
-                sigma = sigma_interp(o, A)
-                if not sigma:
-                    continue
-                s = touch_sinir(A, F, sigma, T)
-                if not s or s['terminal'] <= 0:
+                # TERMINAL MODELSIZ olmali. Onceki surumde lognormal terminal
+                # kullaniliyordu ve sonuc "aritmetik ihlal" diye etiketleniyordu;
+                # yanlisti. Lognormal bir modeldir, ona aykirilik modeli curutur,
+                # aritmetigi degil. Gercek ihlal icin terminal opsiyon
+                # fiyatlarindan dogrudan cikmali (D-025 dijital yaklasimi).
+                d = dijital(ch, vade, A, F, idx)
+                if not d or d['p'] <= 0:
                     continue
                 pm = (float(bid) + float(ask)) / 2
                 if pm <= 0:
                     continue
-                oran = pm / s['terminal']
+                terminal = d['p']
+                oran = pm / terminal
                 sonuc['olcum'] += 1
-                # ARITMETIK IHLAL: touch olasiligi terminalden kucuk olamaz
+                # IHLAL: vade icinde degme olasiligi, vadede ustunde kapanma
+                # olasiligindan KUCUK olamaz. Terminal modelsiz oldugu icin
+                # bu gercekten aritmetiktir.
                 if oran < 1.0:
                     sonuc['ihlal'] += 1
-                # teorik band 1..2; ustu de model disi
+                # Driftsiz sinir 2'dir ama "2" bir sabit DEGILDIR (D-031).
                 if oran > 2.0:
                     sonuc['band_disi'] += 1
                 kar.ekle('%s:%s:%g' % (varlik, bitis, A), oran > 2.0)
@@ -211,11 +215,13 @@ def main():
     kar.yaz('KARARLILIK — oran>2 olan esikler')
 
     print()
-    print('BU OLCUM DIGER IKISINDEN FARKLI: touch olasiligi opsiyondan')
-    print('MODELSIZ cikarilamaz. Buradaki sigma zincirin IV egrisinden')
-    print('interpolasyonla geliyor ve lognormal varsayiliyor. O yuzden')
-    print('"oran>2" bir model ihlali, "oran<1" ise bir ARITMETIK ihlaldir.')
-    print('Ikincisi cok daha guclu bir bulgudur: modele degil, mantiga aykiri.')
+    print('ORAN = prediction market touch fiyati / MODELSIZ terminal dijital.')
+    print('Terminal opsiyon fiyatlarindan dogrudan cikiyor, model varsayilmiyor.')
+    print('')
+    print('oran < 1 : ARITMETIK ihlal. Vade icinde degme, vadede ustunde')
+    print('           kapanmadan az olamaz. Modele degil mantiga aykiri.')
+    print('oran > 2 : driftsiz Brown sinirinin ustu. Bu daha ZAYIF bir')
+    print('           iddiadir, cunku "2" bir sabit degildir (D-031).')
     return 0
 
 
