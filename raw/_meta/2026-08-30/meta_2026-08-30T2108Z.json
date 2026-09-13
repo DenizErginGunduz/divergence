@@ -1,0 +1,46 @@
+{
+ "snapshot_utc": "2026-08-30T21:08:44.996659+00:00",
+ "total_seconds": 145.67,
+ "sync_window_seconds": 1.53,
+ "stage_seconds": {
+  "deribit": 1.13,
+  "polymarket_events": 0.4,
+  "flow": 143.82,
+  "holders": "skipped (once a day)"
+ },
+ "errors": {},
+ "complete": true,
+ "flow_summary": {
+  "markets": 490,
+  "out_of_scope_markets": 251,
+  "new_trades": 1865,
+  "limit_hit": 164,
+  "WITH_GAP": 1,
+  "first_time": 70,
+  "pagination_tried": 1,
+  "pagination_worked": 1
+ },
+ "files": [
+  {
+   "file": "raw/deribit/2026-08-30/deribit_2026-08-30T2108Z.json.gz",
+   "bytes": 71781
+  },
+  {
+   "file": "raw/polymarket_events/2026-08-30/polymarket_events_2026-08-30T2108Z.json.gz",
+   "bytes": 336102
+  },
+  {
+   "file": "raw/events/trades/2026-08-30/trades_2026-08-30T2108Z.ndjson.gz",
+   "bytes": 164237
+  },
+  {
+   "file": "raw/coverage/2026-08-30/coverage_2026-08-30T2108Z.json",
+   "bytes": 176751
+  }
+ ],
+ "assets": [
+  "bitcoin",
+  "ethereum"
+ ],
+ "version": 3
+}

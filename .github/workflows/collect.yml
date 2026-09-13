@@ -1,0 +1,96 @@
+name: collect
+
+# Why these hours: we work with medium and long dated ladders (D-019) and do not
+# need second resolution. Three runs a day; one before the US open, one after the
+# close, one during the Asian session. That also captures the daily shape.
+on:
+  schedule:
+    - cron: '0 13 * * *'    # 13:00 UTC — before the US open
+    - cron: '0 21 * * *'    # 21:00 UTC — after the US close
+    - cron: '0 5  * * *'    # 05:00 UTC — Asian session + the daily holders fetch
+  workflow_dispatch:         # so it can also be triggered by hand
+
+# The run writes to its own repository. No other permission.
+permissions:
+  contents: write
+
+concurrency:
+  group: collect
+  cancel-in-progress: false   # never cut one run short for another; every snapshot counts
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # NO dependencies. The script uses the standard library only, so there is no
+      # package chain that can break.
+      - name: Take a snapshot
+        run: python collector/collect.py
+
+      # Push the full archive to the private mirror — BEFORE any pruning.
+      # The public repo keeps a 14 day rolling window (data rights and repository
+      # size, see docs/DATA_SOURCES.md). The mirror is where nothing is lost:
+      # measurements that need a long series — where today's gap sits in its own
+      # history, how a rung behaves as expiry approaches, regime change — are fed
+      # from there.
+      #
+      # If ARCHIVE_TOKEN is not set the step is skipped, so the collector does not
+      # break before the secret exists. A token that has EXPIRED is a different
+      # case and says so loudly: the mirror silently falling behind is exactly the
+      # failure this step exists to prevent.
+      - name: Push the full archive to the private mirror
+        env:
+          ARCHIVE_TOKEN: ${{ secrets.ARCHIVE_TOKEN }}
+        run: |
+          if [ -z "$ARCHIVE_TOKEN" ]; then
+            echo "ARCHIVE_TOKEN not set — mirror skipped. The public window still works."
+            exit 0
+          fi
+          if ! git clone --quiet --depth 1 \
+            "https://x-access-token:${ARCHIVE_TOKEN}@github.com/DenizErginGunduz/divergence-archive.git" \
+            /tmp/mirror; then
+            echo "::error::MIRROR FAILED. The most likely cause is an EXPIRED ARCHIVE_TOKEN."
+            echo "::error::Create a new fine-grained PAT with Contents: read and write on"
+            echo "::error::divergence-archive, then replace the ARCHIVE_TOKEN secret."
+            echo "::error::Until then the full archive is NOT being backed up."
+            exit 1
+          fi
+          mkdir -p /tmp/mirror/raw /tmp/mirror/state
+          # -n: never OVERWRITE what is already there. Raw data does not change
+          # (rule 2); the mirror only ever adds.
+          cp -rn raw/.  /tmp/mirror/raw/  2>/dev/null || true
+          cp -r  state/. /tmp/mirror/state/ 2>/dev/null || true
+          cd /tmp/mirror
+          git config user.name  "divergence-collector"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          if git diff --staged --quiet; then
+            echo "mirror unchanged"
+          else
+            git commit --quiet -m "archive: ${GITHUB_RUN_NUMBER} ($(date -u +%Y-%m-%dT%H%MZ))"
+            git push --quiet
+            echo "mirror updated"
+          fi
+
+      - name: Commit to the repository
+        run: |
+          git config user.name  "divergence-collector"
+          git config user.email "actions@users.noreply.github.com"
+          # state/ has to be committed too: the watermark lives there. If it is
+          # lost, the next run treats every market as "first time" and rewrites it.
+          git add raw/ state/
+          if git diff --staged --quiet; then
+            echo "No changes — nothing to commit."
+            exit 0
+          fi
+          git commit -m "snapshot $(date -u +'%Y-%m-%dT%H:%MZ')"
+          # Another run may have landed in between; pull before pushing.
+          git pull --rebase --autostash origin ${GITHUB_REF_NAME}
+          git push

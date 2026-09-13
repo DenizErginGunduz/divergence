@@ -1,0 +1,656 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Divergence</title>
+<!--
+  The skeleton from DESIGN.md, exactly:
+    [0]   findings strip     — does not rotate, scrolled by hand, every card
+                               carries its source
+    [0.5] notable right now  — the selection rule is computed; hidden when empty
+    [1]   asset cards        — navigation starts here
+    [2]   ladder list        — one row per ladder
+    [3]   rung table         — opens IN PLACE
+    [4]   detail card        — opens IN PLACE, with the constraint strip
+
+  The token block lives in :root. When theming arrives, ONLY that changes.
+  Data is read LIVE from the archive; no hardcoded numbers (except the
+  "recorded" strip cards — those carry a date and a decision number).
+-->
+<style>
+:root{
+  /* ---------- TOKEN LAYER ---------- */
+  --bg:#14110f; --surface:#181411; --surface-2:#1c1713; --border:#2a231d;
+  --line:#241e19;
+  --text:#f0ece6; --text-2:#c9c0b4; --text-3:#9c8f7e; --text-4:#5a5148;
+  --accent:#e8a33d;
+  --ok:#7fb069; --warn:#c98a2e; --muted:#5a5148;
+  --yes-bg:#1e2a1e; --yes:#8fd18f; --no-bg:#2a1e1e; --no:#d18f8f;
+  --font:'Inter var','Inter',system-ui,-apple-system,sans-serif;
+  --radius:7px; --gap:8px; --row:38px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;
+  font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased;
+  padding:26px 24px 60px;max-width:1200px;margin:0 auto}
+.num{text-align:right} .t12{font-size:12px} .t11{font-size:11px} .t10{font-size:10px}
+.dim{color:var(--text-3)} .dim2{color:var(--text-4)} .w5{font-weight:500}
+.lab{font-size:10px;letter-spacing:.14em;color:var(--text-3)}
+
+/* ---- full-bleed ----
+   body carries max-width:1200px; the helper below escapes it.
+   --vw = usable width EXCLUDING the scrollbar, measured in JS.
+   100vw counts the scrollbar, so it is not used directly; it would overflow
+   horizontally. ONLY the dateline uses this. Content blocks stay inside
+   1200px: strips running to the edge of the screen read worse (D-069). */
+.bleed{width:var(--vw,100%);
+  margin-left:calc(50% - var(--vw,100%)/2)}
+
+/* ---- horizontal slider wrapper ----
+   The arrows sit in the gutter beside the content, not at the screen edge. */
+.swrap{position:relative;margin-bottom:26px}
+.sarr{position:absolute;top:50%;transform:translateY(-50%);
+  width:30px;height:30px;border-radius:50%;cursor:pointer;z-index:5;
+  border:1px solid var(--border);background:var(--surface-2);color:var(--text-2);
+  font-size:15px;line-height:1;opacity:0;transition:opacity .15s,border-color .12s;
+  display:flex;align-items:center;justify-content:center}
+.swrap:hover .sarr{opacity:1}
+.sarr:hover{color:var(--accent);border-color:#3a3026}
+.sarr.sl{left:-14px} .sarr.sr{right:-14px}
+.sarr[hidden]{display:none}
+@media(max-width:720px){ .sarr{display:none} }
+
+/* ---- DATELINE (masthead) ---- */
+.mast{margin-top:-26px;margin-bottom:26px;background:var(--bg)}
+.rule{height:3px;background:var(--accent)}
+.mastin{padding:24px 24px 0;max-width:1200px;margin:0 auto}
+.mtop{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+.wordmark{font-size:42px;font-weight:200;letter-spacing:.14em;color:var(--text);line-height:1}
+.slogan{font-size:18px;font-weight:400;color:var(--text-3);margin-top:11px;letter-spacing:-.005em}
+.slogan .pm{color:var(--accent);font-weight:500}
+.slogan .op{color:var(--text-2);font-weight:500}
+.dateline{display:flex;margin-top:22px;border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);font-size:10px;letter-spacing:.1em;color:var(--text-3)}
+.dateline div{padding:9px 0}
+/* ---- sticky band ---- */
+#band{position:fixed;top:0;left:0;right:0;z-index:50;background:var(--bg);
+  opacity:0;pointer-events:none;transition:opacity .18s ease}
+#band.on{opacity:1;pointer-events:auto}
+#band .rule{height:2px}
+.bandin{display:flex;align-items:center;gap:14px;padding:11px 24px;
+  border-bottom:1px solid var(--border);max-width:1200px;margin:0 auto}
+.bandwm{font-size:15px;font-weight:200;letter-spacing:.14em;color:var(--text)}
+@media(max-width:720px){
+  .wordmark{font-size:30px} .slogan{font-size:15px}
+  .dateline{flex-wrap:wrap} .dateline div{flex:1 1 50%!important;text-align:left!important}
+}
+
+/* [0] findings strip */
+/* The strip is a GRID, not a slider (D-069). Four findings on one row;
+   two on a narrow screen, then one. No scrolling, nothing cut off. */
+#strip{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:26px}
+.fcard{min-width:0;border:1px solid var(--border);border-radius:var(--radius);
+  padding:14px 15px;background:var(--surface)}
+@media(max-width:1000px){ #strip{grid-template-columns:repeat(2,1fr)} }
+@media(max-width:600px){ #strip{grid-template-columns:1fr} }
+.fcard .n{font-size:31px;font-weight:300;color:var(--accent);line-height:1;letter-spacing:-.02em}
+.fcard .b{font-size:12px;font-weight:500;margin:7px 0 6px}
+.fcard .t{font-size:11px;color:var(--text-3);line-height:1.55}
+.fcard .k{font-size:10px;color:var(--text-4);margin-top:9px;padding-top:7px;border-top:1px solid var(--line)}
+
+/* [0.5] notable — market card convention */
+#notable{margin-bottom:0}
+#ngrid{display:flex;gap:11px;overflow-x:auto;padding-bottom:10px;scroll-behavior:smooth;
+  scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.ncard{min-width:262px;max-width:262px;flex-shrink:0;
+  border:1px solid var(--border);border-radius:var(--radius);padding:13px 14px;
+  background:var(--surface);cursor:pointer;transition:border-color .12s,opacity .12s}
+.ncard:hover{border-color:#3a3026}
+/* a card that does not clear the band: stays in place, shown faded (PRODUCT.md 5) */
+.ncard.soft{opacity:.6}
+.ncard.soft:hover{opacity:1}
+.ncard .q{font-size:12px;color:var(--text);line-height:1.45;margin-bottom:11px;min-height:35px}
+.chips2{display:flex;gap:6px;margin-bottom:10px}
+.oc{flex:1;border-radius:4px;padding:6px 9px}
+.oc .k{font-size:9px} .oc .v{font-size:15px}
+.oc.yes{background:var(--yes-bg)} .oc.yes .k{color:#6d8a6d} .oc.yes .v{color:var(--yes)}
+.oc.no{background:var(--no-bg)}   .oc.no .k{color:#8a6d6d}  .oc.no .v{color:var(--no)}
+.nfoot{border-top:1px solid var(--line);padding-top:8px;display:flex;align-items:baseline}
+
+/* [1] asset cards */
+#chips{display:flex;gap:6px;margin-bottom:13px;flex-wrap:wrap}
+.chip{font-size:12px;padding:4px 11px;border-radius:4px;color:var(--text-3);cursor:pointer;user-select:none}
+.chip:hover{color:var(--text-2)} .chip.on{background:var(--border);color:var(--text)}
+#cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px;margin-bottom:8px}
+.acard{border:1px solid var(--border);border-radius:var(--radius);padding:13px 15px;
+  background:var(--surface);cursor:pointer;transition:border-color .12s}
+.acard:hover{border-color:#3a3026}
+.acard.sel{border-color:var(--accent)}
+.acard.none{opacity:.66}
+.icon{width:23px;height:23px;border-radius:50%;background:var(--surface-2);display:flex;
+  align-items:center;justify-content:center;font-size:9px;font-weight:500;color:var(--text-3);flex-shrink:0}
+.an{display:flex;align-items:center;gap:7px;font-size:11px;margin-bottom:3px}
+.an .st{width:9px;flex-shrink:0} .an .lb{width:96px;flex-shrink:0}
+
+/* [2][3] tables */
+.sect{font-size:10px;letter-spacing:.14em;color:var(--text-3);margin:26px 0 9px}
+table{width:100%;border-collapse:collapse}
+th{font-size:10px;font-weight:400;color:var(--text-3);text-align:left;letter-spacing:.04em;
+  padding:0 9px 7px;border-bottom:1px solid var(--border);white-space:nowrap}
+th.num{text-align:right}
+td{font-size:12px;padding:0 9px;height:var(--row);border-bottom:1px solid var(--line);
+  color:var(--text-2);vertical-align:middle}
+tr.clk{cursor:pointer} tr.clk:hover td{background:var(--surface)}
+tr.quiet td{color:var(--text-4)} tr.open td{background:var(--surface)}
+.bar{position:relative;height:12px;min-width:74px}
+.bar .band{position:absolute;left:0;top:3px;height:6px;background:#2f2822;border-radius:2px}
+.bar .gap{position:absolute;left:0;top:4px;height:4px;border-radius:2px}
+.badge{font-size:9px;letter-spacing:.04em;padding:2px 6px;border-radius:3px;border:1px solid;white-space:nowrap}
+.b-free{color:var(--ok);border-color:#2f4a26} .b-model{color:var(--warn);border-color:#4a3a12}
+.b-none{color:var(--text-4);border-color:var(--border)}
+
+/* [4] detail card */
+.detail{border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;
+  margin:3px 0 10px;background:var(--surface-2);max-width:580px}
+.big{display:flex;gap:28px;margin:13px 0 15px}
+.big div div:first-child{font-size:10px;letter-spacing:.05em;color:var(--text-3)}
+.big div div:last-child{font-size:23px;font-weight:400}
+.checks{border-top:1px solid var(--border);padding-top:10px;font-size:11px;color:var(--text-3);line-height:1.85}
+.empty{color:var(--text-4);font-size:12px;padding:14px 0}
+#err{color:var(--warn);font-size:12px;padding:12px 0}
+</style>
+</head>
+<body>
+
+<div id="band"><div class="rule"></div><div class="bandin">
+  <svg width="54" height="22" viewBox="0 0 124 50" style="flex-shrink:0">
+    <path d="M4 25 L44 25" stroke="#9c8f7e" stroke-width="3.5" fill="none"/>
+    <path d="M44 25 C 70 25, 76 8, 120 4" stroke="#e8a33d" stroke-width="4" fill="none"/>
+    <path d="M44 25 C 70 25, 76 42, 120 46" stroke="#5a5148" stroke-width="4" fill="none"/>
+  </svg>
+  <span class="bandwm">DIVERGENCE</span>
+  <span id="bandmeta" class="t10" style="margin-left:auto;letter-spacing:.09em;color:var(--text-4)"></span>
+</div></div>
+
+<div class="mast bleed"><div class="rule"></div><div class="mastin">
+  <div class="mtop">
+    <svg width="124" height="50" viewBox="0 0 124 50" style="flex-shrink:0">
+      <path d="M4 25 L44 25" stroke="#9c8f7e" stroke-width="2" fill="none"/>
+      <path d="M44 25 C 70 25, 76 8, 120 4" stroke="#e8a33d" stroke-width="2.5" fill="none"/>
+      <path d="M44 25 C 70 25, 76 42, 120 46" stroke="#5a5148" stroke-width="2.5" fill="none"/>
+      <circle cx="44" cy="25" r="3.5" fill="#14110f" stroke="#e8a33d" stroke-width="2"/>
+    </svg>
+    <div>
+      <div class="wordmark">DIVERGENCE</div>
+      <div class="slogan">Where <span class="pm">prediction markets</span>
+        and <span class="op">options</span> disagree</div>
+    </div>
+  </div>
+  <div class="dateline">
+    <div id="dl-no"   style="flex:1">NO. —</div>
+    <div id="dl-date" style="flex:2">loading archive…</div>
+    <div id="dl-src"  style="flex:2.4">KALSHI · POLYMARKET · DERIBIT</div>
+    <div id="dl-sync" style="flex:2;text-align:right">SYNC — · ARCHIVE —</div>
+  </div>
+</div></div>
+
+<div class="lab" style="margin-bottom:9px">WHAT WE FOUND · measured, not claimed</div>
+<div id="strip"></div>
+
+<div id="notable"></div>
+
+<div class="lab" style="margin-bottom:9px">ASSETS</div>
+<div id="chips"></div>
+<div id="cards"></div>
+
+<div id="panel"></div>
+<div id="err"></div>
+
+<script>
+/* ===================== CONTENT LAYER — data, not code ===================== */
+const ASSETS=[
+ {a:'BTC', l:'Bitcoin',    c:'Crypto',      i:'BTC', ccy:'BTC'},
+ {a:'ETH', l:'Ethereum',   c:'Crypto',      i:'ETH', ccy:'ETH'},
+ {a:'SPX', l:'S&P 500',    c:'Indices',     i:'SPX'},
+ {a:'NDX', l:'Nasdaq-100', c:'Indices',     i:'NDX'},
+ {a:'WTI', l:'Crude oil',  c:'Commodities', i:'WTI'},
+ {a:'GOLD',l:'Gold',       c:'Commodities', i:'AU'},
+ {a:'TSLA',l:'Tesla',      c:'Equities',    i:'TSLA'}];
+/* Strip cards. src:'live' -> computed from the archive. src:'rec' -> a recorded
+   measurement, where a date and a decision number are REQUIRED. A hand-written
+   sentence is not allowed. */
+const STRIP=[
+ {id:'tail',  src:'live', b:'Tail premium',
+  t:'What prediction markets charge for the least likely outcome, versus what the option chain implies.'},
+ {id:'costs', src:'rec',  n:'3/44', b:'Survive costs', k:'measured 2026-09-11 · D-049',
+  t:'Kalshi year-end rungs whose gap beats fees, spread and measurement error — in every one of 34 observations. All three are tails; nothing in the body survives.'},
+ {id:'rep',   src:'rec',  n:'2',    b:'Model-free setups', k:'measured 2026-09-11 · D-045 · D-049',
+  t:'Kalshi year-end buckets and Polymarket dailies, both compared without assuming a model. A third setup exists but its bound is too loose to test anything (D-046).'},
+ {id:'catch', src:'rec',  n:'12.7%',b:'Caught by a constraint', k:'measured 2026-09-11 · D-067',
+  t:'One bucket boundary off by a cent inflated the density by 12.7%. Every digital looked perfect alone — only the requirement that they sum to 1 exposed it.'}];
+/* Four cards on one row; the strip became a grid, not a slider (D-069).
+   The two that were removed are waiting in docs/BACKLOG.md B-010:
+   - sync window     : the value is already in the dateline; the card repeated it
+   - markets tracked : a scope count, not a finding
+   If the strip becomes a slider again, both come back. */
+
+const REPO='https://raw.githubusercontent.com/DenizErginGunduz/divergence/main/';
+const API ='https://api.github.com/repos/DenizErginGunduz/divergence/contents/';
+
+/* ===================== DATA ===================== */
+async function gz(p){const r=await fetch(REPO+p+'?cb='+Date.now());
+ if(!r.ok) throw new Error(p+' → '+r.status);
+ return JSON.parse(await new Response(r.body.pipeThrough(new DecompressionStream('gzip'))).text());}
+async function newestPath(dir){const g=await (await fetch(API+dir+'?cb='+Date.now())).json();
+ if(!Array.isArray(g)||!g.length) throw new Error(dir);
+ const day=g.map(x=>x.name).sort().pop();
+ const f=await (await fetch(API+dir+'/'+day+'?cb='+Date.now())).json();
+ return dir+'/'+day+'/'+f.map(x=>x.name).sort().pop();}
+
+/* ===================== ARITHMETIC ===================== */
+const bracket=(o,K)=>{const ks=Object.keys(o).map(Number).sort((a,b)=>a-b);
+ const lo=ks.filter(k=>k<K),hi=ks.filter(k=>k>K);
+ return (lo.length&&hi.length)?[lo[lo.length-1],hi[0]]:null;};
+function chain(D,p){const idx=D[p].index.result.index_price,ch={};
+ for(const b of (D[p].book_summary.result||D[p].book_summary)){
+  const q=b.instrument_name.split('-'); if(q.length!==4)continue;
+  ((ch[q[1]]||={})[q[3]]||={})[+q[2]]={mark:(b.mark_price||0)*idx,
+   bid:b.bid_price?b.bid_price*idx:null, ask:b.ask_price?b.ask_price*idx:null};}
+ return {ch,idx};}
+function fwd(ch,e,idx){const C=ch[e].C,P=ch[e].P,v=[];
+ for(const k of Object.keys(C).map(Number)) if(P&&P[k]&&k>.85*idx&&k<1.2*idx) v.push(k+C[k].mark-P[k].mark);
+ v.sort((a,b)=>a-b); return v.length?v[Math.floor(v.length/2)]:null;}
+function digital(ch,e,K,F,idx){const t=K<F?'P':'C',o=ch[e][t]; if(!o)return null;
+ const br=bracket(o,K); if(!br)return null; const[a,b]=br,g=b-a,A=o[a],B=o[b];
+ const p=t==='C'?(A.mark-B.mark)/g:1-(B.mark-A.mark)/g;
+ const se=(A.bid!=null&&A.ask!=null&&B.bid!=null&&B.ask!=null)
+  ?Math.sqrt(((A.ask-A.bid)/2)**2+((B.ask-B.bid)/2)**2)/g:null;
+ const feeOf=x=>Math.min(.0003*idx,.125*x);
+ return {p,se,fee:(feeOf(A.mark)+feeOf(B.mark))/g,pair:[a,b]};}
+const MON={JAN:0,FEB:1,MAR:2,APR:3,MAY:4,JUN:5,JUL:6,AUG:7,SEP:8,OCT:9,NOV:10,DEC:11};
+const expiryMs=l=>{const m=l.match(/^(\d+)([A-Z]{3})(\d{2})$/);
+ return m?Date.UTC(2000+ +m[3],MON[m[2]],+m[1],8,0,0):null;};
+const short=v=>v>=1000?'$'+(v/1000).toFixed(v%1000?1:0).replace(/\.0$/,'')+'k':'$'+Math.round(v);
+const c2=v=>v==null?'—':(v*100).toFixed(2)+'¢';
+const f2=v=>v==null?'—':v.toLocaleString('en-US',{maximumFractionDigits:2});
+
+function buckets(KA,D,series,ccy){
+ const M=(KA.markets[series]||[]).filter(m=>m.status==='active'); if(!M.length)return null;
+ const {ch,idx}=chain(D,ccy), closeMs=Date.parse(M[0].close_time);
+ const expiries=Object.keys(ch).filter(e=>ch[e].C&&ch[e].P).map(l=>({l,t:expiryMs(l)}))
+   .filter(x=>x.t).sort((a,b)=>a.t-b.t);
+ const chosen=expiries.filter(x=>x.t<=closeMs).pop(); if(!chosen)return null;
+ const F=fwd(ch,chosen.l,idx); if(!F)return null;
+ const S=M.map(m=>({kind:m.strike_type,floor:m.floor_strike,cap:m.cap_strike,
+   bid:+m.yes_bid_dollars,ask:+m.yes_ask_dollars,oi:Math.round(+m.open_interest_fp||0)}))
+   .sort((a,b)=>((a.floor??a.cap)-(b.floor??b.cap)));
+ const rows=[]; let top=0,neg=0;
+ for(const m of S){
+  let lo=null,hi=null,label='';
+  if(m.kind==='less'){hi=Math.round(m.cap); label='below '+short(m.cap);}
+  else if(m.kind==='greater'){lo=Math.round(m.floor+.01); label='above '+short(m.floor);}
+  else{lo=Math.round(m.floor); hi=Math.round(m.cap+.01); label=short(m.floor)+' – '+short(m.cap);}
+  const dL=lo!=null?digital(ch,chosen.l,lo,F,idx):{p:1,se:0,fee:0};
+  const dH=hi!=null?digital(ch,chosen.l,hi,F,idx):{p:0,se:0,fee:0};
+  const pm=(m.bid+m.ask)/2, spread=m.ask-m.bid;
+  if(!dL||!dH){rows.push({label,pm,spread,oi:m.oi,skipped:'outside option strike range'});continue;}
+  const opt=dL.p-dH.p; top+=opt; if(opt<0)neg++;
+  const se=(dL.se==null||dH.se==null)?null:Math.sqrt(dL.se**2+dH.se**2);
+  const friction=dL.fee+dH.fee+spread/2, threshold=(se==null?0:1.96*se)+friction;
+  rows.push({label,pm,opt,gap:pm-opt,se,friction,threshold,spread,oi:m.oi,
+    ratio:opt>0?pm/opt:null, exceeds:Math.abs(pm-opt)>threshold, pair:[dL.pair,dH.pair]});
+ }
+ return {rows,expiry:chosen.l,closeMs,F,idx,top,neg,series,
+   pmBid:S.reduce((s,x)=>s+x.bid,0), pmAsk:S.reduce((s,x)=>s+x.ask,0)};
+}
+
+/* ===================== STATE ===================== */
+let S={cls:'All', asset:null, ladder:null, rung:null,
+       KA:null, D:null, calc:{}, ladders:{}, meta:{}};
+
+/* ===================== RENDER ===================== */
+function strip(){
+  const h=S.calc.BTC;
+  const topRow = h ? h.rows.filter(r=>r.ratio).reduce((p,c)=>c.ratio>p.ratio?c:p,{ratio:0}) : null;
+  document.getElementById('strip').innerHTML=STRIP.map(f=>{
+    let n=f.n,k=f.k;
+    if(f.src==='live'){
+      if(f.id==='tail'){ n=topRow&&topRow.ratio?topRow.ratio.toFixed(1)+'×':'—';
+        k=topRow&&topRow.label?'live · BTC '+topRow.label:'live'; }
+    }
+    return `<div class="fcard"><div class="n">${n??'—'}</div>
+      <div class="b">${f.b}</div><div class="t">${f.t}</div>
+      <div class="k">${k??''}</div></div>`;}).join('');
+}
+function notable(){
+  const el=document.getElementById('notable');
+  const pool=[];
+  for(const [a,h] of Object.entries(S.calc))
+    for(const r of h.rows) if(!r.skipped&&r.ratio) pool.push({a,r,h});
+  /* The threshold is NEVER relaxed (DESIGN.md 5.0). Those that clear it come
+     first; those inside the band sit behind and faded. Only the display limit
+     grew to fill the slider; the selection rule stayed the same and every card
+     carries its own status on its face. */
+  const over=pool.filter(x=> x.r.exceeds).sort((a,b)=>Math.abs(b.r.gap)-Math.abs(a.r.gap));
+  const inside=pool.filter(x=>!x.r.exceeds).sort((a,b)=>b.r.ratio-a.r.ratio);
+  const picked=[...over,...inside].slice(0,12);
+  const caption = over.length
+    ? `${over.length} exceed trading costs · rest inside band`
+    : 'none exceed trading costs · ranked by ratio';
+  if(!picked.length){ el.innerHTML=''; return; }
+  el.innerHTML=`<div class="lab" style="margin-bottom:9px">NOTABLE RIGHT NOW · ${caption}</div>
+    <div id="ngrid">${picked.map(x=>notableCard(x)).join('')}</div>`;
+  el.querySelectorAll('.ncard').forEach(e=>e.onclick=()=>{
+    S.asset=e.dataset.a; S.ladder=null; S.rung=null; draw();
+    document.getElementById('panel').scrollIntoView({behavior:'smooth',block:'start'});});
+}
+function notableCard(x){
+  const r=x.r, name={BTC:'Bitcoin',ETH:'Ethereum'}[x.a]||x.a;
+  // turn the bucket label into a readable question
+  const question = r.label.startsWith('above') ? `${name} ${r.label} at year-end`
+             : r.label.startsWith('below') ? `${name} ${r.label} at year-end`
+             : `${name} between ${r.label.replace(' – ',' and ')} at year-end`;
+  return `<div class="ncard${r.exceeds?'':' soft'}" data-a="${x.a}">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:9px">
+      <span class="icon">${x.a}</span>
+      <span class="t11 dim2">Kalshi</span>
+      <span class="t10 dim2" style="margin-left:auto">OI ${r.oi.toLocaleString('en-US')}</span></div>
+    <div class="q">${question}</div>
+    <div class="chips2">
+      <div class="oc yes"><div class="k">YES</div><div class="v">${c2(r.pm)}</div></div>
+      <div class="oc no"><div class="k">NO</div><div class="v">${c2(1-r.pm)}</div></div></div>
+    <div class="nfoot">
+      <span class="t10" style="color:var(--text-3);letter-spacing:.04em">OPTIONS IMPLY</span>
+      <span class="t12 dim" style="margin-left:auto">${c2(r.opt)}</span>
+      <span class="t12" style="margin-left:9px;color:${r.ratio>1.5?'var(--accent)':'var(--text-3)'}">${r.ratio.toFixed(1)}×</span>
+    </div>
+    <div class="t10 dim2" style="margin-top:6px">gap ${(Math.abs(r.gap)/r.threshold).toFixed(1)}× band${r.exceeds?'':' · inside band'}</div>
+  </div>`;
+}
+function chipsRow(){
+  const l=['All',...new Set(ASSETS.map(v=>v.c))];
+  document.getElementById('chips').innerHTML=l.map(x=>
+    `<span class="chip ${x===S.cls?'on':''}" data-s="${x}">${x}</span>`).join('');
+  document.querySelectorAll('#chips .chip').forEach(e=>e.onclick=()=>{
+    S.cls=e.dataset.s; S.asset=null; S.ladder=null; S.rung=null; draw();});
+}
+const DOT={live:['var(--ok)','●'],partial:['var(--warn)','◐'],none:['var(--text-4)','○']};
+function readiness(v){
+  const h=S.calc[v.a], o=[];
+  if(h) o.push({l:'Pricing',s:'live',d:`${h.rows.filter(r=>!r.skipped).length}/${h.rows.length} buckets · model-free`});
+  else if(v.a==='SPX'||v.a==='NDX') o.push({l:'Pricing',s:'partial',d:'option chain verified · venue pending'});
+  else if(v.a==='WTI'||v.a==='GOLD') o.push({l:'Pricing',s:'none',d:'ETF proxy only — carry / roll error'});
+  else o.push({l:'Pricing',s:'none',d:'ladder too thin — spread'});
+  const f=v.c==='Crypto'||v.a==='TSLA';
+  o.push({l:'Flow',s:f?'live':'none',d:f?'wallet-resolved':'no on-chain venue'});
+  const x=v.c==='Crypto'||v.a==='WTI'||v.a==='GOLD';
+  o.push({l:'Cross-venue',s:x?'live':'none',d:x?'Kalshi + Polymarket':'single venue'});
+  return o;
+}
+function assetCards(){
+  const l=ASSETS.filter(v=>S.cls==='All'||v.c===S.cls);
+  document.getElementById('cards').innerHTML=l.map(v=>{
+    const a=readiness(v), liveCount=a.filter(x=>x.s==='live').length, h=S.calc[v.a];
+    const ladderCount=(S.ladders[v.a]||[]).length;
+    return `<div class="acard ${liveCount?'':'none'} ${v.a===S.asset?'sel':''}" data-a="${v.a}">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">
+        <span class="icon">${v.i}</span><span class="w5" style="font-size:15px">${v.a}</span>
+        <span class="t11 dim">${v.l}</span>
+        <span class="t12 num" style="margin-left:auto;color:var(--text-2)">${h?f2(h.idx):'—'}</span></div>
+      <div class="t11 dim2" style="margin-bottom:10px">${ladderCount?ladderCount+' ladders listed':'&nbsp;'}</div>
+      ${a.map(x=>{const c=DOT[x.s];
+        return `<div class="an"><span class="st" style="color:${c[0]}">${c[1]}</span>
+          <span class="lb" style="color:${x.s==='none'?'var(--text-4)':'var(--text-2)'}">${x.l}</span>
+          <span class="dim2">${x.d}</span></div>`;}).join('')}
+    </div>`;}).join('');
+  document.querySelectorAll('.acard').forEach(e=>e.onclick=()=>{
+    S.asset=S.asset===e.dataset.a?null:e.dataset.a; S.ladder=null; S.rung=null; draw();});
+}
+/* [2] ladder list */
+function panel(){
+  const p=document.getElementById('panel'); p.innerHTML='';
+  if(!S.asset) return;
+  const list=S.ladders[S.asset]||[];
+  if(!list.length){ p.innerHTML=`<div class="empty">No ladders listed for ${S.asset} in this snapshot.</div>`; return; }
+  p.innerHTML=`<div class="sect">${S.asset} · LADDERS</div>
+   <table><thead><tr>
+     <th style="width:210px">LADDER</th><th style="width:88px">TYPE</th>
+     <th class="num" style="width:66px">RUNGS</th>
+     <th class="num" style="width:86px">MEASURABLE</th>
+     <th class="num" style="width:96px">OPEN INT</th>
+     <th style="width:104px">EXPIRY</th><th style="width:110px">EVIDENCE</th>
+   </tr></thead><tbody>${list.map(s=>ladderRow(s)).join('')}</tbody></table>
+   <div id="rungs"></div>`;
+  p.querySelectorAll('tr.clk').forEach(e=>e.onclick=()=>{
+    S.ladder=S.ladder===e.dataset.s?null:e.dataset.s; S.rung=null; draw();});
+  if(S.ladder && S.calc[S.asset] && S.calc[S.asset].series===S.ladder) rungTable();
+}
+function ladderRow(s){
+  const h=(S.calc[S.asset]&&S.calc[S.asset].series===s.t)?S.calc[S.asset]:null;
+  const isOpen=S.ladder===s.t;
+  if(!h) return `<tr class="quiet"><td>${s.title}</td><td>${s.kind}</td>
+    <td class="num">${s.n}</td><td class="num">—</td>
+    <td class="num">${s.oi.toLocaleString('en-US')}</td><td>${s.expiry}</td>
+    <td><span class="badge b-none">not terminal</span></td></tr>`;
+  const measurable=h.rows.filter(r=>!r.skipped).length;
+  return `<tr class="clk ${isOpen?'open':''}" data-s="${s.t}">
+    <td style="color:var(--text)">${s.title}</td><td>terminal</td>
+    <td class="num">${h.rows.length}</td>
+    <td class="num" style="color:${measurable/h.rows.length>.8?'var(--ok)':'var(--warn)'}">${measurable}/${h.rows.length}</td>
+    <td class="num">${s.oi.toLocaleString('en-US')}</td><td>${s.expiry}</td>
+    <td><span class="badge b-free">MODEL-FREE</span></td></tr>`;
+}
+/* [3] rung table */
+function rungTable(){
+  const h=S.calc[S.asset], t=Math.abs(h.top-1)<.05&&h.neg===0;
+  document.getElementById('rungs').innerHTML=`
+    <div class="sect">RUNGS · vs Deribit ${h.expiry}</div>
+    <div class="t11 dim2" style="margin-bottom:10px">
+      forward ${f2(h.F)} · option bucket sum
+      <span style="color:${t?'var(--ok)':'var(--warn)'}">${h.top.toFixed(4)}</span> ·
+      prediction bid/ask sum ${h.pmBid.toFixed(3)} / ${h.pmAsk.toFixed(3)} ·
+      negative buckets <span style="color:${h.neg?'var(--warn)':'var(--ok)'}">${h.neg}</span></div>
+    <table><thead><tr>
+      <th style="width:140px">OUTCOME</th>
+      <th class="num" style="width:88px">PREDICTION</th>
+      <th class="num" style="width:88px">OPTIONS IMPLY</th>
+      <th class="num" style="width:62px">RATIO</th>
+      <th style="width:126px">GAP vs BAND</th>
+      <th class="num" style="width:88px">OPEN INT</th>
+    </tr></thead><tbody>${h.rows.map((r,i)=>rungRow(r,i)).join('')}</tbody></table>`;
+  document.querySelectorAll('#rungs tr.clk').forEach(e=>e.onclick=()=>{
+    S.rung=S.rung===+e.dataset.i?null:+e.dataset.i; draw();});
+}
+function rungRow(r,i){
+  if(r.skipped) return `<tr class="quiet"><td>${r.label}</td><td class="num">${c2(r.pm)}</td>
+    <td class="num">—</td><td class="num">—</td>
+    <td class="t11">not measurable · ${r.skipped}</td>
+    <td class="num">${r.oi.toLocaleString('en-US')}</td></tr>`;
+  const w=Math.min(100,Math.abs(r.gap)/.03*100), bw=Math.min(100,r.threshold/.03*100), isOpen=S.rung===i;
+  return `<tr class="clk ${isOpen?'open':''}" data-i="${i}">
+    <td style="color:var(--text)">${r.label}</td>
+    <td class="num">${c2(r.pm)}</td><td class="num dim">${c2(r.opt)}</td>
+    <td class="num" style="color:${r.ratio>1.5?'var(--accent)':'var(--text-3)'}">${r.ratio?r.ratio.toFixed(1)+'×':'—'}</td>
+    <td><div class="bar"><div class="band" style="width:${bw}%"></div>
+      <div class="gap" style="width:${w}%;background:${r.exceeds?'var(--accent)':'#4a4137'}"></div></div></td>
+    <td class="num">${r.oi.toLocaleString('en-US')}</td></tr>`
+    + (isOpen?`<tr><td colspan="6" style="padding:0">${detailPanel(r)}</td></tr>`:'');
+}
+/* [4] detail card */
+function detailPanel(r){
+  const h=S.calc[S.asset], mult=r.threshold>0?(Math.abs(r.gap)/r.threshold).toFixed(1):'—';
+  return `<div class="detail">
+    <div style="display:flex;align-items:baseline;gap:10px">
+      <span class="w5">${S.asset} ${r.label}</span>
+      <span class="t11 dim">year-end · ${Math.round((h.closeMs-Date.now())/864e5)}d</span>
+      <span class="badge b-free" style="margin-left:auto">MODEL-FREE</span></div>
+    <div class="t11 dim2">Kalshi bucket · Deribit ${h.expiry} digitals</div>
+    <div class="big">
+      <div><div>PREDICTION</div><div>${c2(r.pm)}</div></div>
+      <div><div>OPTIONS IMPLY</div><div class="dim">${c2(r.opt)}</div></div>
+      <div><div>RICHER BY</div><div style="color:var(--accent)">${r.ratio?r.ratio.toFixed(1)+'×':'—'}</div></div>
+    </div>
+    <div class="t10 dim" style="letter-spacing:.05em;margin-bottom:5px">GAP vs UNCERTAINTY + FRICTION</div>
+    <div class="bar" style="height:20px;margin-bottom:5px">
+      <div class="band" style="top:6px;height:9px;width:${Math.min(100,r.threshold/.03*100)}%"></div>
+      <div class="gap" style="top:8px;height:5px;width:${Math.min(100,Math.abs(r.gap)/.03*100)}%;
+        background:${r.exceeds?'var(--accent)':'#4a4137'}"></div></div>
+    <div class="t11 dim" style="display:flex;margin-bottom:12px">
+      <span>band ${c2(r.threshold)}</span>
+      <span style="margin-left:auto">gap ${c2(Math.abs(r.gap))} —
+        <span style="color:var(--text)">${mult}× band</span></span></div>
+    <div class="checks">
+      <div>uncertainty ${c2(r.se)} · friction ${c2(r.friction)} · prediction spread ${c2(r.spread)}</div>
+      <div>bucket set sums to
+        <span style="color:${Math.abs(h.top-1)<.05?'var(--ok)':'var(--warn)'}">${h.top.toFixed(4)}</span>
+        · negative buckets <span style="color:${h.neg?'var(--warn)':'var(--ok)'}">${h.neg}</span></div>
+      <div>option strikes used: ${r.pair?r.pair.map(c=>c?'['+c.join(', ')+']':'—').join(' / '):'—'}</div>
+      <div>sync window <span style="color:var(--ok)">${S.meta.syncWindow??'—'}s</span>
+        · open interest ${r.oi.toLocaleString('en-US')}</div>
+      <div style="color:var(--warn)">expiry gap ${Math.round((h.closeMs-expiryMs(h.expiry))/864e5)}d —
+        options slightly narrow, biases the gap upward</div>
+      <div style="color:var(--warn)">index mismatch: venue index vs Deribit index — unmeasured</div>
+      <div class="dim2">reference: collecting — archive started 2026-08-30</div>
+    </div></div>`;
+}
+/* Measures the usable width (scrollbar excluded) and writes it to --vw.
+   ResizeObserver is required: a scrollbar appearing or disappearing later
+   fires no resize event, it only changes the width of the html element. If the
+   measurement goes stale, full-bleed blocks land a few pixels off. */
+let lastVw = -1;
+function measureWidth(){
+  const g = document.documentElement.clientWidth;
+  if (g === lastVw) return;                 // unchanged: do not touch the style
+  lastVw = g;
+  document.documentElement.style.setProperty('--vw', g+'px');
+}
+measureWidth();
+addEventListener('resize', measureWidth);
+addEventListener('orientationchange', measureWidth);
+if(window.ResizeObserver) new ResizeObserver(measureWidth).observe(document.documentElement);
+/* Last line of defence. MEASURED: in some environments a viewport change fires
+   nothing at all — resize stayed silent, so did ResizeObserver on html and on
+   body, and so did visualViewport, while clientWidth fell from 1385 to 885. A
+   stale measurement draws the dateline strip at the wrong width. Reading one
+   integer twice a second is cheap; if the value has not changed, nothing is
+   written. */
+setInterval(measureWidth, 500);
+
+/* One slider component; both strips use it.
+   It adds a wrapper, puts arrows in the gutters, and wraps to the start at the
+   end. NO automatic rotation (DESIGN.md 5.0) — wrapping only happens on click.
+   If the content fits, the arrows are hidden; the page does not claim there is
+   more to see when there is not. */
+function slider(el){
+  if(!el || el.dataset.sld) return; el.dataset.sld='1';
+  const w=document.createElement('div'); w.className='swrap';
+  el.parentNode.insertBefore(w, el); w.appendChild(el);
+  const arrow=(c,t,aria)=>{ const b=document.createElement('button');
+    b.className='sarr '+c; b.type='button'; b.textContent=t;
+    b.setAttribute('aria-label',aria); w.appendChild(b); return b; };
+  const L=arrow('sl','‹','previous'), R=arrow('sr','›','next');
+  const step=()=>Math.max(240, el.clientWidth*0.8);
+  const maxScroll =()=>el.scrollWidth-el.clientWidth;
+  /* The target is tracked separately. While a smooth scroll is in flight
+     el.scrollLeft reads stale, so on a long strip the "I am at the end" state
+     was never seen and the wrap to the start was missed. 140ms after scrolling
+     stops, the target is refreshed from the real position. */
+  let target=0, idle=0;
+  el.addEventListener('scroll',()=>{ clearTimeout(idle);
+    idle=setTimeout(()=>{ target=el.scrollLeft; },140); },{passive:true});
+  R.onclick=()=>{ target = target>=maxScroll()-4 ? 0 : Math.min(maxScroll(), target+step());
+    el.scrollTo({left:target}); };
+  L.onclick=()=>{ target = target<=4 ? maxScroll() : Math.max(0, target-step());
+    el.scrollTo({left:target}); };
+  const refresh=()=>{ const scrollable=maxScroll()>4; L.hidden=!scrollable; R.hidden=!scrollable; };
+  refresh(); addEventListener('resize',refresh);
+  if(window.ResizeObserver) new ResizeObserver(refresh).observe(el);
+}
+
+function draw(){ strip(); notable(); chipsRow(); assetCards(); panel();
+  slider(document.getElementById('ngrid')); }   /* the strip is a grid, not a slider */
+
+/* Dateline fields. NO. = the number of snapshots in the archive — not an
+   invented version number. */
+function dateline(){
+  const at=(S.meta.at||'').replace('T',' ').slice(0,16);
+  const seq=S.meta.seq?String(S.meta.seq).padStart(3,'0'):'—';
+  document.getElementById('dl-no').textContent='NO. '+seq;
+  document.getElementById('dl-date').textContent=at?at+'Z':'—';
+  document.getElementById('dl-sync').textContent=
+    'SYNC '+(S.meta.syncWindow??'—')+'s · ARCHIVE '+(S.meta.day??'—')+'d';
+  document.getElementById('bandmeta').textContent=
+    'NO. '+seq+' · '+(at?at.slice(11):'—')+'Z · SYNC '+(S.meta.syncWindow??'—')+'s';
+}
+addEventListener('scroll',()=>{
+  document.getElementById('band').classList.toggle('on', scrollY>170);
+},{passive:true});
+
+/* ===================== BOOT ===================== */
+(async()=>{
+ try{
+  /* The pointer first (D-070). state/latest.json is a single raw file; no API
+     call. The newest snapshot used to be found by listing the contents API, and
+     the counter listed EVERY archive day separately — so the cost grew by one
+     call a day: at 12 days, ~18 calls per page load. The unauthenticated limit
+     is 60 an hour, i.e. ~3 page opens per visitor, after which the page showed
+     "archive unavailable". */
+  let pk, pd, ptr=null;
+  try{
+   const r=await fetch(REPO+'state/latest.json?cb='+Date.now());
+   if(r.ok){ const j=await r.json();
+    if(j&&j.version===2&&j.paths&&j.paths.kalshi&&j.paths.deribit) ptr=j; }
+  }catch(e){}
+  if(ptr){ pk=ptr.paths.kalshi; pd=ptr.paths.deribit; }
+  else{ /* fallback: if the collector has not written the pointer yet, the old path works */
+   [pk,pd]=await Promise.all([newestPath('raw/kalshi'),newestPath('raw/deribit')]); }
+  const [KA,D]=await Promise.all([gz(pk),gz(pd)]);
+  S.KA=KA; S.D=D;
+  if(ptr){
+   const ar=ptr.archive||{};
+   S.meta={syncWindow:ptr.sync_window_seconds, at:ptr.snapshot_utc,
+           day:ar.day_count, seq:ar.snapshot_count};
+  }else try{
+   const mg=await (await fetch(API+'raw/_meta?cb='+Date.now())).json();
+   const day=mg.map(x=>x.name).sort().pop();
+   const mf=await (await fetch(API+'raw/_meta/'+day+'?cb='+Date.now())).json();
+   const m=await (await fetch(REPO+'raw/_meta/'+day+'/'+mf.map(x=>x.name).sort().pop()+'?cb='+Date.now())).json();
+   S.meta={syncWindow:m.sync_window_seconds, at:m.snapshot_utc, day:mg.length};
+   // NO. = total number of snapshots in the archive
+   try{
+    const counts=await Promise.all(mg.map(async d=>{
+     const f=await (await fetch(API+'raw/_meta/'+d.name+'?cb='+Date.now())).json();
+     return Array.isArray(f)?f.length:0;}));
+    S.meta.seq=counts.reduce((a,b)=>a+b,0);
+   }catch(e){}
+  }catch(e){}
+  // measurable terminal ladders
+  for(const [a,series,ccy] of [['BTC','KXBTCY','BTC'],['ETH','KXETHY','ETH']]){
+   try{const h=buckets(KA,D,series,ccy); if(h) S.calc[a]=h;}catch(e){console.warn(a,e);}
+  }
+  // ladder list: ALL live Kalshi series for that asset
+  const catSeries=(KA.catalogue&&KA.catalogue.Crypto&&KA.catalogue.Crypto.series)||[];
+  const byTicker=Object.fromEntries(catSeries.map(x=>[x.ticker,x]));
+  for(const [t,v] of Object.entries(KA.markets||{})){
+   if(!Array.isArray(v)) continue;
+   const activeMarkets=v.filter(m=>m.status==='active'); if(!activeMarkets.length) continue;
+   const tagList=(byTicker[t]&&byTicker[t].tags)||[];
+   const a=tagList.includes('BTC')?'BTC':(tagList.includes('ETH')?'ETH':null); if(!a) continue;
+   const endsMs=activeMarkets.map(m=>Date.parse(m.close_time)).filter(Boolean);
+   (S.ladders[a] ||= []).push({t, title:(byTicker[t]&&byTicker[t].title)||t,
+     kind:(byTicker[t]&&byTicker[t].frequency)||'—', n:activeMarkets.length,
+     oi:Math.round(activeMarkets.reduce((s,m)=>s+(+m.open_interest_fp||0),0)),
+     expiry:endsMs.length?new Date(Math.max(...endsMs)).toISOString().slice(0,10):'—'});
+  }
+  for(const k in S.ladders) S.ladders[k].sort((a,b)=>b.oi-a.oi);
+  dateline();
+  draw();
+ }catch(e){
+  document.getElementById('err').textContent='archive read failed: '+e.message;
+  document.getElementById('dl-date').textContent='archive unavailable'; draw();
+ }
+})();
+</script>
+</body>
+</html>

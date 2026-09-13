@@ -1,0 +1,52 @@
+name: ref-check
+
+# Checks decision references: every D-XXX number mentioned in the docs or the
+# interface must have a counterpart in DECISIONS.md.
+#
+# Why it exists: the finding cards in the interface printed "D-049" and
+# "D-045 . D-046 . D-066" while those decisions had never been written. The
+# screen was citing records that did not exist, and a human noticed it, not the
+# code. This workflow stops the same thing recurring quietly.
+#
+# It does not touch the collector, needs no network access, and takes seconds.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  ref-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # Does every Python file compile? This step runs on every push.
+      #
+      # Why it exists: on 2026-09-11 a half-finished line was committed to
+      # collect.py (a truncated paste, an unterminated string). The collector
+      # crashed through 5 runs and no snapshot was taken for two days. Nobody
+      # noticed, because nothing was red — the scheduled run was failing
+      # silently.
+      #
+      # A syntax error is the cheapest class of error to catch; leaving it for
+      # the next scheduled run is the most expensive choice available.
+      - name: Do the Python files compile
+        run: |
+          python -m compileall -q collector scripts
+          echo 'all files compiled'
+
+      # First prove the checker CAN CATCH. A checker that catches nothing also
+      # stays green, so this step comes before the real check.
+      - name: Checker self-test
+        run: python scripts/ref_check.py --self-test
+
+      # A dangling reference exits 1 -> the run goes red.
+      - name: Check decision references
+        run: python scripts/ref_check.py --list

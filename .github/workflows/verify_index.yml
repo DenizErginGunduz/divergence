@@ -1,0 +1,63 @@
+name: verify-index
+
+# ONE PURPOSE: can yfinance pull an index option chain from a GitHub Actions
+# runner? It worked on the user's home connection (^SPX, 54 expiries), but
+# Actions is a data centre and Yahoo may be blocking data-centre IPs — we had
+# already failed 5 of 5 from Colab.
+#
+# It DOES NOT TOUCH the collector. We are not risking a working pipeline for an
+# experiment. If the result is positive, the index arm gets added as a separate
+# stage.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install yfinance
+        run: pip install -q yfinance
+
+      - name: Try the index option chain
+        run: |
+          python - <<'PY'
+          import yfinance as yf
+
+          def attempt(symbol):
+              t = yf.Ticker(symbol)
+              expiries = t.options
+              if not expiries:
+                  return 'expiry list EMPTY'
+              chosen = expiries[min(len(expiries) - 1, 8)]
+              c = t.option_chain(chosen)
+              ks = sorted(set(c.calls['strike']) | set(c.puts['strike']))
+              spot = None
+              try:
+                  spot = t.fast_info.get('lastPrice')
+              except Exception:
+                  pass
+              return ('expiries=%d, chosen=%s, calls=%d puts=%d, strikes %s..%s, spot=%s'
+                      % (len(expiries), chosen, len(c.calls), len(c.puts),
+                         ks[0] if ks else '-', ks[-1] if ks else '-', spot))
+
+          ok = 0
+          for symbol in ['^SPX', '^XSP', '^NDX', 'SPY', 'QQQ', 'GLD']:
+              try:
+                  print('[OK   ] %-6s %s' % (symbol, attempt(symbol)))
+                  ok += 1
+              except Exception as e:
+                  print('[FAIL ] %-6s %s' % (symbol, str(e)[:160]))
+
+          print()
+          print('SUCCEEDED: %d / 6' % ok)
+          print('Reading: if ^SPX or ^NDX works, the index arm can be built on Actions.')
+          print('If none of them work, Yahoo is blocking data-centre IPs; in that case')
+          print('either a keyed source (Finnhub / Polygon), or the index arm is left to')
+          print('a separate collector on the user machine.')
+          PY

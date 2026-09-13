@@ -1,0 +1,81 @@
+name: measure
+
+# The REPOSITORY runs the measurements, not a person.
+#
+# Why: the recorded numbers on screen — "0/44", "13%" — had no reproducible path
+# in the repository. The old scripts read a file layout that no longer existed
+# (raw/_store.json, inventory/*.csv). Caught during an audit.
+#
+# From here on every measurement is computed from the raw archive and its output
+# goes into the log. Because raw data is never modified (rule 2), the same
+# snapshot always yields the same number; the result is repeatable and checkable.
+#
+# NO network access: only files already in the repository are read.
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'scripts/**'
+      - '.github/workflows/measure.yml'
+
+permissions:
+  contents: write        # findings/latest.json gets committed
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # First prove the archive read path works. If this step is red, every
+      # measurement after it is meaningless.
+      - name: Archive read smoke test
+        run: python scripts/archive.py
+
+      # Friction band: does the gap beat the cost of trading it? The whole
+      # archive is scanned, because no single snapshot can carry significance.
+      - name: Friction band
+        run: python scripts/measure_band.py
+
+      # Exhaustiveness: bucket probabilities must sum to 1. Three boundary rules
+      # are compared; constraints caught the bug, not numbers (D-067).
+      - name: Exhaustiveness constraint
+        run: python scripts/measure_exhaustive.py
+
+      # Third independent setup: Polymarket daily terminal ladders. Touch
+      # ("hit") ladders are excluded explicitly; the expiry gap is reported.
+      - name: Polymarket terminal ladders
+        run: python scripts/measure_polymarket.py
+
+      # Third setup, and the only MODEL-ASSUMING measurement. Its most valuable
+      # output is the arithmetic violations: touch cannot be rarer than terminal.
+      - name: Long-horizon touch bound
+        run: python scripts/measure_touch.py
+
+      # Write the results to a file. Logs are not readable (the API needs admin
+      # rights, the UI view is virtualised); a file is readable, durable, and the
+      # page will read it. Record and screen become inseparable that way.
+      - name: Write findings
+        run: python scripts/write_findings.py
+
+      # Only on a manual run. On a pull_request the checkout is a detached merge
+      # commit with no upstream branch, so a push cannot succeed — and a PR run
+      # should prove the numbers, not write to the branch.
+      - name: Commit findings/ if it changed
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add findings/
+          if git diff --staged --quiet; then
+            echo "findings/ unchanged, nothing to commit"
+          else
+            git commit -m "findings: measurement results updated (automated)"
+            git push
+          fi
