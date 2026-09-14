@@ -48,6 +48,8 @@ def measure_band_all(all_stamps):
     stab = Stability()
     exceeding = measured = 0
     density = []
+    discounts = []
+    fallbacks = 0
     for d in all_stamps:
         try:
             s = measure_band.run(d, stab)
@@ -59,13 +61,22 @@ def measure_band_all(all_stamps):
             exceeding += v['exceeding']
             measured += v['measured']
             density.append(v['density_sum'])
+            discounts.append(v['discount_factor'])
+            if not v['discount_estimated']:
+                fallbacks += 1
     return {
         # The digital comes from a price difference, so no model is assumed.
         # The page counts this flag rather than a hand-typed number.
         'model_free': True,
         'exceeding': exceeding, 'measured': measured,
         'percent': round(100.0 * exceeding / measured, 1) if measured else None,
+        # The ladder is exhaustive, so this sums to the DISCOUNT FACTOR, not
+        # to 1 (D-073). Reporting it beside the mean D is the point: the two
+        # should agree, and a gap between them is a measurement error rather
+        # than a fact about the market.
         'mean_density': round(sum(density) / len(density), 4) if density else None,
+        'mean_discount_factor': round(sum(discounts) / len(discounts), 6) if discounts else None,
+        'discount_fallbacks': fallbacks,
         'stability': stability_summary(stab),
     }
 
@@ -153,7 +164,11 @@ def measure_exhaustive_all(all_stamps):
                 except (KeyError, TypeError, ValueError):
                     r = None
                 if r:
-                    pooled[rule].append(r['total'])
+                    # The ratio, not the raw total: after D-073 an exhaustive
+                    # ladder is worth D rather than 1, and D differs between
+                    # chains, so raw totals from different maturities are not
+                    # comparable while ratios are.
+                    pooled[rule].append(r['ratio'])
 
     out = {}
     for rule, v in pooled.items():
@@ -163,14 +178,20 @@ def measure_exhaustive_all(all_stamps):
         mean = sum(v) / len(v)
         out[rule] = {
             'measured': len(v),
-            'mean_total': round(mean, 4),
-            'min_total': round(min(v), 4),
-            'max_total': round(max(v), 4),
+            'mean_ratio_to_discount': round(mean, 4),
+            'min_ratio_to_discount': round(min(v), 4),
+            'max_ratio_to_discount': round(max(v), 4),
             'departure_percent': round(100.0 * (mean - 1.0), 1),
         }
-    out['note'] = ('An exhaustive bucket set must sum to 1. That is arithmetic, '
-                   'not a preference, so a departure from 1 says the computation '
-                   'is wrong without saying which bucket is wrong. See D-067.')
+    out['note'] = ('An exhaustive bucket set is worth the discount factor D '
+                   'today, because buying every bucket buys a dollar at expiry '
+                   'with certainty. That is arithmetic, not a preference, so a '
+                   'departure from D says the computation is wrong without '
+                   'saying which bucket is wrong. The figures below are '
+                   'total/D, so 1.0000 is the target. Until D-073 the target '
+                   'was written as 1 and the sum landed on 1 for any D, which '
+                   'made the check blind to the convention bug. See D-067 for '
+                   'the boundary rule and D-073 for the discount.')
     return out
 
 
