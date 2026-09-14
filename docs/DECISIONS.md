@@ -843,3 +843,72 @@ The interpretive sentences, and the decision numbers each card cites. The rule i
 not that prose is forbidden; it is that every FIGURE derives from a measurement
 and every claim carries its source. The date on each card is now the archive's own
 last stamp rather than a typed one, so a stale strip is visible as a stale date.
+
+## D-073 — The put-call cross-check closes the numeraire question and dates the discount bug
+**Date:** 2026-09-15 · **Produced by:** `scripts/measure_parity.py` · workflow `measure`
+
+The external review raised a possibility that would have invalidated every number
+this project has produced: that the Deribit inverse contract, whose premium is
+quoted in the underlying, makes the converted chain a share-measure price rather
+than a USD present value. If that were true, the finite difference
+`[C(K1) - C(K2)] / (K2 - K1)` is not `D · Q(S_T > K)` under the risk-neutral
+measure but a quantity contaminated by a strike-dependent Radon-Nikodym factor,
+and no amount of side selection or friction banding repairs it.
+
+Testing this does not require theory. A share-measure error is moneyness-dependent;
+a discount factor is not. So: compute both sides of the digital on the same bracket
+and look at whether their difference moves with the strike.
+
+### Construction
+For each consecutive pair of shared strikes `(a, b)` the script evaluates
+`call_side = [C(a) - C(b)] / (b - a)` and `put_side = 1 - [P(b) - P(a)] / (b - a)`
+and records the residual `put_side - call_side` at the bracket **midpoint**, so both
+sides are read off identical intervals and the discretisation error is common to
+them. Restricted to moneyness 0.70-1.40 and to expiries beyond 7 days, where the
+chain is populated.
+
+### Result
+28 chains across 6 snapshots and both currencies, 19 to 46 brackets each:
+
+- absolute slope of residual against log-moneyness: median 2.9e-6, worst 1.8e-4
+- residual spread across all brackets in a chain: median 5.0e-5, worst 4.7e-3
+- that spread as a share of the residual itself: median 4.7e-3
+
+The residual is flat. Across up to 46 strikes spanning 0.70-1.40 moneyness it varies
+by roughly half a percent of its own magnitude, and its regression slope against
+log-moneyness is zero to six decimal places. There is no strike dependence to find.
+
+### Two conclusions, one of them uncomfortable
+**The numeraire concern is empirically dead.** Not argued away, measured. A share
+measure would have produced exactly the signature this test was built to detect, and
+it is absent at every maturity in both currencies. The existing measurements are not
+contaminated in the way the review feared.
+
+**The residual is the discount factor, which confirms the convention bug.** Since
+`call_side = D·Q(S>K)` and `put_side = (1-D) + D·Q(S>K)`, the residual is `1-D`. It
+grows monotonically with maturity, 1.1e-4 at 1 day and 2.7e-2 at 207 days, and the
+implied continuously compounded rate is a coherent term structure with median
+**4.24%** and range 3.24-5.50%. A plausible USD funding curve is the strongest
+available evidence that the residual is what it claims to be.
+
+It also means the two sides of the digital have never been on the same footing, and
+that the sum-to-1 exhaustiveness check cannot see this: `D·1 + (1-D) = 1` for any
+`D`. The check that was supposed to catch inconsistency is structurally blind to
+this particular one.
+
+### What this licenses, and what it does not
+Licensed: Week 1 items 2 to 4. Unify the put side to return `D·Q(S>K)`, carry `D`
+explicitly, rename the output to `discounted_state_price`, and correct `forward()`
+to `F = K + (C - P)/D`.
+
+Not licensed: calling the corrected quantity a probability. `D·Q(S>K)` is a
+discounted state price under the risk-neutral measure. Dividing by `D` gives `Q`,
+not `P`. The distance between `Q` and any real-world probability is the volatility
+risk premium, and nothing in this test measures it.
+
+### Caveat
+Expiries under two days are excluded from the statistics above. Their residuals are
+noisy, and the 0.1-day chain returns -1.1e-4, the wrong sign, because `1-D` there is
+smaller than the tick. That is a resolution limit rather than a contradiction, but it
+means the discount cannot be estimated per-chain at the front end and has to be
+interpolated from longer maturities.
