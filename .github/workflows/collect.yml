@@ -51,6 +51,7 @@ jobs:
         run: |
           if [ -z "$ARCHIVE_TOKEN" ]; then
             echo "ARCHIVE_TOKEN not set — mirror skipped. The public window still works."
+            echo "MIRROR_OK=0" >> "$GITHUB_ENV"
             exit 0
           fi
           if ! git clone --quiet --depth 1 \
@@ -78,6 +79,17 @@ jobs:
             git push --quiet
             echo "mirror updated"
           fi
+          # The mirror is confirmed. Only now may pruning run. This flag is the
+          # whole safety mechanism: the step above exits 0 when it is SKIPPED for
+          # a missing token, so "the previous step passed" proves nothing.
+          echo "MIRROR_OK=1" >> "$GITHUB_ENV"
+
+      # Bound the working tree to a rolling window. Gated on MIRROR_OK, so if the
+      # mirror was skipped or failed, nothing is deleted — the full archive must
+      # exist in two places before it leaves one of them.
+      - name: Prune the archive to the rolling window
+        if: env.MIRROR_OK == '1'
+        run: python scripts/prune_archive.py --apply
 
       - name: Commit to the repository
         run: |
