@@ -797,3 +797,49 @@ The measured sample is capped at about 42 snapshots. The long series that D-009
 needs — where today's gap sits in its own history — cannot come from the public
 repository any more; it has to be read from the mirror. That is a real
 restriction on the reference metric and it is not solved here.
+
+
+## D-072 — The findings strip reads the record, and two overclaims it was hiding
+**Date:** 2026-09-14 · **Produced by:** `scripts/write_findings.py` · `web/index.html`
+
+DESIGN.md 5.0 says the strip's contents are "always computed, never hand-written"
+and that a hand-written sentence turns it into a slogan board. Three of the four
+cards were hand-written anyway. They have now been wired to
+`findings/latest.json`, and wiring them exposed two things.
+
+### The drift that prompted it
+The costs card read "in every one of 34 observations", dated 2026-09-11. The live
+measurement said 45 observations per rung. The number on screen had come loose
+from the measurement three days earlier and nothing noticed, because nothing was
+checking. Same failure mode as the "0/44" withdrawn in D-049 — a figure with no
+path back to a record.
+
+### Overclaim 1: "always" does not mean always
+`stability.py` classifies a rung as always-exceeding when its share is
+`> always_above`, and `always_above` defaults to **0.9**, not 1.0. The card said
+"in every one of N observations". Today that happens to be true — all three rungs
+are 45 of 45 — but the code would have said the same about 41 of 45. The card now
+states the rule: "in over 90% of their observations".
+
+### Overclaim 2: "the rest never clears the band"
+False whenever `sometimes_exceeds` is above zero, which it is: 3 always, 3
+sometimes, 38 never. The card now reports all three buckets. That is also the more
+informative statement, since the split between structure and noise is the whole
+point of the stability module.
+
+### What changed structurally
+- `write_findings.py` now records the exhaustiveness constraint as well. The 12.7%
+  on the fourth card had no entry in `findings/latest.json` at all, so it could not
+  be verified from the record even in principle. It now reads
+  `exhaustiveness_constraint.naive_b.departure_percent` and comes out at 12.7,
+  matching D-067 exactly.
+- Each measurement block carries `model_free: true/false`. The "2 model-free
+  setups" card counts those flags instead of asserting a number.
+- A card whose source is missing renders a dash and "measurement unavailable".
+  A number nobody can reproduce is worse than no number.
+
+### What is still hand-written, on purpose
+The interpretive sentences, and the decision numbers each card cites. The rule is
+not that prose is forbidden; it is that every FIGURE derives from a measurement
+and every claim carries its source. The date on each card is now the archive's own
+last stamp rather than a typed one, so a stale strip is visible as a stale date.
