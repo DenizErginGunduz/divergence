@@ -2,15 +2,27 @@
 """Exhaustiveness constraint — what happens when the bucket boundary is wrong?
 
 THE CONSTRAINT
-If a bucket ladder partitions the whole outcome space, the bucket
-probabilities MUST sum to 1. That is not a preference, it is arithmetic. So a
-sum that departs from 1 says the computation is wrong — it does not say which
-bucket is wrong, but it does say one of them is.
+If a bucket ladder partitions the whole outcome space, the bucket prices MUST
+sum to the discount factor D. Buying every bucket buys a dollar at expiry with
+certainty, and a certain dollar at expiry is worth D today. That is not a
+preference, it is arithmetic. A sum that departs from D says the computation is
+wrong — it does not say which bucket is wrong, but it does say one of them is.
+
+WHY IT SAYS D AND NOT 1 (D-073)
+It used to say 1, and that made the check partly blind. The call side of the
+digital returns D*Q(S>K); the put side used to return 1 - D*Q(S<K), which is
+(1-D) + D*Q(S>K). A ladder built from a mixture of the two summed to
+D*1 + (1-D) = 1 for ANY D, so the constraint was satisfied by a computation
+that was internally inconsistent. Once both sides return D*Q(S>K) the sum has
+to land on D, and a convention slip finally shows up here.
+
+The departure below is therefore reported on total/D, which is dimensionless
+and comparable across chains with different maturities.
 
 WHY IT MATTERS
 Most of the errors caught in this project were caught by constraints, not by
 numbers. In the bucket-boundary bug every individual digital looked plausible;
-only the rule that the total must be 1 made the error visible.
+only the rule that the total must be exhaustive made the error visible.
 
 WHAT THIS SCRIPT DOES
 It computes the same data under three different boundary rules and reports each
@@ -24,7 +36,7 @@ Why the difference matters: with cap 24999.99, round(24999.99 + 0.01) = 25000,
 but round(24999.99) + 0.01 = 25000.01. The next bucket's floor is 25000. The
 digital picks bracketing strikes by strict inequality, so 25000.01 and 25000
 can select DIFFERENT strike pairs for the same boundary. One region then gets
-counted twice and the total runs above 1.
+counted twice and the total runs above the constraint.
 
 HONESTY NOTE
 The historical shape of the bug was reconstructed from a summary. This script
@@ -38,7 +50,8 @@ Usage:
 import sys
 
 from archive import snapshot, stamps, summary, Missing
-from measure_band import SERIES, chain, forward, digital, expiry_ord
+from measure_band import (SERIES, chain, forward, digital, discount,
+                          expiry_ord)
 
 RULES = ('corrected', 'naive_a', 'naive_b')
 
@@ -68,13 +81,13 @@ def bounds(m, rule):
     return round(fl), round(cap) + .01
 
 
-def ladder_sum(KA, D, series, currency, rule):
-    """Sum of the bucket probabilities of one ladder under the given rule."""
+def ladder_sum(KA, D_raw, series, currency, rule):
+    """Sum of the bucket prices of one ladder under the given rule."""
     M = [m for m in (KA.get('markets', {}).get(series) or [])
          if m.get('status') == 'active']
     if not M:
         return None
-    ch, idx = chain(D, currency)
+    ch, idx = chain(D_raw, currency)
     close = M[0].get('close_time', '')
     usable = [v for v in ch if ch[v].get('C') and ch[v].get('P') and expiry_ord(v)]
     if not usable:
@@ -85,7 +98,11 @@ def ladder_sum(KA, D, series, currency, rule):
     if not ok:
         return None
     expiry = ok[-1]
-    F = forward(ch, expiry, idx)
+
+    dis = discount(ch, expiry)
+    D = dis['D'] if dis else 1.0
+
+    F = forward(ch, expiry, idx, D)
     if not F:
         return None
 
@@ -93,13 +110,15 @@ def ladder_sum(KA, D, series, currency, rule):
     n = 0
     for m in M:
         lo, hi = bounds(m, rule)
-        dL = digital(ch, expiry, lo, F, idx) if lo is not None else {'p': 1}
-        dH = digital(ch, expiry, hi, F, idx) if hi is not None else {'p': 0}
+        # An unbounded lower edge is certainty, worth D today rather than 1.
+        dL = digital(ch, expiry, lo, F, idx, D) if lo is not None else {'p': D}
+        dH = digital(ch, expiry, hi, F, idx, D) if hi is not None else {'p': 0}
         if not dL or not dH:
             continue
         t += dL['p'] - dH['p']
         n += 1
-    return {'total': t, 'buckets': n}
+    return {'total': t, 'buckets': n, 'D': D, 'estimated': dis is not None,
+            'ratio': t / D}
 
 
 def main():
@@ -110,38 +129,46 @@ def main():
         every = every[-last:]
 
     o = summary()
-    print("EXHAUSTIVENESS CONSTRAINT — boundary rule and departure from 1")
+    print("EXHAUSTIVENESS CONSTRAINT — boundary rule and departure from D")
     print('archive: %(snapshot_count)d snapshots / %(day_count)d days' % o)
     print()
-    print('%-18s %-5s %10s %10s %10s'
-          % ('snapshot', 'series', 'corrected', 'naive_a', 'naive_b'))
-    print('-' * 60)
+    print('%-18s %-5s %9s %10s %10s %10s'
+          % ('snapshot', 'series', 'D', 'corrected', 'naive_a', 'naive_b'))
+    print('-' * 72)
 
     pooled = {k: [] for k in RULES}
+    fallbacks = 0
     for stamp in every:
         try:
             g = snapshot(stamp)
-            KA, D = g.kalshi, g.deribit
+            KA, D_raw = g.kalshi, g.deribit
         except Missing:
             continue
         for asset, series, currency in SERIES:
             row = []
+            shown = None
             for rule in RULES:
                 try:
-                    r = ladder_sum(KA, D, series, currency, rule)
+                    r = ladder_sum(KA, D_raw, series, currency, rule)
                 except (KeyError, TypeError, ValueError):
                     r = None
                 if r:
-                    row.append(r['total'])
-                    pooled[rule].append(r['total'])
+                    # Pool the RATIO, not the raw total: totals from chains with
+                    # different maturities are not comparable, ratios are.
+                    row.append(r['ratio'])
+                    pooled[rule].append(r['ratio'])
+                    if shown is None:
+                        shown = '%.4f%s' % (r['D'], '' if r['estimated'] else '!')
+                        if not r['estimated']:
+                            fallbacks += 1
                 else:
                     row.append(None)
             if any(x is not None for x in row):
-                print('%-18s %-5s %10s %10s %10s' % (
-                    stamp, asset,
+                print('%-18s %-5s %9s %10s %10s %10s' % (
+                    stamp, asset, shown or '-',
                     *['%.4f' % x if x is not None else '-' for x in row]))
 
-    print('-' * 60)
+    print('-' * 72)
     print()
     print('%-14s %8s %10s %10s %10s'
           % ('rule', 'measured', 'mean', 'min', 'max'))
@@ -153,14 +180,21 @@ def main():
         mean = sum(v) / len(v)
         print('%-14s %8d %10.4f %10.4f %10.4f'
               % (rule, len(v), mean, min(v), max(v)))
-        print('%-14s %8s departure from 1: %+.1f%%'
+        print('%-14s %8s departure from D: %+.1f%%'
               % ('', '', 100.0 * (mean - 1.0)))
 
+    if fallbacks:
+        print()
+        print('WARNING: %d ladders could not estimate D and fell back to D=1' % fallbacks)
+        print('         (marked !). For those the ratio column is the old,')
+        print('         convention-blind total and should not be compared')
+        print('         against the rest.')
+
     print()
-    print("Reading note: the further the total is from 1, the more wrong that")
-    print("boundary rule is. The constraint does not say which bucket is broken")
-    print("— only THAT something is. That is exactly what caught the bug: the")
-    print("digitals looked flawless one by one.")
+    print("Reading note: the three columns are total/D. The further from 1.0000,")
+    print("the more wrong that boundary rule is. The constraint does not say")
+    print("which bucket is broken — only THAT something is. That is exactly what")
+    print("caught the bug: the digitals looked flawless one by one.")
     return 0
 
 
