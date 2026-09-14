@@ -224,32 +224,40 @@ vendor payloads. Other tools display data; none redistribute it in bulk.
 
 That is the specific practice the Kalshi clause names.
 
-### The rolling window is decided but NOT yet implemented
+### The rolling window
 
-The decision was to keep `raw/` as a rolling window of about 14 days: enough of a
-research sample to reproduce the published findings, rather than an indefinite
-feed. The same change caps repository growth, measured at 4.03 MB/day, which would
-have reached roughly 1.44 GB in a year against GitHub's 1 GB guidance.
+`raw/` is a rolling window of 14 days (`ARCHIVE_DAYS` in
+`scripts/prune_archive.py`). What remains is a research sample large enough to
+reproduce the published findings — about 42 snapshots — rather than an indefinite
+feed. Built and running as of 2026-09-14; the first prune removed 2026-08-30,
+eight day folders and 15.5 MB.
 
-**As of 2026-09-13 that pruning does not exist.** `scripts/prune_archive.py` has not
-been written and `collect.yml` has no pruning step. The archive is 14 days long
-because collection started 14 days ago, not because anything is trimming it.
-Tomorrow it will be 15 days and it will keep growing.
+**The ordering is the safety mechanism.** Pruning runs only after the private
+mirror has been updated successfully. The mirror step exits 0 even when it is
+skipped for a missing token, so "the previous step passed" proves nothing; the
+workflow sets `MIRROR_OK=1` only on the real push path and the prune step is gated
+on that. Skipped mirror, skipped prune. Otherwise the data leaves both places at
+once.
 
-An earlier version of this document said the window was in place, citing a
-constant in `collector/collect.py`. That constant was removed when it broke the
-collector, and this paragraph was not updated with it. Corrected on 2026-09-13.
+**What the window does not do.** Deleting a file in a new commit does not remove
+it from git history. The blob stays, so `.git` keeps growing at the same ~4 MB a
+day and a full `git clone` still downloads everything ever committed. The window
+bounds the WORKING TREE: what a visitor browses, and what a shallow clone
+retrieves. It does not bound the repository.
 
-The ordering, when it is built, matters: pruning runs **after** the private mirror
-has been updated successfully in the workflow. If the mirror step is skipped,
-pruning must be skipped too, otherwise data is lost silently.
+So the size argument is weaker than it first looks, and the data-rights argument
+is weaker than it first looks too — a determined full clone still reaches the
+whole feed. Bounding the repository itself would take either periodic history
+rewriting or never committing raw vendor data to the public repo at all. Neither
+is done. The claim is limited to what is measured.
 
 ### Still open
 
 - Kalshi's API Developer Agreement is unread. Until it is, the Kalshi position rests on
   website terms that may not be the governing document.
-- Pruning is not implemented, so the bulk-archive practice the Kalshi clause names
-  is still in effect on the public repository.
+- The window bounds the working tree, not git history. A full clone still reaches
+  every snapshot ever committed, so the bulk-archive practice the Kalshi clause
+  names is reduced rather than removed.
 - No written permission has been requested from any venue. All three have an
   "unless agreed in writing" carve-out; none has been exercised.
 - Deribit's "derived data" wording arguably reaches `findings/latest.json`. We publish
