@@ -1,58 +1,60 @@
 {
  "archive": {
   "day_count": 14,
-  "snapshot_count": 46,
+  "snapshot_count": 47,
   "first": "2026-08-31T0508Z",
-  "last": "2026-09-14T0948Z"
+  "last": "2026-09-14T1303Z"
  },
  "produced_by": "scripts/write_findings.py",
  "measurements": {
   "friction_band_kalshi": {
-   "exceeding": 136,
-   "measured": 1936,
+   "model_free": true,
+   "exceeding": 139,
+   "measured": 1980,
    "percent": 7.0,
    "mean_density": 0.9978,
    "stability": {
     "distinct_rungs": 44,
-    "total_observations": 1936,
-    "observations_per_rung": 44.0,
+    "total_observations": 1980,
+    "observations_per_rung": 45.0,
     "always_exceeds": 3,
     "sometimes_exceeds": 3,
     "never_exceeds": 38,
     "always_exceeding_list": [
      {
       "rung": "BTC:KXBTCY-27JAN0100-T149999.99",
-      "observations": 44,
-      "exceeding": 44
+      "observations": 45,
+      "exceeding": 45
      },
      {
       "rung": "ETH:KXETHY-27JAN0100-T1000.00",
-      "observations": 44,
-      "exceeding": 44
+      "observations": 45,
+      "exceeding": 45
      },
      {
       "rung": "ETH:KXETHY-27JAN0100-T4999.99",
-      "observations": 44,
-      "exceeding": 44
+      "observations": 45,
+      "exceeding": 45
      }
     ]
    }
   },
   "polymarket_terminal": {
-   "exceeding": 1166,
-   "measured": 4484,
-   "percent": 26.0,
-   "gap_12h_exceeding": 896,
-   "gap_12h_measured": 3220,
-   "gap_12h_percent": 27.8,
-   "touch_ladders_excluded": 795,
+   "model_free": true,
+   "exceeding": 1183,
+   "measured": 4584,
+   "percent": 25.8,
+   "gap_12h_exceeding": 908,
+   "gap_12h_measured": 3286,
+   "gap_12h_percent": 27.6,
+   "touch_ladders_excluded": 811,
    "stability": {
     "distinct_rungs": 374,
-    "total_observations": 4484,
-    "observations_per_rung": 12.0,
+    "total_observations": 4584,
+    "observations_per_rung": 12.3,
     "always_exceeds": 13,
-    "sometimes_exceeds": 272,
-    "never_exceeds": 89,
+    "sometimes_exceeds": 275,
+    "never_exceeds": 86,
     "always_exceeding_list": [
      {
       "rung": "BTC:2026-08-31:74000",
@@ -123,73 +125,74 @@
    }
   },
   "long_horizon_touch": {
-   "measured": 2112,
+   "model_free": false,
+   "measured": 2151,
    "arithmetic_violations": 6,
-   "ratio_over_two": 1998,
+   "ratio_over_two": 2036,
    "violation_percent": 0.3,
-   "ratio_over_two_percent": 94.6,
+   "ratio_over_two_percent": 94.7,
    "stability": {
     "distinct_rungs": 83,
-    "total_observations": 2112,
-    "observations_per_rung": 25.4,
+    "total_observations": 2151,
+    "observations_per_rung": 25.9,
     "always_exceeds": 59,
     "sometimes_exceeds": 23,
     "never_exceeds": 1,
     "always_exceeding_list": [
      {
       "rung": "BTC:2027-01-01:200000",
-      "observations": 46,
-      "exceeding": 46
+      "observations": 47,
+      "exceeding": 47
      },
      {
       "rung": "BTC:2027-01-01:190000",
-      "observations": 46,
-      "exceeding": 46
+      "observations": 47,
+      "exceeding": 47
      },
      {
       "rung": "BTC:2027-01-01:180000",
-      "observations": 46,
-      "exceeding": 46
+      "observations": 47,
+      "exceeding": 47
      },
      {
       "rung": "BTC:2027-01-01:170000",
-      "observations": 46,
-      "exceeding": 46
+      "observations": 47,
+      "exceeding": 47
      },
      {
       "rung": "BTC:2027-01-01:160000",
-      "observations": 46,
-      "exceeding": 46
+      "observations": 47,
+      "exceeding": 47
      },
      {
       "rung": "BTC:2027-01-01:150000",
-      "observations": 46,
-      "exceeding": 46
+      "observations": 47,
+      "exceeding": 47
      },
      {
       "rung": "BTC:2027-01-01:140000",
-      "observations": 46,
-      "exceeding": 46
+      "observations": 47,
+      "exceeding": 47
      },
      {
       "rung": "BTC:2027-01-01:130000",
-      "observations": 46,
-      "exceeding": 46
+      "observations": 47,
+      "exceeding": 47
      },
      {
       "rung": "BTC:2027-01-01:120000",
-      "observations": 46,
-      "exceeding": 46
+      "observations": 47,
+      "exceeding": 47
      },
      {
       "rung": "BTC:2027-01-01:110000",
-      "observations": 46,
-      "exceeding": 46
+      "observations": 47,
+      "exceeding": 47
      },
      {
       "rung": "BTC:2027-01-01:100000",
-      "observations": 46,
-      "exceeding": 45
+      "observations": 47,
+      "exceeding": 46
      },
      {
       "rung": "BTC:2026-09-01:85000",
@@ -203,42 +206,66 @@
      },
      {
       "rung": "ETH:2027-01-01:3000",
-      "observations": 46,
-      "exceeding": 46
+      "observations": 47,
+      "exceeding": 47
      },
      {
       "rung": "ETH:2027-01-01:2750",
-      "observations": 46,
-      "exceeding": 46
+      "observations": 47,
+      "exceeding": 47
      },
      {
       "rung": "ETH:2027-01-01:10000",
-      "observations": 46,
-      "exceeding": 46
+      "observations": 47,
+      "exceeding": 47
      },
      {
       "rung": "ETH:2027-01-01:8000",
-      "observations": 46,
-      "exceeding": 46
+      "observations": 47,
+      "exceeding": 47
      },
      {
       "rung": "ETH:2027-01-01:7500",
-      "observations": 46,
-      "exceeding": 46
+      "observations": 47,
+      "exceeding": 47
      },
      {
       "rung": "ETH:2027-01-01:7000",
-      "observations": 46,
-      "exceeding": 46
+      "observations": 47,
+      "exceeding": 47
      },
      {
       "rung": "ETH:2027-01-01:6500",
-      "observations": 46,
-      "exceeding": 46
+      "observations": 47,
+      "exceeding": 47
      }
     ]
    },
    "note": "The terminal comes from a MODEL-FREE digital. \"ratio>2\" means above the driftless Brownian bound; \"2\" is not a constant (D-031), so that is a weak claim. \"ratio<1\" is an arithmetic violation."
+  },
+  "exhaustiveness_constraint": {
+   "corrected": {
+    "measured": 90,
+    "mean_total": 0.9978,
+    "min_total": 0.9948,
+    "max_total": 1.0,
+    "departure_percent": -0.2
+   },
+   "naive_a": {
+    "measured": 90,
+    "mean_total": 0.9978,
+    "min_total": 0.9948,
+    "max_total": 1.0,
+    "departure_percent": -0.2
+   },
+   "naive_b": {
+    "measured": 90,
+    "mean_total": 1.1273,
+    "min_total": 1.0835,
+    "max_total": 1.1889,
+    "departure_percent": 12.7
+   },
+   "note": "An exhaustive bucket set must sum to 1. That is arithmetic, not a preference, so a departure from 1 says the computation is wrong without saying which bucket is wrong. See D-067."
   }
  }
 }
