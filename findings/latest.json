@@ -12,7 +12,7 @@
    "exceeding": 145,
    "measured": 2068,
    "percent": 7.0,
-   "mean_density": 0.9978,
+   "mean_density": 0.9859,
    "stability": {
     "distinct_rungs": 44,
     "total_observations": 2068,
@@ -131,17 +131,17 @@
   },
   "long_horizon_touch": {
    "model_free": false,
-   "measured": 2228,
-   "arithmetic_violations": 6,
-   "ratio_over_two": 2112,
-   "violation_percent": 0.3,
-   "ratio_over_two_percent": 94.8,
+   "measured": 1149,
+   "arithmetic_violations": 5,
+   "ratio_over_two": 1060,
+   "violation_percent": 0.4,
+   "ratio_over_two_percent": 92.3,
    "stability": {
-    "distinct_rungs": 83,
-    "total_observations": 2228,
-    "observations_per_rung": 26.8,
-    "always_exceeds": 59,
-    "sometimes_exceeds": 23,
+    "distinct_rungs": 44,
+    "total_observations": 1149,
+    "observations_per_rung": 26.1,
+    "always_exceeds": 26,
+    "sometimes_exceeds": 17,
     "never_exceeds": 1,
     "always_exceeding_list": [
      {
@@ -210,39 +210,39 @@
       "exceeding": 4
      },
      {
-      "rung": "ETH:2027-01-01:3000",
-      "observations": 49,
-      "exceeding": 49
+      "rung": "BTC:2026-09-07:80000",
+      "observations": 11,
+      "exceeding": 10
      },
      {
-      "rung": "ETH:2027-01-01:2750",
-      "observations": 49,
-      "exceeding": 49
+      "rung": "BTC:2026-10-01:100000",
+      "observations": 25,
+      "exceeding": 25
      },
      {
-      "rung": "ETH:2027-01-01:10000",
-      "observations": 49,
-      "exceeding": 49
+      "rung": "BTC:2026-10-01:97500",
+      "observations": 25,
+      "exceeding": 25
      },
      {
-      "rung": "ETH:2027-01-01:8000",
-      "observations": 49,
-      "exceeding": 49
+      "rung": "BTC:2026-10-01:95000",
+      "observations": 25,
+      "exceeding": 25
      },
      {
-      "rung": "ETH:2027-01-01:7500",
-      "observations": 49,
-      "exceeding": 49
+      "rung": "BTC:2026-10-01:92500",
+      "observations": 37,
+      "exceeding": 37
      },
      {
-      "rung": "ETH:2027-01-01:7000",
-      "observations": 49,
-      "exceeding": 49
+      "rung": "BTC:2026-10-01:90000",
+      "observations": 37,
+      "exceeding": 37
      },
      {
-      "rung": "ETH:2027-01-01:6500",
-      "observations": 49,
-      "exceeding": 49
+      "rung": "BTC:2026-10-01:87500",
+      "observations": 41,
+      "exceeding": 41
      }
     ]
    },
@@ -251,24 +251,24 @@
   "exhaustiveness_constraint": {
    "corrected": {
     "measured": 94,
-    "mean_total": 0.9978,
-    "min_total": 0.9946,
-    "max_total": 1.0,
-    "departure_percent": -0.2
+    "mean_total": 0.9859,
+    "min_total": 0.9794,
+    "max_total": 0.9907,
+    "departure_percent": -1.4
    },
    "naive_a": {
     "measured": 94,
-    "mean_total": 0.9978,
-    "min_total": 0.9946,
-    "max_total": 1.0,
-    "departure_percent": -0.2
+    "mean_total": 0.9859,
+    "min_total": 0.9794,
+    "max_total": 0.9907,
+    "departure_percent": -1.4
    },
    "naive_b": {
     "measured": 94,
-    "mean_total": 1.1274,
-    "min_total": 1.0835,
-    "max_total": 1.1889,
-    "departure_percent": 12.7
+    "mean_total": 1.1155,
+    "min_total": 1.0742,
+    "max_total": 1.1758,
+    "departure_percent": 11.5
    },
    "note": "An exhaustive bucket set must sum to 1. That is arithmetic, not a preference, so a departure from 1 says the computation is wrong without saying which bucket is wrong. See D-067."
   }
