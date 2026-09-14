@@ -13,6 +13,8 @@
    "measured": 2068,
    "percent": 7.0,
    "mean_density": 0.9859,
+   "mean_discount_factor": 0.988094,
+   "discount_fallbacks": 0,
    "stability": {
     "distinct_rungs": 44,
     "total_observations": 2068,
@@ -251,26 +253,26 @@
   "exhaustiveness_constraint": {
    "corrected": {
     "measured": 94,
-    "mean_total": 0.9859,
-    "min_total": 0.9794,
-    "max_total": 0.9907,
-    "departure_percent": -1.4
+    "mean_ratio_to_discount": 0.9978,
+    "min_ratio_to_discount": 0.9945,
+    "max_ratio_to_discount": 1.0,
+    "departure_percent": -0.2
    },
    "naive_a": {
     "measured": 94,
-    "mean_total": 0.9859,
-    "min_total": 0.9794,
-    "max_total": 0.9907,
-    "departure_percent": -1.4
+    "mean_ratio_to_discount": 0.9978,
+    "min_ratio_to_discount": 0.9945,
+    "max_ratio_to_discount": 1.0,
+    "departure_percent": -0.2
    },
    "naive_b": {
     "measured": 94,
-    "mean_total": 1.1155,
-    "min_total": 1.0742,
-    "max_total": 1.1758,
-    "departure_percent": 11.5
+    "mean_ratio_to_discount": 1.129,
+    "min_ratio_to_discount": 1.0843,
+    "max_ratio_to_discount": 1.1914,
+    "departure_percent": 12.9
    },
-   "note": "An exhaustive bucket set must sum to 1. That is arithmetic, not a preference, so a departure from 1 says the computation is wrong without saying which bucket is wrong. See D-067."
+   "note": "An exhaustive bucket set is worth the discount factor D today, because buying every bucket buys a dollar at expiry with certainty. That is arithmetic, not a preference, so a departure from D says the computation is wrong without saying which bucket is wrong. The figures below are total/D, so 1.0000 is the target. Until D-073 the target was written as 1 and the sum landed on 1 for any D, which made the check blind to the convention bug. See D-067 for the boundary rule and D-073 for the discount."
   }
  }
 }
