@@ -44,7 +44,7 @@ import re
 import sys
 
 from archive import snapshot, stamps, summary, Missing
-from measure_band import forward, digital, MONTH
+from measure_band import forward, digital, discount, MONTH
 from stability import Stability
 
 ASSETS = [('BTC', 'bitcoin', 'BTC'), ('ETH', 'ethereum', 'ETH')]
@@ -138,7 +138,13 @@ def run(stamp, stab):
                 continue
             usable.sort()
             day_gap, expiry = usable[0]
-            F = forward(ch, expiry, idx)
+            # Discount first (D-073): forward() and digital() both need it.
+            # The touch ratio itself is a price over a price, so D cancels;
+            # what D fixes here is the forward, and with it the A <= F cutoff
+            # that decides which contracts are in scope at all.
+            dis = discount(ch, expiry)
+            D = dis['D'] if dis else 1.0
+            F = forward(ch, expiry, idx, D)
             if not F:
                 continue
             # time to expiry: target day - measurement day
@@ -162,7 +168,7 @@ def run(stamp, stab):
                 # contradiction with it refutes the model, not arithmetic. For a
                 # real violation the terminal has to come straight from option
                 # prices (the D-025 digital approach).
-                d = digital(ch, expiry, A, F, idx)
+                d = digital(ch, expiry, A, F, idx, D)
                 if not d or d['p'] <= 0:
                     continue
                 pm = (float(bid) + float(ask)) / 2
