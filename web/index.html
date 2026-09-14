@@ -221,14 +221,32 @@ const ASSETS=[
    measurement, where a date and a decision number are REQUIRED. A hand-written
    sentence is not allowed. */
 const STRIP=[
- {id:'tail',  src:'live', b:'Tail premium',
-  t:'What prediction markets charge for the least likely outcome, versus what the option chain implies.'},
- {id:'costs', src:'rec',  n:'3/44', b:'Survive costs', k:'measured 2026-09-11 · D-049',
-  t:'Kalshi year-end rungs whose gap beats fees, spread and measurement error — in every one of 34 observations. All three are tails; nothing in the body survives.'},
- {id:'rep',   src:'rec',  n:'2',    b:'Model-free setups', k:'measured 2026-09-11 · D-045 · D-049',
-  t:'Kalshi year-end buckets and Polymarket dailies, both compared without assuming a model. A third setup exists but its bound is too loose to test anything (D-046).'},
- {id:'catch', src:'rec',  n:'12.7%',b:'Caught by a constraint', k:'measured 2026-09-11 · D-067',
-  t:'One bucket boundary off by a cent inflated the density by 12.7%. Every digital looked perfect alone — only the requirement that they sum to 1 exposed it.'}];
+ {id:'tail', b:'Tail premium', src:'chain',
+  t:()=>'What prediction markets charge for the least likely outcome, versus what the option chain implies.'},
+
+ {id:'costs', b:'Survive costs', src:'findings', d:'D-049',
+  read:F=>{ const s=F.measurements.friction_band_kalshi.stability;
+    return {n:s.always_exceeds+'/'+s.distinct_rungs,
+      t:`Kalshi year-end rungs whose gap beats fees, spread and measurement error `
+        +`\u2014 in every one of ${Math.round(s.observations_per_rung)} observations. `
+        +`The rest of the ladder never clears the band.`}; }},
+
+ {id:'rep', b:'Model-free setups', src:'findings', d:'D-045 \u00b7 D-049',
+  read:F=>{ const m=F.measurements;
+    const free=Object.keys(m).filter(k=>m[k] && m[k].model_free===true);
+    return {n:String(free.length),
+      t:`Independent comparisons that assume no model at all. A third setup `
+        +`exists but its bound is too loose to test anything (D-046).`}; }},
+
+ {id:'catch', b:'Caught by a constraint', src:'findings', d:'D-067',
+  read:F=>{ const e=F.measurements.exhaustiveness_constraint;
+    const worst=Object.keys(e).filter(k=>e[k]&&typeof e[k]==='object')
+      .map(k=>e[k]).reduce((a,b)=>Math.abs(b.departure_percent)>Math.abs(a.departure_percent)?b:a);
+    return {n:worst.departure_percent.toFixed(1)+'%',
+      t:`One bucket boundary off by a cent inflated the density by `
+        +`${worst.departure_percent.toFixed(1)}%. Every digital looked perfect alone `
+        +`\u2014 only the requirement that they sum to 1 exposed it.`}; }}
+];
 /* Four cards on one row; the strip became a grid, not a slider (D-069).
    The two that were removed are waiting in docs/BACKLOG.md B-010:
    - sync window     : the value is already in the dateline; the card repeated it
@@ -307,21 +325,34 @@ function buckets(KA,D,series,ccy){
 
 /* ===================== STATE ===================== */
 let S={cls:'All', asset:null, ladder:null, rung:null,
-       KA:null, D:null, calc:{}, ladders:{}, meta:{}};
+       KA:null, D:null, calc:{}, ladders:{}, meta:{}, findings:null};
 
 /* ===================== RENDER ===================== */
+/* Every card is computed. Two sources:
+     src:'chain'    — from the snapshot the page just loaded
+     src:'findings' — from findings/latest.json, written by the measure workflow
+   Nothing here is typed by hand. A card whose source is missing renders with a
+   dash rather than a stale number, because a number nobody can reproduce is
+   worse than no number (D-049 withdrew exactly such a figure). */
 function strip(){
   const h=S.calc.BTC;
   const topRow = h ? h.rows.filter(r=>r.ratio).reduce((p,c)=>c.ratio>p.ratio?c:p,{ratio:0}) : null;
+  const F=S.findings;
   document.getElementById('strip').innerHTML=STRIP.map(f=>{
-    let n=f.n,k=f.k;
-    if(f.src==='live'){
-      if(f.id==='tail'){ n=topRow&&topRow.ratio?topRow.ratio.toFixed(1)+'×':'—';
-        k=topRow&&topRow.label?'live · BTC '+topRow.label:'live'; }
+    let n='—', k='', t=typeof f.t==='function'?f.t():f.t;
+    if(f.src==='chain' && f.id==='tail'){
+      if(topRow&&topRow.ratio){ n=topRow.ratio.toFixed(1)+'×';
+        k=topRow.label?'live · BTC '+topRow.label:'live'; }
+    } else if(f.src==='findings' && F){
+      try{ const r=f.read(F); n=r.n; t=r.t;
+        k='measured '+String(F.archive.last||'').slice(0,10)+' · '+f.d;
+      }catch(e){ console.warn('findings card '+f.id, e); k='measurement unavailable'; }
+    } else if(f.src==='findings'){
+      k='measurement unavailable';
     }
-    return `<div class="fcard"><div class="n">${n??'—'}</div>
-      <div class="b">${f.b}</div><div class="t">${f.t}</div>
-      <div class="k">${k??''}</div></div>`;}).join('');
+    return `<div class="fcard"><div class="n">${n}</div>
+      <div class="b">${f.b}</div><div class="t">${t}</div>
+      <div class="k">${k}</div></div>`;}).join('');
 }
 function notable(){
   const el=document.getElementById('notable');
@@ -607,6 +638,12 @@ addEventListener('scroll',()=>{
    [pk,pd]=await Promise.all([newestPath('raw/kalshi'),newestPath('raw/deribit')]); }
   const [KA,D]=await Promise.all([gz(pk),gz(pd)]);
   S.KA=KA; S.D=D;
+  /* The recorded measurements. Failing to read this must not take the page down:
+     the chain-derived layers below do not depend on it. */
+  try{
+   const fr=await fetch(REPO+'findings/latest.json?cb='+Date.now());
+   if(fr.ok){ const fj=await fr.json(); if(fj&&fj.measurements) S.findings=fj; }
+  }catch(e){ console.warn('findings', e); }
   if(ptr){
    const ar=ptr.archive||{};
    S.meta={syncWindow:ptr.sync_window_seconds, at:ptr.snapshot_utc,
