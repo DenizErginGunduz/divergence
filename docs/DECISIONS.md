@@ -912,3 +912,80 @@ noisy, and the 0.1-day chain returns -1.1e-4, the wrong sign, because `1-D` ther
 smaller than the tick. That is a resolution limit rather than a contradiction, but it
 means the discount cannot be estimated per-chain at the front end and has to be
 interpolated from longer maturities.
+
+## D-074 — The discount repair, and how little it moved
+**Date:** 2026-09-15 · **Produced by:** `scripts/measure_band.py` · `scripts/measure_exhaustive.py` · `scripts/measure_touch.py` · `scripts/write_findings.py` · `web/index.html`
+
+D-073 established that the put side of the digital returned `(1-D) + D*Q(S>K)`
+while the call side returned `D*Q(S>K)`. This is the repair and, more usefully,
+the measurement of what the bug was actually costing.
+
+### What changed
+- `digital()` takes D and the put side returns `D - D*Q(S<K)`. With D=1 the new
+  expression is identical to the old one, which is why the bug survived review.
+- `forward()` divides by D: parity is `C - P = D*(F - K)`, not `C - P = F - K`.
+- `discount()` is new. It reads D off the residual, needs no forward, and refuses
+  to answer on fewer than 8 brackets or outside 0.5 < D <= 1.
+- The unbounded lower edge of a ladder is priced at D rather than 1. That single
+  literal was what pinned the exhaustive sum at 1 for any D.
+- The exhaustiveness check reports total/D. `web/index.html` got the same repair, so
+  screen and record still agree (the standing rule from D-072).
+
+### What it did to the numbers
+| | before | after |
+|---|---|---|
+| exhaustive ladder sum, corrected rule | 0.9978 | 0.9978 as a ratio to D |
+| naive_b departure | +12.7% | +12.9% |
+| rung-observations clearing the band | 145 / 2068 | 145 / 2068 |
+| stability: always / sometimes / never | 3 / 3 / 38 | 3 / 3 / 38 |
+
+**No conclusion changed.** Not one rung moved across the friction band, and the
+three that always clear it are the same three. Normalised by D, the corrected
+boundary rule sits exactly where it sat before.
+
+### Why the footprint was that small
+Worth stating plainly, because "we found a systematic error in every put-side
+number" would have been the exciting version and it is not true. A rung is a
+DIFFERENCE of two digitals. Where both edges sit on the same side of the
+forward the (1-D) offset appears twice and cancels. Where the lower edge is
+unbounded it cancelled against the literal 1. What is left is exactly one rung
+per ladder — the bucket straddling the forward — overstated by 1-D, about 1.3
+cents. That rung was nowhere near its threshold in any of the 47 snapshots, so
+nothing flipped.
+
+So the bug was real, systematic, and almost entirely self-cancelling. It is
+worth fixing because the next computation built on `digital()` might not be a
+difference, not because it was distorting today's answers.
+
+### The check that now works
+The exhaustive ladder sum used to be pinned at 1 by construction, so it could
+only ever measure discretisation noise. It now has to land on an independently
+estimated D, and it does:
+
+- ETH, 25DEC26: D 0.98991, ladder sum 0.98991 — agreement to five decimals.
+- BTC, 25DEC26: D 0.98704, ladder sum 0.98163 — a ratio of 0.9945.
+
+The BTC gap is the discretisation error on a 28-rung ladder whose tails reach
+below $20k, where the option chain is thin. That is now a visible, measurable
+quantity instead of something the constraint was arithmetically unable to see.
+
+### Two things found on the way, neither of them about discounting
+**The page threw on first load.** `buckets()` already had a parameter named D — the
+Deribit payload — so declaring the discount factor as D was a redeclaration.
+Syntax-checking the file passed, because it is a syntax error only in context.
+Running the page found it in one load. This is the D-072 lesson landing a
+second time: for `web/index.html`, a parse is not a test.
+
+**A failing test suite exited green.** `tests.yml` piped unittest through `tee`, and
+bash reports the status of the last command in a pipeline, so the only thing
+standing between a red suite and a green tick was the test-count floor. Fixed
+with `set -o pipefail`. The floor was also raised from 15 to the actual count,
+33, because a floor far below the real number hides the deletion of everything
+above it.
+
+### Still open
+The internal key is still `p` and the ladder row key is still `opt`. The
+docstrings, the findings note and the page now all say "discounted state
+price", but the identifiers have not been renamed, so the naming half of the
+Week 1 item is done in prose and not in code. Recorded here rather than
+claimed as finished.
