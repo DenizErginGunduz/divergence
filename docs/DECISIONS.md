@@ -752,3 +752,48 @@ pairs under strict inequality, and one region gets counted twice.
 **The real lesson:** each digital looked flawless on its own. The error was caught
 by a **constraint**, not by a number. Most of the errors caught in this project were
 caught that way.
+
+
+## D-071 — The archive becomes a rolling window, and what that does not buy
+**Date:** 2026-09-14 · **Built:** `scripts/prune_archive.py` · `collect.yml`
+
+`raw/` now keeps 14 days. The first prune removed 2026-08-30: eight day folders,
+15.5 MB, including two orphan streams (`polymarket_flow`, `polymarket_holders`) left
+behind by a collector version that no longer exists.
+
+**The ordering is the whole safety mechanism.** Pruning runs only after the
+private mirror has been pushed successfully. The subtlety that makes this
+non-obvious: the mirror step exits 0 when it is SKIPPED for a missing token, so
+"the previous step passed" is not evidence the mirror was updated. The step now
+writes `MIRROR_OK=1` only on the real push path, and the prune step is gated on
+that variable. Skipped mirror, skipped prune. Without this the archive could
+leave both places in the same run.
+
+### What the window does not do
+Deleting a file in a new commit does not remove it from git history. The blob
+stays, so `.git` keeps growing at the same rate and a full `git clone` still
+downloads every snapshot ever committed.
+
+So both arguments for the window are weaker than they first look:
+- **Size.** It bounds the working tree, not the repository.
+- **Data rights.** It bounds what a visitor browses or a shallow clone fetches,
+  not what a determined full clone reaches.
+
+Bounding the repository itself would take periodic history rewriting, or never
+committing raw vendor data to the public repo at all. Neither is done. This is
+recorded rather than smoothed over because the earlier version of
+`DATA_SOURCES.md` claimed the window "caps repository growth", and that claim was
+wrong in a way nobody would have caught by reading it.
+
+### A bug the first run exposed
+The collector computes the archive counters from disk during the snapshot step,
+which happens BEFORE pruning. After the first prune the repository held 14 days
+while `state/latest.json` still said 15, and the page's dateline read `ARCHIVE 15d`
+with no files behind the number. `prune_archive.py` now recomputes that block after
+deleting. Measured before the fix: day_count 15, actual 14.
+
+### Cost
+The measured sample is capped at about 42 snapshots. The long series that D-009
+needs — where today's gap sits in its own history — cannot come from the public
+repository any more; it has to be read from the mirror. That is a real
+restriction on the reference metric and it is not solved here.
