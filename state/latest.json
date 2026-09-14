@@ -1,19 +1,19 @@
 {
  "version": 2,
- "snapshot_utc": "2026-09-14T09:28:16.466400+00:00",
+ "snapshot_utc": "2026-09-14T09:42:46.822872+00:00",
  "day": "2026-09-14",
- "stamp": "2026-09-14T0928Z",
- "sync_window_seconds": 1.53,
+ "stamp": "2026-09-14T0942Z",
+ "sync_window_seconds": 1.59,
  "complete": true,
  "paths": {
-  "deribit": "raw/deribit/2026-09-14/deribit_2026-09-14T0928Z.json.gz",
-  "polymarket_events": "raw/polymarket_events/2026-09-14/polymarket_events_2026-09-14T0928Z.json.gz",
-  "kalshi": "raw/kalshi/2026-09-14/kalshi_2026-09-14T0928Z.json.gz"
+  "deribit": "raw/deribit/2026-09-14/deribit_2026-09-14T0942Z.json.gz",
+  "polymarket_events": "raw/polymarket_events/2026-09-14/polymarket_events_2026-09-14T0942Z.json.gz",
+  "kalshi": "raw/kalshi/2026-09-14/kalshi_2026-09-14T0942Z.json.gz"
  },
- "meta_path": "raw/_meta/2026-09-14/meta_2026-09-14T0928Z.json",
+ "meta_path": "raw/_meta/2026-09-14/meta_2026-09-14T0942Z.json",
  "archive": {
   "day_count": 15,
-  "snapshot_count": 48,
+  "snapshot_count": 49,
   "first_day": "2026-08-30",
   "last_day": "2026-09-14",
   "per_day": {
@@ -31,7 +31,7 @@
    "2026-09-10": 3,
    "2026-09-11": 2,
    "2026-09-13": 5,
-   "2026-09-14": 2
+   "2026-09-14": 3
   }
  }
 }
