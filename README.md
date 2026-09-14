@@ -77,7 +77,7 @@ repository. Only the collector talks to the outside world.
 
 ```
 collector/collect.py   the only thing that fetches from the internet; runs 3x daily in CI
-raw/                   immutable snapshots, never rewritten  (docs/ARCHIVE_SCHEMA.md)
+raw/                   immutable snapshots, rolling 14-day window  (docs/ARCHIVE_SCHEMA.md)
 state/latest.json      pointer to the newest snapshot of each stream
 scripts/               measurements; scripts/legacy/ does not run, by design
 findings/latest.json   measurement output, written by CI
@@ -146,9 +146,9 @@ Known gaps, tracked openly:
 
 - The decision log is being folded into architecture decision records. Numbers that
   carried no reasoning of their own have been removed rather than renumbered.
-- The archive grows about 4 MB a day and nothing prunes it yet. The rolling window
-  is decided but not built, so git is the wrong home for it beyond roughly a year
-  (docs/DATA_SOURCES.md).
+- `raw/` is a rolling 14-day window. It bounds the working tree, not git history:
+  `.git` still grows about 4 MB a day and a full clone reaches every snapshot ever
+  committed. The full archive lives in a private mirror (docs/DATA_SOURCES.md).
 - 148 of 446 flow markets hit the fetch limit in the latest run with no gap flagged.
   Probably fine, not verified.
 - Assets beyond BTC and ETH are collected but not measured.
