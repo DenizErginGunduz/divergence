@@ -34,6 +34,7 @@ Usage:
     python scripts/prune_archive.py             # dry run, prints what would go
     python scripts/prune_archive.py --apply     # delete
 """
+import json
 import os
 import re
 import shutil
@@ -41,6 +42,7 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RAW = os.path.join(ROOT, 'raw')
+POINTER = os.path.join(ROOT, 'state', 'latest.json')
 
 ARCHIVE_DAYS = 14          # how many days of day-folders to keep
 DAY = re.compile(r'^\d{4}-\d{2}-\d{2}$')
@@ -75,6 +77,43 @@ def size_of(path):
             except OSError:
                 pass
     return total
+
+
+def refresh_pointer():
+    """Recompute the archive counters in state/latest.json.
+
+    The collector writes those counters from disk during the snapshot step,
+    which happens BEFORE this script runs. Without this, the pointer reports one
+    day more than the repository actually holds and the dateline on the page
+    shows a number no file backs up. Measured on 2026-09-14: the archive was 14
+    days and the pointer said 15.
+
+    Only the archive block is touched. The snapshot fields — stamp, paths,
+    sync window — describe the run that just happened and stay as written.
+    """
+    if not os.path.isfile(POINTER):
+        return None
+    meta_root = os.path.join(RAW, '_meta')
+    per_day = {}
+    if os.path.isdir(meta_root):
+        for d in sorted(os.listdir(meta_root)):
+            dp = os.path.join(meta_root, d)
+            if DAY.match(d) and os.path.isdir(dp):
+                per_day[d] = len([x for x in os.listdir(dp) if x.endswith('.json')])
+    days = sorted(per_day)
+    with open(POINTER, encoding='utf-8') as f:
+        ptr = json.load(f)
+    before = (ptr.get('archive') or {}).get('day_count')
+    ptr['archive'] = {
+        'day_count': len(per_day),
+        'snapshot_count': sum(per_day.values()),
+        'first_day': days[0] if days else None,
+        'last_day': days[-1] if days else None,
+        'per_day': per_day,
+    }
+    with open(POINTER, 'w', encoding='utf-8') as f:
+        json.dump(ptr, f, ensure_ascii=False, indent=1)
+    return before, ptr['archive']['day_count'], ptr['archive']['snapshot_count']
 
 
 def main():
@@ -135,7 +174,12 @@ def main():
     if not apply:
         print('\nDry run. Re-run with --apply to delete.')
     else:
-        print('\nThe full archive lives in the private mirror. This only bounds')
+        r = refresh_pointer()
+        if r:
+            print('pointer     : day_count %s -> %d, snapshot_count %d'
+                  % (r[0], r[1], r[2]))
+        print()
+        print('The full archive lives in the private mirror. This only bounds')
         print('the working tree of the public repository; git history is unchanged.')
     return 0
 
