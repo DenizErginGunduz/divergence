@@ -1,83 +1,103 @@
 {
  "archive": {
   "day_count": 14,
-  "snapshot_count": 44,
-  "first": "2026-08-30T1611Z",
-  "last": "2026-09-13T2115Z"
+  "snapshot_count": 46,
+  "first": "2026-08-31T0508Z",
+  "last": "2026-09-14T0948Z"
  },
  "produced_by": "scripts/write_findings.py",
  "measurements": {
   "friction_band_kalshi": {
-   "exceeding": 118,
-   "measured": 1672,
-   "percent": 7.1,
-   "mean_density": 0.9979,
+   "exceeding": 136,
+   "measured": 1936,
+   "percent": 7.0,
+   "mean_density": 0.9978,
    "stability": {
     "distinct_rungs": 44,
-    "total_observations": 1672,
-    "observations_per_rung": 38.0,
+    "total_observations": 1936,
+    "observations_per_rung": 44.0,
     "always_exceeds": 3,
     "sometimes_exceeds": 3,
     "never_exceeds": 38,
     "always_exceeding_list": [
      {
       "rung": "BTC:KXBTCY-27JAN0100-T149999.99",
-      "observations": 38,
-      "exceeding": 38
+      "observations": 44,
+      "exceeding": 44
      },
      {
       "rung": "ETH:KXETHY-27JAN0100-T1000.00",
-      "observations": 38,
-      "exceeding": 38
+      "observations": 44,
+      "exceeding": 44
      },
      {
       "rung": "ETH:KXETHY-27JAN0100-T4999.99",
-      "observations": 38,
-      "exceeding": 38
+      "observations": 44,
+      "exceeding": 44
      }
     ]
    }
   },
   "polymarket_terminal": {
-   "exceeding": 1120,
-   "measured": 4183,
-   "percent": 26.8,
-   "gap_12h_exceeding": 859,
-   "gap_12h_measured": 3024,
-   "gap_12h_percent": 28.4,
-   "touch_ladders_excluded": 749,
+   "exceeding": 1166,
+   "measured": 4484,
+   "percent": 26.0,
+   "gap_12h_exceeding": 896,
+   "gap_12h_measured": 3220,
+   "gap_12h_percent": 27.8,
+   "touch_ladders_excluded": 795,
    "stability": {
-    "distinct_rungs": 377,
-    "total_observations": 4183,
-    "observations_per_rung": 11.1,
-    "always_exceeds": 10,
+    "distinct_rungs": 374,
+    "total_observations": 4484,
+    "observations_per_rung": 12.0,
+    "always_exceeds": 13,
     "sometimes_exceeds": 272,
-    "never_exceeds": 95,
+    "never_exceeds": 89,
     "always_exceeding_list": [
      {
       "rung": "BTC:2026-08-31:74000",
-      "observations": 7,
-      "exceeding": 7
+      "observations": 4,
+      "exceeding": 4
      },
      {
-      "rung": "BTC:2026-08-31:86000",
+      "rung": "BTC:2026-09-01:84000",
+      "observations": 5,
+      "exceeding": 5
+     },
+     {
+      "rung": "BTC:2026-09-01:86000",
+      "observations": 5,
+      "exceeding": 5
+     },
+     {
+      "rung": "BTC:2026-09-01:88000",
       "observations": 3,
       "exceeding": 3
      },
      {
-      "rung": "ETH:2026-08-31:2800",
-      "observations": 3,
-      "exceeding": 3
+      "rung": "BTC:2026-09-02:86000",
+      "observations": 6,
+      "exceeding": 6
+     },
+     {
+      "rung": "ETH:2026-09-01:2700",
+      "observations": 5,
+      "exceeding": 5
      },
      {
       "rung": "ETH:2026-09-01:2800",
-      "observations": 8,
-      "exceeding": 8
+      "observations": 5,
+      "exceeding": 5
+     },
+     {
+      "rung": "ETH:2026-09-02:2200",
+      "observations": 10,
+      "exceeding": 10
      },
      {
       "rung": "ETH:2026-09-02:2700",
-      "observations": 11,
-      "exceeding": 10
+      "observations": 8,
+      "exceeding": 8
      },
      {
       "rung": "ETH:2026-09-08:2100",
@@ -96,130 +116,125 @@
      },
      {
       "rung": "ETH:2026-09-14:2900",
-      "observations": 2,
-      "exceeding": 2
-     },
-     {
-      "rung": "ETH:2026-09-15:2900",
-      "observations": 3,
-      "exceeding": 3
+      "observations": 4,
+      "exceeding": 4
      }
     ]
    }
   },
   "long_horizon_touch": {
-   "measured": 1988,
-   "arithmetic_violations": 4,
-   "ratio_over_two": 1882,
-   "violation_percent": 0.2,
-   "ratio_over_two_percent": 94.7,
+   "measured": 2112,
+   "arithmetic_violations": 6,
+   "ratio_over_two": 1998,
+   "violation_percent": 0.3,
+   "ratio_over_two_percent": 94.6,
    "stability": {
-    "distinct_rungs": 90,
-    "total_observations": 1988,
-    "observations_per_rung": 22.1,
-    "always_exceeds": 63,
-    "sometimes_exceeds": 26,
+    "distinct_rungs": 83,
+    "total_observations": 2112,
+    "observations_per_rung": 25.4,
+    "always_exceeds": 59,
+    "sometimes_exceeds": 23,
     "never_exceeds": 1,
     "always_exceeding_list": [
      {
       "rung": "BTC:2027-01-01:200000",
-      "observations": 43,
-      "exceeding": 43
+      "observations": 46,
+      "exceeding": 46
      },
      {
       "rung": "BTC:2027-01-01:190000",
-      "observations": 43,
-      "exceeding": 43
+      "observations": 46,
+      "exceeding": 46
      },
      {
       "rung": "BTC:2027-01-01:180000",
-      "observations": 43,
-      "exceeding": 43
+      "observations": 46,
+      "exceeding": 46
      },
      {
       "rung": "BTC:2027-01-01:170000",
-      "observations": 43,
-      "exceeding": 43
+      "observations": 46,
+      "exceeding": 46
      },
      {
       "rung": "BTC:2027-01-01:160000",
-      "observations": 43,
-      "exceeding": 43
+      "observations": 46,
+      "exceeding": 46
      },
      {
       "rung": "BTC:2027-01-01:150000",
-      "observations": 43,
-      "exceeding": 43
+      "observations": 46,
+      "exceeding": 46
      },
      {
       "rung": "BTC:2027-01-01:140000",
-      "observations": 43,
-      "exceeding": 43
+      "observations": 46,
+      "exceeding": 46
      },
      {
       "rung": "BTC:2027-01-01:130000",
-      "observations": 43,
-      "exceeding": 43
+      "observations": 46,
+      "exceeding": 46
      },
      {
       "rung": "BTC:2027-01-01:120000",
-      "observations": 43,
-      "exceeding": 43
+      "observations": 46,
+      "exceeding": 46
      },
      {
       "rung": "BTC:2027-01-01:110000",
-      "observations": 43,
-      "exceeding": 43
+      "observations": 46,
+      "exceeding": 46
      },
      {
       "rung": "BTC:2027-01-01:100000",
-      "observations": 43,
-      "exceeding": 42
+      "observations": 46,
+      "exceeding": 45
      },
      {
       "rung": "BTC:2026-09-01:85000",
-      "observations": 8,
-      "exceeding": 8
+      "observations": 5,
+      "exceeding": 5
      },
      {
       "rung": "BTC:2026-09-01:87500",
-      "observations": 7,
-      "exceeding": 7
-     },
-     {
-      "rung": "BTC:2026-08-31:86000",
-      "observations": 2,
-      "exceeding": 2
-     },
-     {
-      "rung": "BTC:2026-08-31:82000",
-      "observations": 3,
-      "exceeding": 3
-     },
-     {
-      "rung": "BTC:2026-08-31:80000",
-      "observations": 3,
-      "exceeding": 3
+      "observations": 4,
+      "exceeding": 4
      },
      {
       "rung": "ETH:2027-01-01:3000",
-      "observations": 43,
-      "exceeding": 43
+      "observations": 46,
+      "exceeding": 46
      },
      {
       "rung": "ETH:2027-01-01:2750",
-      "observations": 43,
-      "exceeding": 43
+      "observations": 46,
+      "exceeding": 46
      },
      {
       "rung": "ETH:2027-01-01:10000",
-      "observations": 43,
-      "exceeding": 43
+      "observations": 46,
+      "exceeding": 46
      },
      {
       "rung": "ETH:2027-01-01:8000",
-      "observations": 43,
-      "exceeding": 43
+      "observations": 46,
+      "exceeding": 46
+     },
+     {
+      "rung": "ETH:2027-01-01:7500",
+      "observations": 46,
+      "exceeding": 46
+     },
+     {
+      "rung": "ETH:2027-01-01:7000",
+      "observations": 46,
+      "exceeding": 46
+     },
+     {
+      "rung": "ETH:2027-01-01:6500",
+      "observations": 46,
+      "exceeding": 46
      }
     ]
    },
