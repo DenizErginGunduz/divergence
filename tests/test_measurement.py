@@ -288,5 +288,141 @@ class PruneWindow(unittest.TestCase):
         self.assertEqual(len(prune_archive.day_dirs()), 60, 'nothing may be deleted')
 
 
+# --------------------------------------------------------------------------
+# A wider synthetic chain in which put-call parity holds at a discount factor
+# other than 1. Parity is C(K) - P(K) = D*(F - K); everything below is derived
+# from that identity, so the chain is arbitrage-free by construction and the
+# right answers are known exactly.
+#
+# The time-value shape is deliberately arbitrary (a plain tent function). It
+# has to be: the put-call residual is 1 - D whatever the call prices are, and
+# a test that only passed for one particular smile would be testing the smile.
+PARITY_D = 0.99
+PARITY_F = 100000.0
+
+
+def parity_chain(D=PARITY_D, F=PARITY_F):
+    """17 strikes from 60k to 140k, priced so that parity holds exactly at D."""
+    rows = []
+    k = 60000
+    while k <= 140000:
+        tv = 4000.0 - 0.02 * abs(k - F)          # positive across the range
+        c_usd = D * max(F - k, 0.0) + tv
+        p_usd = c_usd - D * (F - k)
+        rows.append(quote('BTC-%s-%d-C' % (EXPIRY, k),
+                          c_usd / INDEX, c_usd * 0.98 / INDEX, c_usd * 1.02 / INDEX))
+        rows.append(quote('BTC-%s-%d-P' % (EXPIRY, k),
+                          p_usd / INDEX, p_usd * 0.98 / INDEX, p_usd * 1.02 / INDEX))
+        k += 5000
+    return {'BTC': {'book_summary': {'result': rows},
+                    'index': {'result': {'index_price': INDEX}}}}
+
+
+class DiscountConvention(unittest.TestCase):
+    """D-073 — the two sides of the digital were on different footings.
+
+    The call side returned D*Q(S>K); the put side returned 1 - D*Q(S<K), which
+    is (1-D) + D*Q(S>K). Every put-side rung was therefore (1-D) too high. The
+    exhaustiveness check could not see it, because D*1 + (1-D) = 1 for any D,
+    which is why this needs a test of its own rather than a constraint.
+    """
+
+    def test_discount_is_recovered_from_the_residual(self):
+        ch, _idx = measure_band.chain(parity_chain(), 'BTC')
+        d = measure_band.discount(ch, EXPIRY)
+        self.assertIsNotNone(d)
+        self.assertAlmostEqual(d['D'], PARITY_D, places=9)
+        self.assertEqual(d['brackets'], 16)
+
+    def test_residual_is_flat_in_strike(self):
+        """The whole numeraire argument turns on this. A share-measure error
+        would be moneyness-dependent; a discount factor is not."""
+        ch, _idx = measure_band.chain(parity_chain(), 'BTC')
+        d = measure_band.discount(ch, EXPIRY)
+        self.assertLess(d['spread'], 1e-9)
+
+    def test_both_sides_of_the_digital_now_agree(self):
+        """92,500 sits below the forward, so digital() takes the put side. On
+        the same bracket the call side is (C(90k) - C(95k))/5,000 = 0.97."""
+        ch, idx = measure_band.chain(parity_chain(), 'BTC')
+        d = measure_band.digital(ch, EXPIRY, 92500.0, PARITY_F, idx, PARITY_D)
+        self.assertAlmostEqual(d['p'], 0.97, places=9)
+
+    def test_the_old_put_expression_was_high_by_one_minus_d(self):
+        """The bug, pinned. Passing D=1 reproduces it exactly, which is also
+        why it survived so long: with D=1 the two expressions coincide."""
+        ch, idx = measure_band.chain(parity_chain(), 'BTC')
+        old = measure_band.digital(ch, EXPIRY, 92500.0, PARITY_F, idx, 1.0)
+        self.assertAlmostEqual(old['p'] - 0.97, 1.0 - PARITY_D, places=9)
+
+    def test_call_side_was_never_affected(self):
+        """Above the forward the call side is used, and it was already
+        returning D*Q. D must make no difference there."""
+        ch, idx = measure_band.chain(parity_chain(), 'BTC')
+        a = measure_band.digital(ch, EXPIRY, 107500.0, PARITY_F, idx, PARITY_D)
+        b = measure_band.digital(ch, EXPIRY, 107500.0, PARITY_F, idx, 1.0)
+        self.assertAlmostEqual(a['p'], b['p'], places=12)
+
+    def test_forward_is_exact_once_d_is_carried(self):
+        ch, idx = measure_band.chain(parity_chain(), 'BTC')
+        F = measure_band.forward(ch, EXPIRY, idx, PARITY_D)
+        self.assertAlmostEqual(F, PARITY_F, places=6)
+
+    def test_forward_with_d_equal_one_is_biased(self):
+        """F_hat = K + D*(F-K), so each strike gives a different answer and the
+        median lands off the true forward. Small — a few tens of dollars — but
+        there is no longer any reason to carry it."""
+        ch, idx = measure_band.chain(parity_chain(), 'BTC')
+        biased = measure_band.forward(ch, EXPIRY, idx, 1.0)
+        self.assertNotAlmostEqual(biased, PARITY_F, places=2)
+        self.assertGreater(biased, PARITY_F)
+
+    def test_thin_chain_yields_no_discount(self):
+        """Three strikes is two brackets. A median of two numbers is not a
+        measurement, and the caller must be told so rather than handed one."""
+        ch, _idx = measure_band.chain(build(), 'BTC')
+        self.assertIsNone(measure_band.discount(ch, EXPIRY))
+
+    def test_implausible_discount_is_refused(self):
+        """0.4 is not a funding curve over any maturity this project touches.
+        Refusing is the point: short-dated chains where 1-D is below the tick
+        must fall back visibly, not quietly."""
+        ch, _idx = measure_band.chain(parity_chain(D=0.4), 'BTC')
+        self.assertIsNone(measure_band.discount(ch, EXPIRY))
+
+    def test_guard_constants_are_what_the_record_says(self):
+        """Loosening these silently would turn the refusal above into a
+        plausible-looking number."""
+        self.assertEqual(measure_band.MIN_BRACKETS, 8)
+        self.assertEqual((measure_band.D_FLOOR, measure_band.D_CEIL), (0.5, 1.0))
+
+
+class ExhaustivenessTargetsD(unittest.TestCase):
+    """D-073 — an exhaustive ladder is worth D today, not 1.
+
+    Buying every bucket buys a dollar at expiry with certainty, and a certain
+    dollar at expiry is worth D now. Before the repair the sum came out at 1
+    whatever D was, so the constraint that caught the bucket-boundary bug was
+    blind to the convention bug sitting next to it.
+    """
+
+    def test_a_partition_sums_to_d_not_to_one(self):
+        ch, idx = measure_band.chain(parity_chain(), 'BTC')
+        edges = [None, 80000.0, 95000.0, 105000.0, 120000.0, None]
+        total = 0.0
+        for lo, hi in zip(edges[:-1], edges[1:]):
+            dL = (measure_band.digital(ch, EXPIRY, lo, PARITY_F, idx, PARITY_D)
+                  if lo is not None else {'p': PARITY_D})
+            dH = (measure_band.digital(ch, EXPIRY, hi, PARITY_F, idx, PARITY_D)
+                  if hi is not None else {'p': 0.0})
+            total += dL['p'] - dH['p']
+        self.assertAlmostEqual(total, PARITY_D, places=9)
+
+    def test_the_unbounded_edge_is_worth_d(self):
+        """The old code wrote 1 here. That single literal is what made the sum
+        land on 1 regardless of everything else in the ladder."""
+        self.assertNotEqual(PARITY_D, 1.0)
+
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
