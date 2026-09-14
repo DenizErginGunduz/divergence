@@ -38,6 +38,15 @@ jobs:
       - name: Archive read smoke test
         run: python scripts/archive.py
 
+      # Before any price is compared: do the two contracts pay out on the same
+      # event? This reads Kalshi's rules_primary rather than trusting the three
+      # numeric fields, and it is deliberately the first measurement, because a
+      # number computed for the wrong event is worse than no number. It exits
+      # non-zero on a MISMATCH; UNKNOWN is reported but does not fail, since an
+      # unrecognised sentence is a gap in the script until someone reads it.
+      - name: Event semantics
+        run: python scripts/audit_semantics.py
+
       # Does the converted chain behave like a USD present value at all? This
       # runs FIRST among the measurements because every number after it depends
       # on the answer. A residual that drifts with moneyness means the inverse
@@ -50,8 +59,9 @@ jobs:
       - name: Friction band
         run: python scripts/measure_band.py
 
-      # Exhaustiveness: bucket probabilities must sum to 1. Three boundary rules
-      # are compared; constraints caught the bug, not numbers (D-067).
+      # Exhaustiveness: an exhaustive bucket set is worth the discount factor D
+      # today, not 1 (D-073). Three boundary rules are compared; constraints
+      # caught the bug, not numbers (D-067).
       - name: Exhaustiveness constraint
         run: python scripts/measure_exhaustive.py
 
