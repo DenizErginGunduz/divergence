@@ -20,8 +20,9 @@ import json
 import os
 import sys
 
-from archive import stamps, summary, Missing
+from archive import snapshot, stamps, summary, Missing
 import measure_band
+import measure_exhaustive
 import measure_polymarket
 import measure_touch
 from stability import Stability
@@ -124,6 +125,48 @@ def measure_touch_all(all_stamps):
     }
 
 
+def measure_exhaustive_all(all_stamps):
+    """The three boundary rules, pooled over the archive.
+
+    This one has no stability block because it is not a per-rung question. It
+    asks whether a bucket set sums to 1, which is a property of the whole
+    ladder, and the answer is the same shape on every snapshot.
+    """
+    pooled = {rule: [] for rule in measure_exhaustive.RULES}
+    for d in all_stamps:
+        try:
+            g = snapshot(d)
+            KA, D = g.kalshi, g.deribit
+        except Missing:
+            continue
+        for _asset, series, currency in measure_band.SERIES:
+            for rule in measure_exhaustive.RULES:
+                try:
+                    r = measure_exhaustive.ladder_sum(KA, D, series, currency, rule)
+                except (KeyError, TypeError, ValueError):
+                    r = None
+                if r:
+                    pooled[rule].append(r['total'])
+
+    out = {}
+    for rule, v in pooled.items():
+        if not v:
+            out[rule] = None
+            continue
+        mean = sum(v) / len(v)
+        out[rule] = {
+            'measured': len(v),
+            'mean_total': round(mean, 4),
+            'min_total': round(min(v), 4),
+            'max_total': round(max(v), 4),
+            'departure_percent': round(100.0 * (mean - 1.0), 1),
+        }
+    out['note'] = ('An exhaustive bucket set must sum to 1. That is arithmetic, '
+                   'not a preference, so a departure from 1 says the computation '
+                   'is wrong without saying which bucket is wrong. See D-067.')
+    return out
+
+
 def main():
     all_stamps = stamps('_meta')
     o = summary()
@@ -136,6 +179,7 @@ def main():
             'friction_band_kalshi': measure_band_all(all_stamps),
             'polymarket_terminal': measure_polymarket_all(all_stamps),
             'long_horizon_touch': measure_touch_all(all_stamps),
+            'exhaustiveness_constraint': measure_exhaustive_all(all_stamps),
         },
     }
 
@@ -147,9 +191,15 @@ def main():
 
     print('written: findings/latest.json')
     for name, m in result['measurements'].items():
-        k = m.get('stability', {})
-        print('  %-26s distinct rungs %-4s always exceeding %-4s'
-              % (name, k.get('distinct_rungs'), k.get('always_exceeds')))
+        k = m.get('stability') or {}
+        if k:
+            print('  %-26s distinct rungs %-4s always exceeding %-4s'
+                  % (name, k.get('distinct_rungs'), k.get('always_exceeds')))
+        else:
+            worst = max((v for v in m.values() if isinstance(v, dict)),
+                        key=lambda x: abs(x.get('departure_percent') or 0), default=None)
+            print('  %-26s worst departure from 1: %s%%'
+                  % (name, worst.get('departure_percent') if worst else '-'))
     return 0
 
 
