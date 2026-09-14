@@ -321,8 +321,11 @@ function buckets(KA,D,series,ccy){
  const expiries=Object.keys(ch).filter(e=>ch[e].C&&ch[e].P).map(l=>({l,t:expiryMs(l)}))
    .filter(x=>x.t).sort((a,b)=>a.t-b.t);
  const chosen=expiries.filter(x=>x.t<=closeMs).pop(); if(!chosen)return null;
- const dis=disc(ch,chosen.l), D=dis?dis.D:1;   /* discount first: both need it */
- const F=fwd(ch,chosen.l,idx,D); if(!F)return null;
+ /* Discount first: fwd() and digital() both need it. Named DF, not D,
+    because D is already this function's Deribit payload — the page threw
+    "Identifier 'D' has already been declared" on the first attempt. */
+ const dis=disc(ch,chosen.l), DF=dis?dis.D:1;
+ const F=fwd(ch,chosen.l,idx,DF); if(!F)return null;
  const S=M.map(m=>({kind:m.strike_type,floor:m.floor_strike,cap:m.cap_strike,
    bid:+m.yes_bid_dollars,ask:+m.yes_ask_dollars,oi:Math.round(+m.open_interest_fp||0)}))
    .sort((a,b)=>((a.floor??a.cap)-(b.floor??b.cap)));
@@ -334,8 +337,8 @@ function buckets(KA,D,series,ccy){
   else{lo=Math.round(m.floor); hi=Math.round(m.cap+.01); label=short(m.floor)+' – '+short(m.cap);}
   /* An unbounded lower edge is certainty, and certainty is worth D today,
      not 1. That literal 1 is what pinned the bucket sum at 1 for any D. */
-  const dL=lo!=null?digital(ch,chosen.l,lo,F,idx,D):{p:D,se:0,fee:0};
-  const dH=hi!=null?digital(ch,chosen.l,hi,F,idx,D):{p:0,se:0,fee:0};
+  const dL=lo!=null?digital(ch,chosen.l,lo,F,idx,DF):{p:DF,se:0,fee:0};
+  const dH=hi!=null?digital(ch,chosen.l,hi,F,idx,DF):{p:0,se:0,fee:0};
   const pm=(m.bid+m.ask)/2, spread=m.ask-m.bid;
   if(!dL||!dH){rows.push({label,pm,spread,oi:m.oi,skipped:'outside option strike range'});continue;}
   const opt=dL.p-dH.p; top+=opt; if(opt<0)neg++;
@@ -344,7 +347,7 @@ function buckets(KA,D,series,ccy){
   rows.push({label,pm,opt,gap:pm-opt,se,friction,threshold,spread,oi:m.oi,
     ratio:opt>0?pm/opt:null, exceeds:Math.abs(pm-opt)>threshold, pair:[dL.pair,dH.pair]});
  }
- return {rows,expiry:chosen.l,closeMs,F,idx,top,neg,series,D,discEstimated:!!dis,
+ return {rows,expiry:chosen.l,closeMs,F,idx,top,neg,series,D:DF,discEstimated:!!dis,
    pmBid:S.reduce((s,x)=>s+x.bid,0), pmAsk:S.reduce((s,x)=>s+x.ask,0)};
 }
 
