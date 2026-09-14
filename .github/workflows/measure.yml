@@ -38,6 +38,13 @@ jobs:
       - name: Archive read smoke test
         run: python scripts/archive.py
 
+      # Does the converted chain behave like a USD present value at all? This
+      # runs FIRST among the measurements because every number after it depends
+      # on the answer. A residual that drifts with moneyness means the inverse
+      # conversion is not producing what the rest of the pipeline assumes.
+      - name: Put-call cross-check
+        run: python scripts/measure_parity.py
+
       # Friction band: does the gap beat the cost of trading it? The whole
       # archive is scanned, because no single snapshot can carry significance.
       - name: Friction band
