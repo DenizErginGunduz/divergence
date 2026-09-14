@@ -224,12 +224,18 @@ const STRIP=[
  {id:'tail', b:'Tail premium', src:'chain',
   t:()=>'What prediction markets charge for the least likely outcome, versus what the option chain implies.'},
 
+ /* The headline is always_exceeds / distinct_rungs. "Always" is the classifier's
+    word for MORE THAN 90% of a rung's observations, not 100% — see
+    scripts/stability.py. The text says so, and reports the other two buckets,
+    because "the rest never clears" would be false whenever sometimes_exceeds
+    is above zero. */
  {id:'costs', b:'Survive costs', src:'findings', d:'D-049',
   read:F=>{ const s=F.measurements.friction_band_kalshi.stability;
     return {n:s.always_exceeds+'/'+s.distinct_rungs,
       t:`Kalshi year-end rungs whose gap beats fees, spread and measurement error `
-        +`\u2014 in every one of ${Math.round(s.observations_per_rung)} observations. `
-        +`The rest of the ladder never clears the band.`}; }},
+        +`in over 90% of their observations. ${s.sometimes_exceeds} clear it `
+        +`sometimes, ${s.never_exceeds} never. About `
+        +`${Math.round(s.observations_per_rung)} observations per rung.`}; }},
 
  {id:'rep', b:'Model-free setups', src:'findings', d:'D-045 \u00b7 D-049',
   read:F=>{ const m=F.measurements;
