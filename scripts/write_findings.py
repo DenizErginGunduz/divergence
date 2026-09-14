@@ -60,6 +60,9 @@ def measure_band_all(all_stamps):
             measured += v['measured']
             density.append(v['density_sum'])
     return {
+        # The digital comes from a price difference, so no model is assumed.
+        # The page counts this flag rather than a hand-typed number.
+        'model_free': True,
         'exceeding': exceeding, 'measured': measured,
         'percent': round(100.0 * exceeding / measured, 1) if measured else None,
         'mean_density': round(sum(density) / len(density), 4) if density else None,
@@ -91,6 +94,7 @@ def measure_polymarket_all(all_stamps):
             for r in rows:
                 stab.add('%s:%s:%g' % (h['asset'], h['end'], r['K']), r['exceeds'])
     return {
+        'model_free': True,
         'exceeding': exceeding, 'measured': measured,
         'percent': round(100.0 * exceeding / measured, 1) if measured else None,
         'gap_12h_exceeding': near_exceeding, 'gap_12h_measured': near_measured,
@@ -113,6 +117,9 @@ def measure_touch_all(all_stamps):
         violations += s['violations']
         over_two += s['over_two']
     return {
+        # The bound comes from lognormal dynamics, so this one DOES assume a
+        # model. Kept separate from the two above on purpose (D-046).
+        'model_free': False,
         'measured': measured, 'arithmetic_violations': violations,
         'ratio_over_two': over_two,
         'violation_percent': round(100.0 * violations / measured, 1) if measured else None,
