@@ -251,7 +251,7 @@ const STRIP=[
     return {n:worst.departure_percent.toFixed(1)+'%',
       t:`One bucket boundary off by a cent inflated the density by `
         +`${worst.departure_percent.toFixed(1)}%. Every digital looked perfect alone `
-        +`\u2014 only the requirement that they sum to 1 exposed it.`}; }}
+        +`\u2014 only the requirement that they sum to the discount factor exposed it.`}; }}
 ];
 /* Four cards on one row; the strip became a grid, not a slider (D-069).
    The two that were removed are waiting in docs/BACKLOG.md B-010:
@@ -282,12 +282,28 @@ function chain(D,p){const idx=D[p].index.result.index_price,ch={};
   ((ch[q[1]]||={})[q[3]]||={})[+q[2]]={mark:(b.mark_price||0)*idx,
    bid:b.bid_price?b.bid_price*idx:null, ask:b.ask_price?b.ask_price*idx:null};}
  return {ch,idx};}
-function fwd(ch,e,idx){const C=ch[e].C,P=ch[e].P,v=[];
- for(const k of Object.keys(C).map(Number)) if(P&&P[k]&&k>.85*idx&&k<1.2*idx) v.push(k+C[k].mark-P[k].mark);
+/* Discount factor from the put-call residual (D-073). The call side of the
+   digital gives D*Q(S>K), the put side gives 1-D*Q(S<K); the difference is
+   1-D and carries no Q at all, so this needs no forward and there is no
+   circularity with fwd() below. Mirrors scripts/measure_band.py:discount. */
+function disc(ch,e){const C=ch[e].C,P=ch[e].P; if(!C||!P)return null;
+ const ks=Object.keys(C).map(Number).filter(k=>P[k]).sort((a,b)=>a-b),v=[];
+ for(let i=0;i+1<ks.length;i++){const a=ks[i],b=ks[i+1],g=b-a; if(g<=0)continue;
+  v.push((1-(P[b].mark-P[a].mark)/g)-((C[a].mark-C[b].mark)/g));}
+ if(v.length<8)return null; v.sort((a,b)=>a-b);
+ const D=1-v[Math.floor(v.length/2)];
+ return (D>.5&&D<=1)?{D,brackets:v.length,spread:v[v.length-1]-v[0]}:null;}
+/* Parity is C-P = D*(F-K), so F = K+(C-P)/D. Dividing by nothing assumed
+   D=1 and biased F by -(1-D)*(F-K) (D-073). */
+function fwd(ch,e,idx,D){const C=ch[e].C,P=ch[e].P,v=[];
+ for(const k of Object.keys(C).map(Number)) if(P&&P[k]&&k>.85*idx&&k<1.2*idx) v.push(k+(C[k].mark-P[k].mark)/D);
  v.sort((a,b)=>a-b); return v.length?v[Math.floor(v.length/2)]:null;}
-function digital(ch,e,K,F,idx){const t=K<F?'P':'C',o=ch[e][t]; if(!o)return null;
+function digital(ch,e,K,F,idx,D){const t=K<F?'P':'C',o=ch[e][t]; if(!o)return null;
  const br=bracket(o,K); if(!br)return null; const[a,b]=br,g=b-a,A=o[a],B=o[b];
- const p=t==='C'?(A.mark-B.mark)/g:1-(B.mark-A.mark)/g;
+ /* Both sides return D*Q(S>K). The put side reaches it as D-D*Q(S<K), not
+    1-D*Q(S<K); with D=1 the two coincide, which is why the old line looked
+    right for so long (D-073). */
+ const p=t==='C'?(A.mark-B.mark)/g:D-(B.mark-A.mark)/g;
  const se=(A.bid!=null&&A.ask!=null&&B.bid!=null&&B.ask!=null)
   ?Math.sqrt(((A.ask-A.bid)/2)**2+((B.ask-B.bid)/2)**2)/g:null;
  const feeOf=x=>Math.min(.0003*idx,.125*x);
@@ -305,7 +321,8 @@ function buckets(KA,D,series,ccy){
  const expiries=Object.keys(ch).filter(e=>ch[e].C&&ch[e].P).map(l=>({l,t:expiryMs(l)}))
    .filter(x=>x.t).sort((a,b)=>a.t-b.t);
  const chosen=expiries.filter(x=>x.t<=closeMs).pop(); if(!chosen)return null;
- const F=fwd(ch,chosen.l,idx); if(!F)return null;
+ const dis=disc(ch,chosen.l), D=dis?dis.D:1;   /* discount first: both need it */
+ const F=fwd(ch,chosen.l,idx,D); if(!F)return null;
  const S=M.map(m=>({kind:m.strike_type,floor:m.floor_strike,cap:m.cap_strike,
    bid:+m.yes_bid_dollars,ask:+m.yes_ask_dollars,oi:Math.round(+m.open_interest_fp||0)}))
    .sort((a,b)=>((a.floor??a.cap)-(b.floor??b.cap)));
@@ -315,8 +332,10 @@ function buckets(KA,D,series,ccy){
   if(m.kind==='less'){hi=Math.round(m.cap); label='below '+short(m.cap);}
   else if(m.kind==='greater'){lo=Math.round(m.floor+.01); label='above '+short(m.floor);}
   else{lo=Math.round(m.floor); hi=Math.round(m.cap+.01); label=short(m.floor)+' – '+short(m.cap);}
-  const dL=lo!=null?digital(ch,chosen.l,lo,F,idx):{p:1,se:0,fee:0};
-  const dH=hi!=null?digital(ch,chosen.l,hi,F,idx):{p:0,se:0,fee:0};
+  /* An unbounded lower edge is certainty, and certainty is worth D today,
+     not 1. That literal 1 is what pinned the bucket sum at 1 for any D. */
+  const dL=lo!=null?digital(ch,chosen.l,lo,F,idx,D):{p:D,se:0,fee:0};
+  const dH=hi!=null?digital(ch,chosen.l,hi,F,idx,D):{p:0,se:0,fee:0};
   const pm=(m.bid+m.ask)/2, spread=m.ask-m.bid;
   if(!dL||!dH){rows.push({label,pm,spread,oi:m.oi,skipped:'outside option strike range'});continue;}
   const opt=dL.p-dH.p; top+=opt; if(opt<0)neg++;
@@ -325,7 +344,7 @@ function buckets(KA,D,series,ccy){
   rows.push({label,pm,opt,gap:pm-opt,se,friction,threshold,spread,oi:m.oi,
     ratio:opt>0?pm/opt:null, exceeds:Math.abs(pm-opt)>threshold, pair:[dL.pair,dH.pair]});
  }
- return {rows,expiry:chosen.l,closeMs,F,idx,top,neg,series,
+ return {rows,expiry:chosen.l,closeMs,F,idx,top,neg,series,D,discEstimated:!!dis,
    pmBid:S.reduce((s,x)=>s+x.bid,0), pmAsk:S.reduce((s,x)=>s+x.ask,0)};
 }
 
@@ -480,12 +499,14 @@ function ladderRow(s){
 }
 /* [3] rung table */
 function rungTable(){
-  const h=S.calc[S.asset], t=Math.abs(h.top-1)<.05&&h.neg===0;
+  /* The exhaustive bucket set is worth D today, not 1 (D-073). */
+  const h=S.calc[S.asset], t=Math.abs(h.top-h.D)<.05&&h.neg===0;
   document.getElementById('rungs').innerHTML=`
     <div class="sect">RUNGS · vs Deribit ${h.expiry}</div>
     <div class="t11 dim2" style="margin-bottom:10px">
       forward ${f2(h.F)} · option bucket sum
-      <span style="color:${t?'var(--ok)':'var(--warn)'}">${h.top.toFixed(4)}</span> ·
+      <span style="color:${t?'var(--ok)':'var(--warn)'}">${h.top.toFixed(4)}</span>
+      (target D ${h.D.toFixed(4)}${h.discEstimated?'':', not measured'}) ·
       prediction bid/ask sum ${h.pmBid.toFixed(3)} / ${h.pmAsk.toFixed(3)} ·
       negative buckets <span style="color:${h.neg?'var(--warn)':'var(--ok)'}">${h.neg}</span></div>
     <table><thead><tr>
@@ -540,7 +561,8 @@ function detailPanel(r){
     <div class="checks">
       <div>uncertainty ${c2(r.se)} · friction ${c2(r.friction)} · prediction spread ${c2(r.spread)}</div>
       <div>bucket set sums to
-        <span style="color:${Math.abs(h.top-1)<.05?'var(--ok)':'var(--warn)'}">${h.top.toFixed(4)}</span>
+        <span style="color:${Math.abs(h.top-h.D)<.05?'var(--ok)':'var(--warn)'}">${h.top.toFixed(4)}</span>
+        · target D ${h.D.toFixed(4)}
         · negative buckets <span style="color:${h.neg?'var(--warn)':'var(--ok)'}">${h.neg}</span></div>
       <div>option strikes used: ${r.pair?r.pair.map(c=>c?'['+c.join(', ')+']':'—').join(' / '):'—'}</div>
       <div>sync window <span style="color:var(--ok)">${S.meta.syncWindow??'—'}s</span>
