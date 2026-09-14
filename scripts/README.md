@@ -20,6 +20,7 @@ python scripts/measure_polymarket.py    # Polymarket daily terminal ladders
 python scripts/measure_touch.py         # long-horizon touch bound
 python scripts/write_findings.py        # run all three, write findings/latest.json
 python scripts/ref_check.py --list      # every D-XXX reference resolves?
+python scripts/prune_archive.py         # dry run: what would leave the window?
 ```
 
 Most accept `--last N` to limit the scan to the last N snapshots, which is
@@ -43,6 +44,7 @@ local checkout, run the workflow from the Actions tab.
 | `measure_touch.py` | Is the touch price inside the theoretical bound above terminal? | Polymarket + Deribit |
 | `write_findings.py` | Calls the three measurements, writes `findings/latest.json`. | — |
 | `ref_check.py` | Does every decision number cited anywhere actually exist? | repo text |
+| `prune_archive.py` | Bounds `raw/` to a rolling 14-day window. Runs in CI only after the private mirror is confirmed. | `raw/` |
 
 `stability.py` exists because a ratio over repeated observations is
 misleading. The same 44 Kalshi rungs are measured 34 times each; reporting
