@@ -1,0 +1,31 @@
+name: tests
+
+# Unit tests. They read no archive and touch no network, so they run in seconds
+# and give the same answer on an empty checkout.
+#
+# Every case pins a bug that actually happened and names the decision record it
+# came from. That is the point: these are not coverage, they are a fence around
+# the specific mistakes this project has already paid for once — the deep ITM
+# call trap, the bucket boundary off by a cent, "always" quietly meaning 90%.
+#
+# Runs on every push and every pull request. If this is red, nothing else
+# matters yet.
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Unit tests
+        run: python -m unittest discover -s tests -v
