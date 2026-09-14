@@ -6,7 +6,8 @@ name: tests
 # Every case pins a bug that actually happened and names the decision record it
 # came from. That is the point: these are not coverage, they are a fence around
 # the specific mistakes this project has already paid for once — the deep ITM
-# call trap, the bucket boundary off by a cent, "always" quietly meaning 90%.
+# call trap, the bucket boundary off by a cent, "always" quietly meaning 90%,
+# the two sides of the digital sitting on different discount conventions.
 #
 # Runs on every push and every pull request. If this is red, nothing else
 # matters yet.
@@ -27,16 +28,28 @@ jobs:
         with:
           python-version: '3.12'
 
-      # "discover" exits 0 when it finds NOTHING, so a moved directory or a
-      # renamed file would turn this job into a green light that checks nothing.
-      # ref_check.py learned the same lesson: an empty scan must not pass quietly.
+      # Three ways this step could pass while checking nothing, all of them
+      # found the hard way:
+      #
+      #   1. "discover" exits 0 when it finds NOTHING, so a moved directory or
+      #      a renamed file would turn this job into a green light. Hence the
+      #      count floor below. ref_check.py learned the same lesson.
+      #   2. In a pipeline bash reports the status of the LAST command, which
+      #      here is tee. Without pipefail a failing suite exits 0 and the only
+      #      thing standing between a red suite and a green tick is the count.
+      #      Hence "set -o pipefail".
+      #   3. A count floor that is far below the real count hides the deletion
+      #      of everything above it. The floor is the current number, not a
+      #      comfortable margin under it: if you remove a test on purpose, say
+      #      so here.
       - name: Unit tests
         run: |
+          set -o pipefail
           python -m unittest discover -s tests -v 2>&1 | tee /tmp/tests.log
           n=$(grep -oE "Ran [0-9]+ test" /tmp/tests.log | tail -1 | grep -oE "[0-9]+")
           n=${n:-0}
           echo "tests run: $n"
-          if [ "$n" -lt 15 ]; then
+          if [ "$n" -lt 33 ]; then
             echo "::error::Only $n tests ran. Discovery is broken, or cases were deleted."
             exit 1
           fi
