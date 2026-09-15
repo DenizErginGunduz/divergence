@@ -43,7 +43,7 @@ DERIBIT = 'https://www.deribit.com/api/v2/public'
 KALSHI = 'https://external-api.kalshi.com/trade-api/v2'
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-ARCHIVE_VERSION = 4                          # schema version of the files we write
+ARCHIVE_VERSION = 5                          # schema version of the files we write
 
 # Trade fields dropped before writing. Two kinds, neither of them market data:
 #
@@ -61,6 +61,26 @@ ARCHIVE_VERSION = 4                          # schema version of the files we wr
 # Together they were 47.5% of the bytes.
 TRADE_DROP = ('name', 'pseudonym', 'bio', 'profileImage',
               'profileImageOptimized', 'icon', 'title', 'slug', 'eventSlug')
+
+# Holder fields dropped before writing, on the same two grounds as TRADE_DROP
+# and with the same distinction between them (D-088):
+#
+#   PROFILE, not recoverable and not wanted — name, pseudonym, bio,
+#   profileImage, profileImageOptimized, displayUsernamePublic, verified.
+#   Measured on the 2026-09-15T0505Z file: name populated on 9,622 of 10,409
+#   holder rows. This stream is worse than the trade stream in one respect:
+#   a trade is a past act, a holding is a CURRENT position, so the row said
+#   which named account is holding which side right now.
+#
+#   REDUNDANT, exactly recoverable — asset. It equals the enclosing token on
+#   all 10,409 rows checked, 0 mismatches, so removing it loses nothing at
+#   all: any reader can put it back from the key it sits under.
+#
+# KEPT: proxyWallet (actor key, already on-chain, B-007 needs it), amount,
+# outcomeIndex. Together the dropped fields were 73.5% of the field bytes.
+HOLDER_DROP = ('name', 'pseudonym', 'bio', 'profileImage',
+               'profileImageOptimized', 'displayUsernamePublic', 'verified',
+               'asset')
 
 ASSETS = ['bitcoin', 'ethereum']             # D-034: the V1 measured universe
 DERIBIT_CURRENCIES = ['BTC', 'ETH']
@@ -350,11 +370,36 @@ stage('flow', lambda: flow(cids))
 
 
 # ---------------- 4. Holders: once a day ----------------
+# Anything that is not a list of token groups is counted here rather than
+# passed over. One condition in the 2026-09-15T0505Z file had a JSON null
+# body: not an exception, so the try/except below never saw it, and null and
+# 'nobody holds this' were stored identically. The payload is still written
+# exactly as it arrived -- only the count is new, so the hole is visible in
+# _meta instead of being invisible everywhere.
+HOLDERS_UNEXPECTED = []
+
+
+def strip_holders(payload):
+    """Remove HOLDER_DROP from every holder row, in place. Non-list payloads
+    are returned untouched and counted."""
+    if not isinstance(payload, list):
+        HOLDERS_UNEXPECTED.append(type(payload).__name__)
+        return payload
+    for group in payload:
+        if not isinstance(group, dict):
+            continue
+        group['holders'] = [
+            dict((k, v) for k, v in h.items() if k not in HOLDER_DROP)
+            for h in (group.get('holders') or []) if isinstance(h, dict)]
+    return payload
+
+
 def holders():
     out = {}
     for c in cids[:80]:
         try:
-            out[c] = get('%s/holders?market=%s&limit=100' % (DATA, c), timeout=25)
+            out[c] = strip_holders(
+                get('%s/holders?market=%s&limit=100' % (DATA, c), timeout=25))
         except Exception as e:
             out[c] = {'_error': str(e)[:150]}
         time.sleep(0.12)
@@ -443,6 +488,8 @@ meta = {'snapshot_utc': now.isoformat(),
             'total_markets': sum(len(v) for v in k['markets'].values() if isinstance(v, list)),
             'observed_markets': sum(len(v) for v in k['observed'].values() if isinstance(v, list)),
         })(bucket.get('kalshi')),
+        'holders_unexpected': (len(HOLDERS_UNEXPECTED)
+                               if 'holders' in bucket else None),
         'files': written, 'assets': ASSETS, 'version': ARCHIVE_VERSION}
 mp = os.path.join(ROOT, 'raw', '_meta', DAY, 'meta_%s.json' % STAMP)
 os.makedirs(os.path.dirname(mp), exist_ok=True)
