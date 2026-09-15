@@ -21,6 +21,7 @@ import unittest
 sys.path.insert(0, os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'scripts'))
 
+import fees
 import measure_band
 import measure_exhaustive
 import measure_touch
@@ -532,6 +533,83 @@ class TradeAtQuotedPrices(unittest.TestCase):
         KA = kalshi_ladder([(0.01, 0.03), (0.90, 0.95), (0.50, 0.52)])
         h = measure_band.rungs(KA, parity_chain(), 'KXBTCY', 'BTC')
         self.assertAlmostEqual(h['total'], PARITY_D, places=9)
+
+
+class KalshiFees(unittest.TestCase):
+    """scripts/fees.py against Kalshi's own published table.
+
+    The schedule prints a worked table beside the formula, which makes this a
+    rare case where the right answers come from the counterparty rather than
+    from us. Every number below is copied from the PDF, not computed here.
+    """
+
+    # "General Trading Fees Table", price -> fee for 100 contracts, in dollars.
+    HUNDRED = [(0.01, 0.07), (0.05, 0.34), (0.10, 0.63), (0.15, 0.90),
+               (0.20, 1.12), (0.25, 1.32), (0.30, 1.47), (0.35, 1.60),
+               (0.40, 1.68), (0.45, 1.74), (0.50, 1.75), (0.55, 1.74),
+               (0.60, 1.68), (0.65, 1.60), (0.70, 1.47), (0.75, 1.32),
+               (0.80, 1.12), (0.85, 0.90), (0.90, 0.63), (0.95, 0.34),
+               (0.99, 0.07)]
+
+    # Same table, fee for ONE contract. Every entry is a cent or two, which is
+    # the round-up doing the work.
+    ONE = [(0.01, 0.01), (0.05, 0.01), (0.10, 0.01), (0.15, 0.01),
+           (0.20, 0.02), (0.25, 0.02), (0.30, 0.02), (0.35, 0.02),
+           (0.40, 0.02), (0.45, 0.02), (0.50, 0.02), (0.55, 0.02),
+           (0.60, 0.02), (0.65, 0.02), (0.70, 0.02), (0.75, 0.02),
+           (0.80, 0.02), (0.85, 0.01), (0.90, 0.01), (0.95, 0.01),
+           (0.99, 0.01)]
+
+    def test_matches_the_published_table_for_one_hundred_contracts(self):
+        for price, expected in self.HUNDRED:
+            self.assertAlmostEqual(fees.order_fee(price, 100), expected, places=9,
+                                   msg='price %.2f' % price)
+
+    def test_matches_the_published_table_for_one_contract(self):
+        for price, expected in self.ONE:
+            self.assertAlmostEqual(fees.order_fee(price, 1), expected, places=9,
+                                   msg='price %.2f' % price)
+
+    def test_the_fee_is_symmetric_in_the_price(self):
+        """P*(1-P), so selling a 3-cent YES costs what buying it at 97 does.
+        Our trades sell cheap tails; if this were asymmetric the direction of
+        the trade would change the answer."""
+        self.assertAlmostEqual(fees.rate(0.03), fees.rate(0.97), places=12)
+
+    def test_the_round_up_is_per_order_not_per_contract(self):
+        """One contract at 3 cents costs a full cent; a hundred cost 21 cents,
+        not a dollar. This is the whole reason an edge needs a size."""
+        self.assertAlmostEqual(fees.order_fee(0.03, 1), 0.01, places=9)
+        self.assertAlmostEqual(fees.order_fee(0.03, 100), 0.21, places=9)
+
+    def test_the_index_coefficient_is_half(self):
+        """S&P 500 and Nasdaq-100 pay 0.035. Divergence does not price them
+        yet; this is here so the day it does, the coefficient is not the
+        general one by default."""
+        self.assertAlmostEqual(fees.order_fee(0.50, 100, 'INXD'), 0.88, places=9)
+        self.assertAlmostEqual(fees.order_fee(0.50, 100, 'NASDAQ100W'), 0.88, places=9)
+
+    def test_our_series_pay_the_general_rate(self):
+        self.assertEqual(fees.coefficient('KXBTCY'), fees.GENERAL)
+        self.assertEqual(fees.coefficient('KXETHY'), fees.GENERAL)
+        self.assertNotIn('KXBTCY', fees.MAKER_SERIES)
+        self.assertNotIn('KXETHY', fees.MAKER_SERIES)
+
+    def test_no_fee_at_the_boundaries(self):
+        """P*(1-P) is zero at 0 and 1, and a contract at either is not a bet."""
+        self.assertEqual(fees.order_fee(0.0, 100), 0.0)
+        self.assertEqual(fees.order_fee(1.0, 100), 0.0)
+
+    def test_min_contracts_answers_the_round_up(self):
+        """A gross edge of 0.6 cents on a 1.2-cent contract cannot pay a
+        one-cent fee alone, so one contract is not enough — but two are."""
+        self.assertIsNone(fees.min_contracts(0.012, 0.0))
+        self.assertEqual(fees.min_contracts(0.012, 0.006), 2)
+
+    def test_min_contracts_refuses_when_the_edge_is_below_the_rate(self):
+        """No order size rescues an edge smaller than the asymptotic fee."""
+        rate = fees.rate(0.50)
+        self.assertIsNone(fees.min_contracts(0.50, rate * 0.5))
 
 
 if __name__ == '__main__':
