@@ -122,6 +122,12 @@ jobs:
       - name: Sensitivity — strike grid and expiry band
         run: python scripts/measure_sensitivity.py
 
+      # The third settlement difference (D-075), measured rather than left
+      # UNKNOWN: Kalshi settles on BRTI, Deribit on its own index, and both
+      # halves are already archived.
+      - name: Settlement basis
+        run: python scripts/measure_basis.py
+
       # How much could ever be scored against an outcome, and how much of
       # that is independent. Counting before scoring: a Brier score over what
       # turns out to be one draw is a decoration.
