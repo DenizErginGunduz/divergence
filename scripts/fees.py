@@ -137,3 +137,52 @@ def min_contracts(price, edge, series=None, cap=10000):
         if order_fee(price, c, series) <= c * edge:
             return c
     return None
+
+# ---------------------------------------------------------------------------
+# Polymarket
+#
+# SOURCE: docs.polymarket.com and help.polymarket.com, read 2026-09-15, plus
+# the feeSchedule object carried on every market in our own archived payload:
+#
+#     {"exponent": 1, "rate": 0.07, "takerOnly": true, "rebateRate": 0.2}
+#
+#     fee = C x rate x p x (1 - p)
+#
+# Structurally the same formula as Kalshi's, and on crypto the same 0.07
+# coefficient. TAKER ONLY, which is exactly what our trades are: the test in
+# measure_band and measure_polymarket crosses the spread on both venues.
+#
+# Until 2026-09-15 this side was charged NOTHING. The code said "Polymarket
+# maker fee is treated as 0", which confused a maker rebate with a taker fee
+# and left one leg of the trade free (D-085).
+#
+# The schedule is READ FROM THE PAYLOAD rather than hardcoded here. Polymarket
+# sets it per market and has changed the crypto rate before (0.072 to 0.07), so
+# a constant in this file would be a number that goes stale without anyone
+# noticing. The rebateRate is a MAKER rebate and does not apply to a trade that
+# crosses the spread.
+
+POLYMARKET_KNOWN_EXPONENT = 1
+
+
+def polymarket_rate(price, schedule, enabled=True):
+    """Per-share taker fee, from the market's own feeSchedule.
+
+    Returns None — UNKNOWN, not zero — when the schedule is missing or carries
+    an exponent this function has not been checked against. A fee that quietly
+    becomes zero is precisely the error this file exists to prevent, and it is
+    the error that was found here.
+    """
+    if not enabled:
+        return 0.0
+    if not isinstance(schedule, dict):
+        return None
+    if schedule.get('exponent') != POLYMARKET_KNOWN_EXPONENT:
+        return None
+    rate_ = schedule.get('rate')
+    if rate_ is None:
+        return None
+    p = float(price)
+    if not (0.0 < p < 1.0):
+        return 0.0
+    return float(rate_) * p * (1.0 - p)
