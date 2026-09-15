@@ -82,6 +82,12 @@ jobs:
       - name: Sensitivity — strike grid and expiry band
         run: python scripts/measure_sensitivity.py
 
+      # How much could ever be scored against an outcome, and how much of
+      # that is independent. Counting before scoring: a Brier score over what
+      # turns out to be one draw is a decoration.
+      - name: Validation inventory
+        run: python scripts/inventory_validation.py
+
       # Write the results to a file. Logs are not readable (the API needs admin
       # rights, the UI view is virtualised); a file is readable, durable, and the
       # page will read it. Record and screen become inseparable that way.
