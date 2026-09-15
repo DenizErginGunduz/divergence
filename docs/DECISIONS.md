@@ -1681,3 +1681,66 @@ year-end shortfall of 0.2%. The strike grid is coarse relative to how far BTC
 moves in a few hours, which is the same discretisation effect D-079 measured at
 12.6% per digital — and it will be larger here, not smaller. Measuring it on
 the intraday chains is the next thing this block needs.
+
+## D-083 — There is no BRTI basis, and the expiry gap is the last one standing
+**Date:** 2026-09-15 · **Produced by:** `scripts/measure_basis.py` · workflow `measure`
+
+D-075 named three ways the Kalshi and Deribit contracts differ. Two were sized.
+The third — Kalshi settles on CF Benchmarks' BRTI, Deribit on its own index —
+was left **UNKNOWN** because it looked unmeasurable. It was not.
+
+### Both halves were already archived
+- A settled Kalshi market carries `expiration_value`, which IS the realised BRTI:
+  the average of the sixty RTI prices before its close.
+- The Deribit payload carries `usIn`, a **microsecond** timestamp of when the
+  index was read. Not the snapshot time — the read time.
+
+Fifteen-minute Kalshi markets settle four times an hour, so every snapshot has
+a settlement within 450 seconds of its Deribit index read. Pair the nearest and
+the difference is the basis plus whatever the price did in between.
+
+### Separating the two, by the shape of the table
+| bin | n | median | spread | se |
+|---|---|---|---|---|
+| within 60 s | 25 | **−0.20 bp** | 1.54 bp | 0.31 bp |
+| within 180 s | 47 | −0.48 bp | 3.81 bp | 0.56 bp |
+| within 450 s | 63 | −0.62 bp | 4.92 bp | 0.62 bp |
+
+The test was stated before the numbers were seen: price movement has a median
+of zero and a spread that GROWS with the gap; a real basis holds its median as
+the bin tightens while the spread falls.
+
+The spread grows exactly as predicted — 1.54, 3.81, 4.92 — so the wide bins are
+measuring BTC, not CF Benchmarks. And the median does not survive the tightening:
+it falls toward zero, and in the tightest bin it is **−0.20 bp against a
+standard error of 0.31 bp**. Every one of the three bins is within about one
+standard error of zero.
+
+Per asset: BTC −1.08 bp (n 31, se 0.81), ETH −0.04 bp (n 32, se 0.87). Neither
+is distinguishable from nothing.
+
+### The answer
+**There is no measurable basis.** A two-sigma bound from the tightest bin is
+±0.62 bp, or **±0.006%**. On an 87,000 index that is about **six dollars**.
+Deribit's strike interval is 5,000 dollars, so the basis is on the order of one
+thousandth of one strike step. It cannot move a digital by an amount this
+project can measure, and it should stop being listed as a caveat.
+
+### What that leaves
+| difference | status |
+|---|---|
+| settlement instant | **the only one that matters.** +165 h on the year-end ladders, and D-079 showed that swallowing two of three findings. −18 h intraday, on the conservative side (D-082). |
+| averaging window | negligible: 60 seconds against a horizon of hours or months |
+| reference rate | **closed, below 0.6 bp** |
+
+Three named differences, and after three measurements exactly one is left. That
+is worth saying plainly, because "the contracts do not settle on the same thing"
+was a reasonable-sounding objection that could have been repeated indefinitely
+without ever being tested. It has been tested. What remains is not the index —
+it is the clock.
+
+### A limit of the method
+It cannot reach zero gap: Kalshi settles every fifteen minutes and the collector
+runs three times a day, so 25 pairs inside a minute is what the archive happens
+to offer. A larger sample would tighten the bound but cannot change its sign —
+there is nothing there to find a sign for.
