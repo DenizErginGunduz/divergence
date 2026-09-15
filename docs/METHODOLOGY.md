@@ -1,7 +1,18 @@
 # METHODOLOGY.md
 
-Updated 2026-08-30. The previous version of this document was wrong in three
+Updated 2026-09-15. The previous version of this document was wrong in three
 places; the corrections and their reasons are below and in `DECISIONS.md`.
+
+**Read this first.** Between 2026-09-14 and 2026-09-15 the measurement was taken
+apart and rebuilt to be defensible (D-073 to D-080). Three things changed that
+this document previously stated the other way round:
+
+1. The option side is a **discounted state price**, not a probability (D-073).
+2. The comparison is a **trade at quoted prices**, not a statistical test. The
+   `1.96 * SE` band is gone (D-076), both venues' fees are charged (D-077), and
+   an edge is reported with the size resting behind it (D-078).
+3. Two of the three persistent divergences **cannot be separated from the
+   seven-day expiry gap** (D-079).
 
 | Layer | Status | Evidence |
 |---|---|---|
@@ -20,16 +31,61 @@ used**: on a thin ladder the mid is an imaginary number nobody trades at. Bid an
 ask are compared separately (D-024). On a one-sided book the answer is `UNKNOWN`,
 not zero.
 
-**Step 2 — put the option side into probability.**
-A call price is not a probability. The terminal probability comes out of the
-digital approximation:
+**Step 2 — put the option side into the same unit. It is not a probability.**
+A call price is not a probability and neither is the difference quotient taken
+from it. What comes out is a **discounted state price**:
 
-    P(S_T > K) ≈ −∂C/∂K ≈ [C(K₁) − C(K₂)] / (K₂ − K₁)
+    D · Q(S_T > K) ≈ −∂C/∂K ≈ [C(K₁) − C(K₂)] / (K₂ − K₁)
 
+where `Q` is the risk-neutral measure and `D` the discount factor to expiry.
 This is not a model, it is a numerical approximation of a derivative. **It is the
 primary method** (D-027).
 
+Both branches return the same quantity. Below the forward the PUT side is used
+(D-025), and it reaches `D · Q(S>K)` as `D − D · Q(S<K)`. Until D-073 it returned
+`1 − D · Q(S<K)`, which is a different number; with `D = 1` the two expressions
+coincide, which is why the error survived review. The exhaustiveness check could
+not see it either, because `D · 1 + (1 − D) = 1` for any `D`.
+
+`D` is read off the put-call residual and carried explicitly (D-073, D-074).
+Measured across 28 chains it is flat in strike to about 0.5% of its own size,
+with an implied rate term structure of 3.2–5.5%.
+
+**Both sides of the comparison are present values.** A Kalshi YES price is also
+what one pays today for a dollar at settlement, so the two are on the same
+footing without dividing anything. Dividing by `D` gives `Q`, which may be
+reported as an options-implied risk-neutral probability, and which is still not
+a real-world probability: the distance between `Q` and `P` is the volatility risk
+premium and nothing here measures it.
+
 **Step 3 — match the contract type.** Not skippable; see section 2.
+
+**Step 4 — ask whether a trade exists, not whether a number differs.** (D-076)
+Two trades, each leg priced at a quote standing right now:
+
+    sell the prediction at its BID, buy the bucket at its ASK side, pay both
+    venues' fees.  Anything left?
+    buy the prediction at its ASK, sell the bucket at its BID side.  Anything left?
+
+    edge = max(the two),  and a rung counts when edge > 0
+
+The bucket's two prices come from the option quotes directly: `opt_high` pairs
+the long leg's ask with the short leg's bid, `opt_low` the other way. The width
+between them is the bid-ask cost of two option legs, **not a confidence
+interval**. No mid appears anywhere in the verdict.
+
+What this replaced: `1.96 * SE + fees + spread/2`. That term described how
+uncertain our ESTIMATE of the option mid was — a question about our arithmetic
+that nobody can trade on. Its size was almost identical (`2s/w` against
+`1.96s/w` for comparable spreads), so the change was in meaning, not in
+strictness.
+
+**Step 5 — charge both venues, then ask what it is worth.** (D-077, D-078)
+Kalshi's taker fee is `round up(0.07 · C · P · (1−P))`, quoted from their
+schedule in `scripts/fees.py`; there is no settlement fee. The rounding is per
+ORDER, so an edge has no meaning until a size is named. Then the resting size at
+the quote being hit turns the edge into dollars. Live on 2026-09-15 the three
+surviving rungs were worth **$4.69 between them**.
 
 ---
 
@@ -82,6 +138,19 @@ inconsistency.
 covers the whole outcome space. With no lower-tail bucket, that region cannot be
 read. The script warns automatically.
 
+**The target is D, not 1** (D-073). Buying every bucket buys a dollar at expiry
+with certainty, and a certain dollar is worth `D` today. `measure_exhaustive.py`
+reports `total / D`, so 1.0000 is the target. Before the repair the sum landed on
+1 whatever `D` was, which made the most productive check in this project blind to
+the convention error sitting beside it.
+
+**And the ladders really do tile** (D-075). The rule texts were parsed and the
+parsed intervals chain without gap or overlap, one tick apart. Adjacent buckets
+end at .99 and begin at .00, and all 1,892 numeric `expiration_value` entries in
+the archive carry exactly two decimals, so the cent between them is not a
+reachable settlement value. The constraint is therefore a statement about the
+contracts and not only about our arithmetic.
+
 ---
 
 ## 2. Contract type matching
@@ -101,6 +170,37 @@ relation is true **by definition**:
 This hard lower bound held on 19 of 19 rungs — independent evidence that the
 classification is right.
 
+**The rule text agrees with the numeric fields (D-075).** 2,070 rung-observations
+were parsed out of `rules_primary` and compared against `strike_type`,
+`floor_strike` and `cap_strike`: 100% agree, 0 mismatch, 0 unrecognised. The
+parser is rigid on purpose — a changed sentence produces UNKNOWN rather than a
+guess.
+
+**But the contracts still are not the same event.** Kalshi settles on CF
+Benchmarks' BRTI (ETHUSD_RTI for ETH), a sixty-second average, at 00:00 EST on
+1 January 2027. Three differences from the option side, with sizes:
+
+| | size |
+|---|---|
+| settlement instant | **6 days 21 hours** — the material one |
+| averaging window | 60 seconds against ~100 days — negligible |
+| reference rate | BRTI against the Deribit index — **UNKNOWN** |
+
+**The expiry gap is not a caveat, it is a band (D-079).** Both bracketing Deribit
+expiries are now computed, 25DEC26 and 26MAR27. Of 135 rung-observations, 70 sit
+above both ends and 65 inside the band. On the latest snapshot only ETH above
+$5,000 clears both; BTC above $150,000 and ETH below $1,000 cannot be separated
+from the seven-day gap and should not be reported as divergences.
+
+The band is asymmetric — 7 days early against 84 days late — so "inside the
+band" means *cannot be separated*, not *explained*. Saying more needs a model of
+how a tail probability grows with maturity, and that is what D-025 refused.
+
+**The strike grid costs about 12%.** Recomputing each digital on wider brackets
+moves it by a median of 12.6% (p90 18.8%, worst 23.9%). No sign flips, no order
+of magnitude changes, but an eighth of every tail digital is a statement about
+how far apart Deribit puts its strikes.
+
 **The upper bound "2" is NOT a constant (D-031).** That number comes from
 driftless arithmetic Brownian motion. Price is lognormal; even when the forward is
 a martingale, the log-price drifts at −σ²/2. The full formula gives every rung its
@@ -109,7 +209,28 @@ that was too loose on the upside and too tight on the downside.
 
 ---
 
-## 3. What the gap is measured against — not zero, its own history
+## 3. What the gap is measured against
+
+**NOT BUILT. Superseded in practice.** The scheme below was written on
+2026-08-30 and no code has ever implemented it: there is no reference median, no
+historical standard deviation, and nothing on screen has ever said "1.2 sigma
+above usual". It is kept because the reasoning is still right — a gap against
+zero is meaningless — and because the replacement solves the same problem a
+different way.
+
+**What is actually done now** (D-076 to D-078): the gap is not compared to its
+own history at all. It is compared to what it costs to take it. A rung counts
+when a trade priced at standing quotes, after both venues' fees, leaves
+something — and the answer is reported in dollars at the resting size. That test
+needs no accumulated reference and produces no indicator, which is why it could
+be built immediately and this could not.
+
+The historical-reference idea remains worth having for a different question:
+whether today's gap is unusual FOR THIS PAIR. Recorded as future work rather
+than pretended to be current.
+
+### The original scheme, unbuilt
+
 
 Even with perfect data the options-implied probability does not equal the realised
 frequency: there is a **variance risk premium**. Rows reading "the prediction
@@ -141,6 +262,19 @@ This works today.
 `contract_type`, `underlying_reference`, `settlement_source`, `expiry`,
 `snapshot_time` (separately for each side), `bid-ask spread`, `volume`.
 
+Added 2026-09-15, each because its absence had already produced a wrong number:
+
+- `discount_factor` and whether it was estimated or fell back to 1 (D-073)
+- the executable envelope `opt_low`–`opt_high`, and the fees of BOTH venues
+  charged separately (D-076, D-077)
+- the **resting size** at the quote being hit, and the edge in dollars. An edge
+  with nothing behind it is a price observation, not an opportunity (D-078)
+- the minimum order size at which Kalshi's per-order fee rounding stops eating
+  the edge (D-077)
+- both bracketing expiries, not one (D-079)
+- `price_ranges`, so quotes are checked against the grid the market publishes
+  rather than an assumed cent (D-078)
+
 A gap shown while any one of these is missing cannot be interpreted. The spread
 especially: on thin ladders it can be larger than the gap being measured.
 
@@ -159,13 +293,36 @@ Used: prediction-market-implied probability, options-implied risk-neutral
 probability, cross-market probability gap, terminal probability, touch probability,
 large trade, concentrated position, historical settlement performance.
 
+Added (D-073): **discounted state price** for `D · Q(S>K)`, which is what the
+option side actually produces. "Options-implied risk-neutral probability" stays
+permitted and means `Q`, i.e. the state price divided by `D` — it is the honest
+name for the readable number, and the two must not be used interchangeably.
+
+Added (D-076): **edge** is permitted, narrowly, and only for the result of the
+two-trade test at quoted prices after fees. It is a necessary condition for a
+trade and never a claim that one exists. "Arbitrage opportunity" remains banned.
+
 ---
 
 ## 7. Still open
 
+- **Validation has not started.** 4,657 markets resolved inside the 14-day window
+  and only 88 were ever seen with a live quote, at a median of 14 minutes before
+  settlement (D-080). The cause was a paging cap in the collector, fixed
+  2026-09-15; daily ladders now arrive live for the first time. Scoring should
+  wait for the corrected collector to accumulate rather than run on this.
+- The one rung that survives the expiry band, ETH above $5,000, survives by about
+  0.4 cents — a margin comparable to the 12.6% strike-grid uncertainty, which has
+  not been measured on the chain that decides it (D-079).
+- BRTI against the Deribit index: size UNKNOWN, and measurable from data already
+  archived (D-075).
+- The internal identifiers are still `p` and `opt`; the `discounted_state_price`
+  naming reached the documents and the screen but not the code (D-074).
+- The measurement pipeline reads only the 14-day public window. The private
+  mirror holds everything since 2026-08-30 and is not read by CI.
 - Layer 4 (Breeden–Litzenberger) is not built; the data is ready.
 - Reference accumulation started 2026-08-30 but is not yet long enough to produce
-  a statistic.
+  a statistic, and section 3 was never implemented.
 - `data-api` `offset` support is unverified — no gap has occurred, so it has never
   been triggered (D-042).
 - The 5 August measurement is stale: BTC has moved 19.9% since, and that day's put
