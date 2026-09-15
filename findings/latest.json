@@ -9,9 +9,12 @@
  "measurements": {
   "friction_band_kalshi": {
    "model_free": true,
-   "exceeding": 138,
+   "exceeding": 136,
    "measured": 1980,
-   "percent": 7.0,
+   "quotable": 1978,
+   "percent": 6.9,
+   "percent_of_all_rungs": 6.9,
+   "mean_envelope": 0.0619,
    "mean_density": 0.9859,
    "mean_discount_factor": 0.988146,
    "discount_fallbacks": 0,
@@ -31,7 +34,7 @@
      {
       "rung": "ETH:KXETHY-27JAN0100-T1000.00",
       "observations": 45,
-      "exceeding": 45
+      "exceeding": 44
      },
      {
       "rung": "ETH:KXETHY-27JAN0100-T4999.99",
