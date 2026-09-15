@@ -226,15 +226,37 @@ and `transactionHash` de-duplicates.
 {
   "proxyWallet": "0xece7...",
   "side": "SELL",
+  "asset": "1014920563...",
   "conditionId": "0x02deb9...",
   "size": 99.5,
   "price": 0.019861809,
   "timestamp": 1789084519,
-  "title": "Will Bitcoin hit $150k by December 31, 2026?",
   "outcome": "Yes",
+  "outcomeIndex": 1,
   "transactionHash": "0x..."
 }
 ```
+
+Ten fields, and that is the whole row. **From archive version 4 (2026-09-16) nine
+vendor fields are dropped before writing** (D-087):
+
+| dropped | why |
+|---|---|
+| `name`, `pseudonym`, `bio`, `profileImage`, `profileImageOptimized` | somebody's profile, not market data. `name` was populated on 6,568 of 7,081 rows in one run. Nothing here reads them. |
+| `icon`, `title`, `slug`, `eventSlug` | repeated on every row and already stored once per run in `polymarket_events/`. `conditionId` resolves them. |
+
+Together they were 47.5% of the bytes; measured after the change, 415 bytes a
+trade against 790.
+
+`proxyWallet` and `transactionHash` are KEPT. A wallet is an actor key, which
+concentration work needs, and both are already public on-chain — the hash is
+also what lets somebody else verify a row.
+
+This is the **only** deliberate exception to rule 2 (raw data stored as it
+arrives). It is allowed because the rule exists so that a changed methodology
+can be recomputed from the archive, and none of the dropped fields can enter a
+recomputation of a price, a probability or a fee. Files written before
+2026-09-16 still contain them.
 
 Per-run files rather than one appended file: git stores whole blobs, so appending to a
 growing file would re-store the entire history on every commit.
