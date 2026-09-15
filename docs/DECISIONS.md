@@ -1438,3 +1438,84 @@ against 0.97657 and reported "below both". The digital is always `D*Q(S > K)`; a
 of ETH being ABOVE $1,000. Fixed, and the verdict now orders the two ends
 rather than assuming early is the lower one — a "below X" rung loses value as
 maturity grows while an "above X" rung gains it.
+
+## D-080 — 88 pairs out of 4,657 resolutions, and the one-line reason
+**Date:** 2026-09-15 · **Produced by:** `scripts/inventory_validation.py` · `collector/collect.py`
+
+Before writing any scoring routine, count the sample. A Brier score over what
+turns out to be a handful of draws is a decoration.
+
+### The inventory
+Over the 14-day public window, 46 snapshots:
+
+| | |
+|---|---|
+| resolved markets seen | **4,657** |
+| of those, with a quote taken while still live | **88** |
+| scorable observations | 113 |
+| independent events | 88 |
+| observations per independent event | 1.3 |
+| outcomes | 44 yes / 44 no |
+| lead time, quote to close | median **0.23 h**, p75 0.27 h, max 719 h |
+
+4,657 markets resolved and 88 of them were ever seen with a live price. The
+median usable forecast was made **fourteen minutes** before settlement, on a
+fifteen-minute market. Scoring that would measure how fast a price converges to
+an outcome it can already see, not whether anyone forecasts well.
+
+### The reason, and it is not the archive window
+`collect.py` asked for each series with no status filter, deliberately, so that
+resolution outcomes come too. But the request stopped at 5 pages of 200 —
+1,000 rows — and for a busy series Kalshi filled those rows with markets that
+are not tradable now. Measured on the 2026-09-14 snapshot:
+
+- **KXBTCD: 1,000 rows, 1,000 of them `initialized`.** Not one live daily quote
+  had ever been archived, in the entire history of this project.
+- KXETHD, KXBTC, KXETH: identical.
+- KXBTC15M: 946 `finalized`, 58 `initialized`, **1 `active`**.
+
+One active 15-minute market per snapshot, 3 snapshots a day, 14 days = 42. The
+inventory found 43. The arithmetic closes exactly, which is how a suspicion
+becomes a diagnosis.
+
+**This also retracts something I said earlier today.** The mirror was framed as
+the thing standing between us and a validation sample. It is not. The mirror
+holds more days of the same truncated pages; it would have multiplied 88 by the
+extra days and by nothing else. The bottleneck was in the collector, in one
+paging loop, and it had been there since the collector was written.
+
+### The fix
+When — and only when — a series fills the cap, one more call asks for its OPEN
+markets explicitly and merges them by ticker. Truncated series pay for the extra
+call and the rest do not.
+
+Verified on the first run after the change (2026-09-15T1317Z):
+
+- 8 series reported truncated: KXBTC15M, KXETH15M, KXBTC, KXETH, KXBTCD,
+  KXETHD, KXINXU, KXNASDAQ100U
+- **KXBTCD went from 0 active to 200 active.** KXETHD, KXBTC, KXETH the same.
+- KXBTC15M still shows 1 active, which is correct: at any instant only one
+  fifteen-minute market is open.
+- open-pass errors: none
+- sync window 0.77 s to **1.4 s**. It widened and that is a real cost on a
+  measured quality number, but it is two orders of magnitude below the 8-minute
+  gap that once moved a result by 33%.
+
+### What the fix buys, and what it does not
+It buys OBSERVATIONS, not independence. The 200 live daily rungs are the rungs
+of one ladder that settles at one instant, so a day of daily markets is one
+independent draw per asset however many rungs it has — the same clustering the
+inventory already reports. What changes is the lead-time distribution: a daily
+rung is observable three times across the day it lives, hours before
+settlement, instead of once fourteen minutes before.
+
+Two independent draws a day, from tomorrow. That is roughly 700 a year, which
+is a sample. It is not a sample today, and no amount of reprocessing makes the
+past fourteen days into one.
+
+### What this means for scoring
+Week 5's scoring work should not run on the present sample. The honest sequence
+is: let the corrected collector accumulate, then score. The inventory script is
+in the `measure` workflow and writes `findings/validation_inventory.json` on every
+run, so the sample size is now a number on the record that grows visibly
+instead of an assumption.
