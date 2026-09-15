@@ -117,18 +117,65 @@ A market object carries 41 fields. The ones the measurements use:
 | `yes_bid_dollars`, `yes_ask_dollars` | prices as **decimal strings**, `"0.9900"` |
 | `status` | only `active` markets are measured |
 | `close_time` | resolution time, ISO 8601 |
-| `open_interest_fp`, `volume_fp` | size |
+| `open_interest_fp`, `volume_fp` | size, in CONTRACTS — see below |
+| `yes_bid_size_fp`, `yes_ask_size_fp` | contracts resting at the BEST level only |
+| `price_level_structure`, `price_ranges` | the tick grid this market trades on |
+| `expiration_value` | the settlement reading, once known |
+| `result` | `yes` / `no` once resolved, empty before |
 | `rules_primary`, `rules_secondary` | settlement rules **in full text** |
 
 Keep `rules_primary` verbatim. The wording decides whether a contract is terminal or
 touch, and that distinction decides whether a comparison is valid at all.
+`scripts/audit_semantics.py` parses it and checks it against the numeric fields;
+across 2,070 rung-observations they agree 100% of the time (D-075).
+
+### `_fp` is CONTRACTS, and that was derived rather than assumed
+
+Nothing in the payload says the unit, and the values are not integers —
+`"30263.99"`, `"9.73"`. The archive settles it. On 2026-09-15 one market reported
+`yes_ask_dollars = 0.0140` with `yes_ask_size_fp = 698.86`, and its order book
+showed the best NO bid at `0.9860` with a quantity of **698.86** — the same
+number. The ask on the YES side IS the bid on the NO side. A dollar amount would
+not survive that flip: a no order at 0.986 commits 0.986 per contract while the
+same order appears as a yes offer worth 0.014. A contract count does.
+
+So: **contracts, fractional, two decimals.** Both size fields describe the BEST
+level only, so they bound a trade that does not walk the book and nothing more
+(D-078).
+
+### The price grid is per-market, and not always a cent
+
+    price_level_structure: "deci_cent"
+    price_ranges: [{start: "0.0000", end: "1.0000", step: "0.0010"}]
+
+That is the year-end crypto ladders: one uniform tenth-of-a-cent tick across the
+whole range. Other markets differ — a multivariate market sampled the same day
+reported `center_deci_edge_centi_cent` with three ranges and a finer 0.0001 tick
+below 0.01 and above 0.99. Our tails do NOT get the finer tick. Read the field,
+do not assume a cent; `measure_band.on_grid()` checks every quote against it and
+has found 0 violations so far.
+
+**`price_level_structure` is the CONTRACT PRICE tick.** It says nothing about the
+granularity of the settlement value, and D-075 originally cited it as if it did.
+The settlement value's granularity is a separate, measurable fact: all 1,892
+numeric `expiration_value` entries in the archive carry exactly two decimals.
+
+### `expiration_value` is not always a number
+
+Most series report a price. Some report `"Yes"` / `"No"`, and a few a
+dollar-prefixed string like `"$2511.18"`. Parse defensively; a series that
+settles on something other than a price is not a bug.
 
 Bucket boundaries need care. `cap_strike` can be `24999.99` while the next bucket's
 `floor_strike` is `25000`. Rounding the two independently makes them disagree, the
 digital picks different bracketing strikes on each side of the same boundary, one
-region gets counted twice, and the densities sum to about 1.13 instead of 1. The
-correct form is `round(cap + 0.01)`. `measure_exhaustive.py` demonstrates all three
-variants against the archive.
+region gets counted twice, and the total runs about 13% over. The correct form is
+`round(cap + 0.01)`. `measure_exhaustive.py` demonstrates all three variants
+against the archive.
+
+The target of that sum is the **discount factor D**, not 1 (D-073): buying every
+bucket buys a dollar at expiry with certainty, and a certain dollar is worth D
+today. The script reports `total / D`, so 1.0000 is the target.
 
 ---
 
@@ -272,6 +319,10 @@ g.meta, g.sync_window, g.stamp, g.day
 
 stamps('_meta')                        # every stamp, oldest first
 ```
+
+`Missing` is raised when a stream is READ, not when `snapshot()` is called. A try
+block around `snapshot()` alone does not catch it — that mistake crashed
+`audit_semantics.py` on its first CI run (D-075).
 
 An absent stream raises `Missing` rather than returning empty. Kalshi was added on
 2026-08-31, so the first five snapshots have no Kalshi file; measurements report those
