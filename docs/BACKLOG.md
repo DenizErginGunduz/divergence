@@ -43,6 +43,14 @@ cron cannot run more often than every 5 minutes and can be late, so real live
 watching needs a continuously running process. Measured: the busiest market sees
 156 trades an hour and the rest are far slower — there is no hurry.
 
+**Caveat added 2026-09-16 (D-088):** the "concentrated position moves" half of this
+item assumed `raw/holders/` describes the holder set. It does not. The collector asks
+for `limit=100` and 77 of 150 token groups came back at the cap, so for most tokens the
+file is the top 100 by size with no tail and no total. A Gini, an HHI or a true
+largest-holder share is not computable from what is archived today; "what share do the
+top 100 hold" is. Raising the limit is a collector change and a scope decision, so it
+is named here rather than made.
+
 ## B-008 — Polymarket price history via clob/prices-history
 The first attempt returned 200 but empty (`{"history": []}`). The parameters need
 another try. If it works we get a historical series without waiting months for
