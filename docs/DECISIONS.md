@@ -1931,3 +1931,67 @@ built to catch.
 The tests passed on the same push, which is the other half: 54 cases over the
 renamed code, including the ones that pin the envelope direction and the
 discount convention.
+
+## D-087 — We were archiving strangers' profiles, and half the flow file was a repeat
+**Date:** 2026-09-16 · **Produced by:** `collector/collect.py` · archive version 4
+
+The 4-6 week plan had an item reading "stop or consume flow/holders". It was
+framed as a storage question: `events/` and `holders/` are 48% of the archive and no
+measurement reads either. Counting before deciding turned it into a different
+question.
+
+### What one flow file actually contains
+7,081 trades, 5.4 MB, 958 distinct wallets in a single run. Per trade:
+
+    proxyWallet, side, asset, conditionId, size, price, timestamp,
+    outcome, outcomeIndex, transactionHash
+    name, pseudonym, bio, profileImage, profileImageOptimized
+    icon, title, slug, eventSlug
+
+The second line is who the trader says they are. `name` was populated on **6,568
+of 7,081** rows, `pseudonym` on 6,543. The third line is metadata repeated on every
+single row that `raw/polymarket_events/` already stores once per run.
+
+Together: **47.5% of the bytes.**
+
+### The part that is not about storage
+A rolling public archive of which named account bought which contract, at what
+price, at what second, is a different category of thing from an archive of
+prices. `docs/DATA_SOURCES.md` analysed the venues' terms for market data. It did
+not consider that the trade tape carries third-party profile data, because
+nobody had looked at a row.
+
+Nothing in this project reads those fields. They were being published for
+fourteen days at a time and accumulated in the mirror indefinitely, for no use.
+
+### The decision
+Nine fields are dropped before writing: `name`, `pseudonym`, `bio`, `profileImage`,
+`profileImageOptimized`, `icon`, `title`, `slug`, `eventSlug`.
+
+`proxyWallet` is **kept**. Concentration and large-trade work (B-007) needs an
+actor key, a wallet is not a person's profile, and it is already public
+on-chain. `transactionHash` is kept for the same reason: it is the on-chain
+receipt and it is what makes a row verifiable by someone else.
+
+Measured on the first run after the change: 415 bytes per trade against 790
+before, and none of the nine fields present. The prediction was 47.5%; the
+result is 47.5%.
+
+### This bends rule 2, and says so
+Rule 2 of this project is that raw data is stored **as it arrives**, because the
+methodology will change and we must be able to recompute from the archive. This
+is the first deliberate exception.
+
+The justification is narrow: the rule exists so a future recomputation is
+possible, and not one of the dropped fields can enter any recomputation of a
+price, a probability or a fee. What is lost is the ability to ask "what is this
+trader's display name", which is not a question this project has or wants.
+
+Recorded as an exception rather than quietly done, so that the next person who
+finds an archived field missing can see it was a decision and read the reason.
+
+### Holders
+`holders/` is untouched for now: it runs once a day, it is 7.8 MB of the archive,
+and it has not been looked at row by row. Whatever this record says about
+`events/` probably applies there too, and that inspection is the obvious next
+thing rather than an assumption.
