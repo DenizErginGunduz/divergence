@@ -298,6 +298,18 @@ function disc(ch,e){const C=ch[e].C,P=ch[e].P; if(!C||!P)return null;
 function fwd(ch,e,idx,D){const C=ch[e].C,P=ch[e].P,v=[];
  for(const k of Object.keys(C).map(Number)) if(P&&P[k]&&k>.85*idx&&k<1.2*idx) v.push(k+(C[k].mark-P[k].mark)/D);
  v.sort((a,b)=>a-b); return v.length?v[Math.floor(v.length/2)]:null;}
+/* Kalshi's published taker fee. Mirrors scripts/fees.py, which quotes the
+   schedule (kalshi-fee-schedule.pdf, effective 2025-07-01):
+     fees = round up(0.07 x C x P x (1-P)),  round up = to the next cent.
+   S&P 500 and Nasdaq-100 pay 0.035; Divergence prices neither yet. There is
+   no settlement fee. kRate is the per-contract cost before the round-up;
+   kMinSize answers what the round-up costs at small size. */
+const K_GENERAL=.07, K_INDEX=.035;
+const kCoef=s=>(s&&(s.toUpperCase().startsWith('INX')||s.toUpperCase().startsWith('NASDAQ100')))?K_INDEX:K_GENERAL;
+const kRate=(p,s)=>(p>0&&p<1)?kCoef(s)*p*(1-p):0;
+const kOrderFee=(p,c,s)=>(p>0&&p<1&&c>0)?Math.ceil(+(kCoef(s)*c*p*(1-p)*100).toFixed(9))/100:0;
+const kMinSize=(p,edge,s)=>{ if(!(edge>0))return null;
+ for(let c=1;c<=10000;c++) if(kOrderFee(p,c,s)<=c*edge) return c; return null;};
 function digital(ch,e,K,F,idx,D){const t=K<F?'P':'C',o=ch[e][t]; if(!o)return null;
  const br=bracket(o,K); if(!br)return null; const[a,b]=br,g=b-a,A=o[a],B=o[b];
  /* Both sides return D*Q(S>K). The put side reaches it as D-D*Q(S<K), not
@@ -359,12 +371,18 @@ function buckets(KA,D,series,ccy){
   const optHigh=qt?dL.high-dH.low:null;
   const sellPm=qt?m.bid-(optHigh+fee):null;
   const buyPm =qt?(optLow-fee)-m.ask:null;
-  const edge=qt?Math.max(sellPm,buyPm):null;
+  const gross=qt?Math.max(sellPm,buyPm):null;
+  /* Both trades cross the spread, so both pay Kalshi's TAKER fee, charged on
+     the quote actually hit rather than on any mid. */
+  const dir=qt?(sellPm>=buyPm?'sell prediction':'buy prediction'):'no two-sided option quote';
+  const pmPrice=qt?(sellPm>=buyPm?m.bid:m.ask):null;
+  const kFee=qt?kRate(pmPrice,series):null;
+  const edge=qt?gross-kFee:null;
+  const minSize=qt?kMinSize(pmPrice,gross,series):null;
   rows.push({label,pm,pmBid:m.bid,pmAsk:m.ask,opt,optLow,optHigh,
-    gap:pm-opt,se,fee,spread,oi:m.oi,
-    envelope:qt?optHigh-optLow:null, edge,
-    direction:qt?(sellPm>=buyPm?'sell prediction':'buy prediction'):'no two-sided option quote',
-    ratio:opt>0?pm/opt:null, exceeds:qt&&edge>0, pair:[dL.pair,dH.pair]});
+    gap:pm-opt,se,fee,kFee,gross,minSize,spread,oi:m.oi,
+    envelope:qt?optHigh-optLow:null, edge, direction:dir,
+    ratio:opt>0?pm/opt:null, exceeds:qt&&edge>0&&minSize!=null, pair:[dL.pair,dH.pair]});
  }
  return {rows,expiry:chosen.l,closeMs,F,idx,top,neg,series,D:DF,discEstimated:!!dis,
    pmBid:S.reduce((s,x)=>s+x.bid,0), pmAsk:S.reduce((s,x)=>s+x.ask,0)};
@@ -589,9 +607,11 @@ function detailPanel(r){
                   :'short by '+c2(-r.edge))}</span></div>
     <div class="checks">
       <div>prediction ${c2(r.pmBid)} / ${c2(r.pmAsk)} · option fees ${c2(r.fee)}
-        · envelope ${c2(r.envelope)} · 1.96·SE was ${c2(r.se==null?null:1.96*r.se)}, no longer used</div>
-      <div style="color:var(--warn)">not in the edge: Kalshi fees (UNKNOWN), margin,
-        the 6d 21h expiry gap, BRTI vs the Deribit index (D-075)</div>
+        · Kalshi fee ${c2(r.kFee)} · envelope ${c2(r.envelope)}</div>
+      <div>gross ${c2(r.gross)} before the Kalshi fee · smallest order that
+        survives the fee rounding: ${r.minSize==null?'none up to 10,000':r.minSize+' contracts'}</div>
+      <div style="color:var(--warn)">not in the edge: option margin, the 6d 21h
+        expiry gap, BRTI vs the Deribit index (D-075)</div>
       <div>bucket set sums to
         <span style="color:${Math.abs(h.top-h.D)<.05?'var(--ok)':'var(--warn)'}">${h.top.toFixed(4)}</span>
         · target D ${h.D.toFixed(4)}
