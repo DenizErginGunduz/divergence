@@ -50,6 +50,8 @@ def measure_band_all(all_stamps):
     density = []
     discounts = []
     envelopes = []
+    values = []
+    off_grid = 0
     fallbacks = 0
     for d in all_stamps:
         try:
@@ -64,6 +66,8 @@ def measure_band_all(all_stamps):
             quotable += v['quotable']
             if v['mean_envelope'] is not None:
                 envelopes.append(v['mean_envelope'])
+            values.extend(v['edge_values'])
+            off_grid += v['off_grid']
             density.append(v['density_sum'])
             discounts.append(v['discount_factor'])
             if not v['discount_estimated']:
@@ -81,6 +85,16 @@ def measure_band_all(all_stamps):
         'percent': round(100.0 * exceeding / quotable, 1) if quotable else None,
         'percent_of_all_rungs': round(100.0 * exceeding / measured, 1) if measured else None,
         'mean_envelope': round(sum(envelopes) / len(envelopes), 4) if envelopes else None,
+        # What every positive edge is worth in DOLLARS at the top of book,
+        # largest first. An edge with nothing resting behind it is a price
+        # observation, not an opportunity, and this is the field that says
+        # which one we are looking at.
+        'edge_value_max': round(max(values), 2) if values else None,
+        'edge_value_median': round(sorted(values)[len(values) // 2], 2) if values else None,
+        'edge_value_total': round(sum(values), 2) if values else None,
+        # Quotes that do not sit on the price grid the market itself
+        # publishes. Any non-zero here means a unit or a parsing error.
+        'off_grid_quotes': off_grid,
         # The ladder is exhaustive, so this sums to the DISCOUNT FACTOR, not
         # to 1 (D-073). Reporting it beside the mean D is the point: the two
         # should agree, and a gap between them is a measurement error rather
