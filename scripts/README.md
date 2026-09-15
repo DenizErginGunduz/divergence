@@ -14,11 +14,13 @@ From the repository root:
 
 ```bash
 python scripts/archive.py               # smoke test: can the archive be read?
-python scripts/measure_band.py          # friction band, Kalshi year-end ladders
-python scripts/measure_exhaustive.py    # do bucket probabilities sum to 1?
+python scripts/audit_semantics.py       # do the rule texts match the fields?
+python scripts/measure_parity.py        # put-call cross-check, discount factor
+python scripts/measure_band.py          # is there an edge at quoted prices?
+python scripts/measure_exhaustive.py    # does a bucket ladder sum to D?
 python scripts/measure_polymarket.py    # Polymarket daily terminal ladders
 python scripts/measure_touch.py         # long-horizon touch bound
-python scripts/write_findings.py        # run all three, write findings/latest.json
+python scripts/write_findings.py        # run them all, write findings/latest.json
 python scripts/ref_check.py --list      # every D-XXX reference resolves?
 python scripts/prune_archive.py         # dry run: what would leave the window?
 ```
@@ -38,18 +40,43 @@ local checkout, run the workflow from the Actions tab.
 |---|---|---|
 | `archive.py` | Can we read a snapshot? Shared loader for everything else. | `raw/` |
 | `stability.py` | Helper. Tracks whether the *same* rung behaves the same way across runs. | — |
-| `measure_band.py` | Does the gap beat fees, spread and measurement error? | Kalshi + Deribit |
-| `measure_exhaustive.py` | Does a bucket ladder's probabilities sum to 1 under three different boundary rules? | Kalshi + Deribit |
+| `audit_semantics.py` | Do Kalshi's own rule texts describe the event the numeric fields describe? Do the rules tile the line? What settles these contracts, verbatim? (D-075) | Kalshi |
+| `measure_parity.py` | Does the converted option chain behave like a USD present value, and what discount factor does it imply? (D-073) | Deribit |
+| `fees.py` | Kalshi's published taker fee, quoted from their schedule. Helper, not a measurement. (D-077) | — |
+| `measure_band.py` | Sell the prediction at its bid against the bucket at its ask side, pay both venues' fees — is anything left, and what is it worth at the resting size? (D-076, D-077, D-078) | Kalshi + Deribit |
+| `measure_exhaustive.py` | Does a bucket ladder sum to the discount factor D under three different boundary rules? (D-067, D-073) | Kalshi + Deribit |
 | `measure_polymarket.py` | Same band question on Polymarket daily terminal ladders. Excludes touch ladders. | Polymarket + Deribit |
 | `measure_touch.py` | Is the touch price inside the theoretical bound above terminal? | Polymarket + Deribit |
-| `write_findings.py` | Calls the three measurements, writes `findings/latest.json`. | — |
+| `write_findings.py` | Calls every measurement, writes `findings/latest.json`. | — |
 | `ref_check.py` | Does every decision number cited anywhere actually exist? | repo text |
 | `prune_archive.py` | Bounds `raw/` to a rolling 14-day window. Runs in CI only after the private mirror is confirmed. | `raw/` |
 
 `stability.py` exists because a ratio over repeated observations is
-misleading. The same 44 Kalshi rungs are measured 34 times each; reporting
-"105 of 1496" implies 1496 independent samples. What matters is whether a rung
-behaves consistently, and that is what this module reports.
+misleading. The same 44 Kalshi rungs are measured 45 times each; reporting
+"134 of 1978" implies 1978 independent samples. What matters is whether a rung
+behaves consistently, and that is what this module reports. Today it reports
+3 rungs that clear the test in essentially every observation, 0 that sometimes
+do, and 41 that never do (D-077).
+
+---
+
+## What the numbers mean now
+
+Three things changed in the two weeks to 2026-09-15, and code written before
+them will read wrong:
+
+- **The option side is a discounted state price, not a probability.** Both the
+  call and the put branch of `measure_band.digital()` return `D*Q(S>K)`. Until
+  D-073 the put branch returned `1 - D*Q(S<K)`, which is a different quantity,
+  and the exhaustiveness check could not see the difference. Dividing by `D`
+  gives `Q`, which is still not a real-world probability.
+- **The band is a trade, not a statistic.** `1.96*SE` is gone (D-076). A rung
+  counts when one of two trades — priced at quotes that exist, after Deribit's
+  fees and Kalshi's taker fee — leaves something. No mid is used in the verdict.
+- **An edge has a size.** `measure_band` reads the contracts resting at the
+  quote being hit and reports what the edge is worth in dollars. Live, the three
+  surviving rungs are worth $4.69 between them (D-078). That is the number, not
+  the cents-per-contract.
 
 ---
 
