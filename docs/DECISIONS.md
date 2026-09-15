@@ -989,3 +989,82 @@ docstrings, the findings note and the page now all say "discounted state
 price", but the identifiers have not been renamed, so the naming half of the
 Week 1 item is done in prose and not in code. Recorded here rather than
 claimed as finished.
+
+## D-075 — The rules say what the fields say, and the real gap is somewhere else
+**Date:** 2026-09-15 · **Produced by:** `scripts/audit_semantics.py` · workflow `measure`
+
+Until now the event being priced came from three numeric fields — strike_type,
+floor_strike, cap_strike — and Kalshi's own resolution text had never been read
+by anything except a person. Rule 3 of this project says the wording of a
+resolution rule is methodologically load-bearing and must be quoted rather than
+summarised, so leaving it unparsed was a standing gap. It is now parsed.
+
+### 1. The numbers agree, in all of them
+2,070 rung-observations across 90 ladders and 45 snapshots:
+
+- AGREE 2,070 (100.0%)
+- MISMATCH 0
+- UNKNOWN 0
+
+A null result, and worth having. The parser is deliberately rigid — one exact
+sentence shape, every variable part captured — so it would have reported
+UNKNOWN rather than guessed if Kalshi had changed a single word. It did not
+have to. The `less` / `greater` / `between` fields and the below / above / between
+wording line up on every rung, and the thresholds match to the cent.
+
+### 2. The ladders tile, so D-067 was a statement about contracts
+No gaps, no overlaps. Adjacent buckets end at .99 and begin at .00, exactly one
+tick apart, and `price_level_structure` says `deci_cent` — the 0.01 between them is
+not a reachable settlement value.
+
+This matters more than it looks. The exhaustiveness constraint has been the
+single most productive check in this project, and it rested on the assumption
+that the ladder partitions the line. That assumption was never verified against
+the contracts themselves, only against our own arithmetic. It holds. The
+boundary rule `round(cap + 0.01)` is now justified by the rules, not only by the
+fact that it makes the sum come out.
+
+### 3. What actually settles these contracts, verbatim
+Two distinct wordings in the entire archive:
+
+> "If the simple average of the sixty seconds of CF Benchmarks' BRTI before
+> 12 AM EST is above 149999.99 at 12 AM EST on Jan 1, 2027, then the market
+> resolves to Yes."
+
+and the same sentence with `CF Benchmarks' ETHUSD_RTI` for the ETH ladder.
+1,260 BTC instances, 810 ETH.
+
+So the Kalshi side is: **CF Benchmarks BRTI (or ETHUSD_RTI), a sixty-second
+average, at 00:00 EST on 1 January 2027.** The option side is a different
+reference rate, a different averaging convention and a different instant. Three
+separate reasons for the two prices to differ with neither being wrong, and
+none of them is inside the friction band.
+
+### How large each one is
+- **Instant.** 00:00 EST on 1 Jan 2027 is 05:00 UTC. The Deribit expiry the
+  band uses is 25DEC26, which settles 08:00 UTC on 25 December. The gap is
+  **6 days 21 hours** — about 7% of the remaining life of a 100-day contract.
+  This is the material one. The page already shows it; nothing prices it.
+- **Averaging window.** Sixty seconds against a horizon of roughly 100 days.
+  The variance reduction from averaging one minute of a process with this much
+  annual volatility is far below the tick. Negligible, and said here so it does
+  not have to be re-argued.
+- **Reference rate.** BRTI against the Deribit index: different constituent
+  venues, different methodology. Size UNKNOWN. This one is measurable from data
+  already in the archive — finalized Kalshi markets carry `expiration_value`,
+  which is the realised BRTI, and Deribit index snapshots sit beside them — but
+  it has not been measured, so it stays UNKNOWN rather than being called small.
+
+### What this does not license
+Nothing here says the two contracts are comparable. It says the two contracts
+are what their fields claim, and it names the three ways they differ with a
+number attached to two of them. The expiry gap in particular is a real economic
+difference that the current friction band treats as zero.
+
+### A bug found on the way
+The first version crashed on 2026-08-31T0508Z. `snapshot()` succeeds even when a
+stream is absent; `Missing` is raised when the stream is READ. The try block was
+around `snapshot()` and not around `g.kalshi`. Two things follow: the archive
+contains snapshots with no Kalshi file at all, which the audit now counts and
+reports; and a lazily raised exception is not caught by a try around the thing
+that looks like it does the work.
