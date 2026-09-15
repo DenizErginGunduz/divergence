@@ -1153,3 +1153,95 @@ current snapshot. That number is dominated by the mid-ladder buckets, where
 the option legs are expensive and their spreads are wide in absolute terms. It
 is not the right number to quote next to a tail edge of 0.6c, and it is
 recorded here so nobody quotes it that way.
+
+## D-077 — The prediction leg stops being free
+**Date:** 2026-09-15 · **Produced by:** `scripts/fees.py` · `scripts/measure_band.py` · `web/index.html`
+
+D-076 made the friction band a trade at quoted prices but charged only the
+Deribit side. A trade with one free leg is not a trade. The Kalshi schedule
+was read and implemented rather than estimated.
+
+### Source, quoted
+kalshi.com/docs/kalshi-fee-schedule.pdf, read 2026-09-15, the document dated
+"Last updated and effective: July 1, 2025":
+
+> "fees = round up(0.07 x C x P x (1-P))
+>  P = the price of a contract in dollars (50 cents is 0.5)
+>  C = the number of contracts being traded
+>  round up = rounds to the next cent"
+
+> "Trading fees are only charged for orders that are immediately matched with
+>  orders sitting on the orderbook."
+
+> "There is no settlement fee."
+
+Three consequences, none of them a judgement call:
+
+1. **Our trades are taker trades.** Both directions cross the spread on both
+   venues, which is what makes them executable in the first place. The maker
+   exemption does not apply, and neither does the 0.0175 maker rate — its
+   series list is reproduced in `fees.py` and contains neither KXBTCY nor
+   KXETHY.
+2. **No settlement fee.** One unknown removed rather than bounded.
+3. **The round-up is per ORDER.** One contract at 3 cents costs 0.2 cents in
+   fee before rounding and a full cent after. So "is there an edge" has no
+   answer until someone says at what size, and `fees.min_contracts()` now
+   returns the smallest order at which the rounding stops eating it.
+
+### The schedule tests itself
+The PDF prints a worked table beside the formula — 21 price points, for one
+contract and for a hundred. Those are the counterparty's own numbers, so
+`tests/test_measurement.py` asserts against them rather than against anything
+computed here. All 42 assertions pass, including the round-up cases where one
+contract costs a cent at every price from 0.01 to 0.99.
+
+### What it did to the measurement
+| | before the Kalshi fee | after |
+|---|---|---|
+| rungs with a positive edge | 136 / 1978 | 134 / 1978 |
+| always / sometimes / never | 3 / 2 / 39 | **3 / 0 / 41** |
+
+The headline count barely moved. The STABILITY picture changed completely: the
+marginal rungs are gone. Every rung that used to clear the band in some
+snapshots and not others now fails in all of them, and what is left is binary
+— three rungs clear it in essentially every observation, forty-one never do.
+A fee of a fifth of a cent was the whole difference between "sometimes" and
+"never" for two rungs, which says how thin those cases were.
+
+### The three, with every cost named
+From the live page, 2026-09-15, all in cents per contract:
+
+| rung | pred. bid | bucket at ask | Deribit | Kalshi | gross | **net** | min size |
+|---|---|---|---|---|---|---|---|
+| ETH above $5,000 | 3.00 | 1.31 | 0.374 | 0.204 | 1.32 | **1.11** | 1 |
+| BTC above $150,000 | 1.20 | 0.47 | 0.132 | 0.083 | 0.60 | **0.52** | 2 |
+| ETH below $1,000 | 2.80 | 1.93 | 0.251 | 0.191 | 0.62 | **0.43** | 2 |
+
+The minimum sizes are small because the gross edges are large relative to a
+one-cent rounding. That was not obvious in advance: on a 1.2-cent contract a
+one-cent minimum fee sounds fatal, and it would be at one contract. At two it
+is already paid for.
+
+### A note for the asset expansion
+S&P 500 and Nasdaq-100 pay 0.035, half the general rate. The schedule
+identifies them by RULEBOOK ticker — "whose Rulebook ticker begins with INX" —
+and whether that string equals the API's series ticker is **UNKNOWN**.
+Divergence prices neither asset yet. The coefficient and the open question are
+both in `fees.py` so that the day it does, the general rate is not applied by
+default.
+
+### Still outside the number
+- **Margin on the option legs**, posted in crypto for three and a half months.
+- **The expiry gap**, 6 days 21 hours (D-075).
+- **BRTI against the Deribit index** (D-075), size UNKNOWN.
+
+An edge of 0.43 cents is not robust to any of these. `edge > 0` remains a
+necessary condition.
+
+### The tests earned their keep
+Two older cases failed on the first run, and the size of each failure was
+exactly the fee: 0.0175 on a 50-cent contract and 0.002037 on a 3-cent one.
+Neither was a bug — they were assertions about a world in which the prediction
+leg was free, and they broke the moment it stopped being. That is what a
+regression test is supposed to do when the thing it pins is deliberately
+changed.
