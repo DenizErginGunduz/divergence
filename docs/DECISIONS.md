@@ -1519,3 +1519,87 @@ is: let the corrected collector accumulate, then score. The inventory script is
 in the `measure` workflow and writes `findings/validation_inventory.json` on every
 run, so the sample size is now a number on the record that grows visibly
 instead of an assumption.
+
+## D-081 — The measurements read the mirror, and nine events are the real sample
+**Date:** 2026-09-15 · **Produced by:** `.github/workflows/measure.yml` · `scripts/archive.py`
+
+The public repository keeps 14 days for data rights (docs/DATA_SOURCES.md). The
+private mirror has held every snapshot since 2026-08-30. Until now the
+measurements could only see the window. They can now read the mirror, and the
+rights decision is untouched: nothing new is published, only findings come out.
+
+### How it is wired
+- `archive.RAW` honours `DIVERGENCE_RAW`. One constant, and every reader moves.
+- `measure.yml` clones the mirror `--depth 1 --filter=blob:none --sparse` and takes
+  only `raw/_meta`, `raw/kalshi`, `raw/deribit`, `raw/polymarket_events`. Measured
+  2026-09-15: `events/`, `holders/` and `coverage/` are **55% of the archive** and no
+  measurement reads any of them.
+- A separate **read-only** token, `ARCHIVE_TOKEN_RO`. The read-write one stays in
+  `collect` and nowhere else.
+- `workflow_dispatch` only. `measure` also runs on pull_request and a same-repo PR
+  can read secrets; a PR should prove the code, not be handed a credential.
+- A missing or expired token is **not a failure**. The step exits, everything
+  runs on the public window, and `findings/latest.json` records
+  `archive_source` so a narrowed run is visible rather than silent.
+
+### The danger, and what guards it
+`DIVERGENCE_RAW` moves every READER. It must never move the DELETER: the mirror
+is the only copy of everything older than fourteen days. `prune_archive.py`
+computes its own `RAW` from `__file__` and does not import `archive.py`. That
+duplication looks like something worth tidying away, so four tests now fail if
+the pruner ever imports the reader, reads the environment, or disagrees with the
+reader when no override is set.
+
+Verified after the first mirror run: the public working tree is still 14 days,
+2026-09-01 to 2026-09-15.
+
+### What the longer series bought
+Archive seen by the measurements: **16 days, 61 snapshots** (was 14 and 46).
+
+| | window | mirror |
+|---|---|---|
+| observations per rung | 45 | **55** |
+| rungs with an edge | 134 / 1978 | 165 / 2418 |
+| share | 6.8% | 6.8% |
+| always / sometimes / never | 3 / 0 / 41 | **3 / 1 / 40** |
+| median edge value | $0.63 | $0.86 |
+
+The share did not move. One rung moved from "never" to "sometimes", which is
+exactly what ten more observations per rung are for: a rung that clears the test
+occasionally is a different object from one that never does, and eleven days
+could not tell them apart.
+
+### Where it mattered: the validation inventory
+| | window | mirror |
+|---|---|---|
+| resolved markets seen | 4,657 | 4,851 |
+| with a prior live quote | 88 | **145** |
+| scorable observations | 113 | **274** |
+| independent events | 88 | **109** |
+| median lead time | 0.23 h | **6.87 h** |
+
+The lead time is the real gain, and the reason is specific: the mirror reaches
+back to 2026-08-30, so it contains the **August month-end settlement**. Forty-two
+monthly markets resolved there — KXBTCMAXMON 22, KXBTCMINMON 8, KXETHMAXMON 6,
+KXETHMINMON 6 — with 149 observations taken days before they settled. That is a
+different and far better kind of forecast than a fifteen-minute market quoted
+fourteen minutes before expiry.
+
+### But count the events, not the pairs
+109 independent events = **100 fifteen-minute markets + 9 everything else**. The
+forty-two monthly markets collapse to 9 events, because every rung of one
+monthly ladder resolves from one reading of one price path.
+
+So the informative sample is **nine events**, and the hundred short-dated ones
+are forecasts made minutes before an outcome that was already visible. That is
+the number to hold in mind when Week 5 arrives, not 145 and not 274.
+
+### One more thing scoring will have to handle
+The outcome balance moved from 44 yes / 44 no to **55 yes / 90 no**, because the
+monthly markets are tails and tails mostly resolve no. A Brier score on an
+unbalanced tail sample is not interpretable against 0.25; it needs a base-rate
+comparison. Recorded now so it is not discovered after the number is computed.
+
+Five of the 61 snapshots carry no Kalshi stream: Kalshi was added on 2026-08-31
+and the mirror predates it. The inventory reports them rather than scoring them
+as empty.
