@@ -106,11 +106,24 @@ def thresholds(M):
         kind = m.get('strike_type')
         if kind == 'greater':
             out.append((round(m['floor_strike'] + .01), 'above %s' % m['floor_strike'],
-                        m.get('ticker'), float(m['yes_bid_dollars'])))
+                        kind, float(m['yes_bid_dollars'])))
         elif kind == 'less':
             out.append((round(m['cap_strike']), 'below %s' % m['cap_strike'],
-                        m.get('ticker'), float(m['yes_bid_dollars'])))
+                        kind, float(m['yes_bid_dollars'])))
     return out
+
+
+def rung_value(p, D, kind):
+    """The digital is always D*Q(S > K). A 'below X' rung pays on the OTHER
+    side, so its value is D - that.
+
+    Getting this wrong is not subtle once you look: the first version of this
+    script compared a 2.8-cent 'ETH below $1,000' bid against 0.97657 and
+    called it "below both". The number was the chance of being ABOVE.
+    """
+    if p is None:
+        return None
+    return p if kind == 'greater' else D - p
 
 
 def run(stamp):
@@ -145,22 +158,26 @@ def run(stamp):
             D_late = dl['D'] if dl else 1.0
             F_late = forward(ch, late, idx, D_late)
 
-        for K, label, ticker, bid in thresholds(M):
+        for K, label, kind, bid in thresholds(M):
             grid = []
             for s in SKIPS:
                 d = digital_at(ch, early, K, F, D, s)
+                if d:
+                    d['v'] = rung_value(d['p'], D, kind)
                 grid.append(d)
             if not grid[0]:
                 continue
             late_d = (digital_at(ch, late, K, F_late, D_late)
                       if (late and F_late) else None)
+            late_v = (rung_value(late_d['p'], D_late, kind) if late_d else None)
             rows.append({
-                'asset': asset, 'label': label, 'ticker': ticker, 'bid': bid,
+                'asset': asset, 'label': label, 'kind': kind, 'bid': bid,
+                'late_v': late_v,
                 'K': K, 'early': early, 'late': late,
                 'early_days': (to_date(close_ord) - to_date(expiry_ord(early))).days,
                 'late_days': ((to_date(expiry_ord(late)) - to_date(close_ord)).days
                               if late else None),
-                'grid': grid, 'late_p': late_d['p'] if late_d else None,
+                'grid': grid,
             })
     return rows
 
@@ -191,18 +208,19 @@ def main():
     print('%-5s %-18s %10s %10s %10s %9s' %
           ('', 'rung', 'tight', 'skip 1', 'skip 2', 'spread'))
     print('-' * 68)
-    seen = set()
     grid_spreads = []
+    latest = {}
     for r in all_rows:
-        vals = [d['p'] if d else None for d in r['grid']]
+        vals = [d['v'] if d else None for d in r['grid']]
         have = [v for v in vals if v is not None]
-        if len(have) > 1:
-            grid_spreads.append((max(have) - min(have)) /
-                                abs(have[0]) if have[0] else 0.0)
-        key = (r['asset'], r['label'])
-        if key in seen:
-            continue
-        seen.add(key)
+        if len(have) > 1 and have[0]:
+            grid_spreads.append((max(have) - min(have)) / abs(have[0]))
+        # Keep the LAST observation of each rung. stamps() is chronological,
+        # so this is the newest snapshot rather than the oldest.
+        latest[(r['asset'], r['label'])] = r
+    for r in latest.values():
+        vals = [d['v'] if d else None for d in r['grid']]
+        have = [v for v in vals if v is not None]
         print('%-5s %-18s %10s %10s %10s %9s' % (
             r['asset'], r['label'][:18],
             *['%.5f' % v if v is not None else '-' for v in vals],
@@ -226,36 +244,49 @@ def main():
     print('%-5s %-18s %8s %9s %9s %9s  %s' %
           ('', 'rung', 'pred bid', 'early', 'late', 'band', 'verdict'))
     print('-' * 86)
-    seen = set()
-    survive = clipped = nolate = 0
+    def judge(r):
+        """A 'below X' rung loses value as maturity grows while an 'above X'
+        rung gains it, so the band is not always early-then-late. Order the
+        two ends and compare against the pair."""
+        early_v = r['grid'][0]['v']
+        late_v = r['late_v']
+        if late_v is None:
+            return None, None, 'no later chain'
+        lo, hi = min(early_v, late_v), max(early_v, late_v)
+        if r['bid'] > hi:
+            return lo, hi, 'above BOTH'
+        if r['bid'] < lo:
+            return lo, hi, 'below both'
+        return lo, hi, 'inside the band'
+
+    survive = clipped = nolate = below = 0
+    latest = {}
     for r in all_rows:
-        early_p = r['grid'][0]['p']
-        late_p = r['late_p']
-        if late_p is None:
-            nolate += 1
-            verdict = 'no later chain'
-        elif r['bid'] > late_p:
+        _lo, _hi, v = judge(r)
+        if v == 'above BOTH':
             survive += 1
-            verdict = 'above BOTH'
-        elif r['bid'] > early_p:
+        elif v == 'inside the band':
             clipped += 1
-            verdict = 'inside the band'
+        elif v == 'below both':
+            below += 1
         else:
-            verdict = 'below both'
-        key = (r['asset'], r['label'])
-        if key in seen:
-            continue
-        seen.add(key)
+            nolate += 1
+        latest[(r['asset'], r['label'])] = r
+    for r in latest.values():
+        early_v = r['grid'][0]['v']
+        late_v = r['late_v']
+        _lo, _hi, verdict = judge(r)
         print('%-5s %-18s %8.4f %9.5f %9s %9s  %s' % (
-            r['asset'], r['label'][:18], r['bid'], early_p,
-            '%.5f' % late_p if late_p is not None else '-',
-            '%.5f' % (late_p - early_p) if late_p is not None else '-',
+            r['asset'], r['label'][:18], r['bid'], early_v,
+            '%.5f' % late_v if late_v is not None else '-',
+            '%.5f' % abs(late_v - early_v) if late_v is not None else '-',
             verdict))
-    total = survive + clipped + nolate
+    total = survive + clipped + nolate + below
     if total:
         print('-' * 86)
         print('across all %d observations: %d above both, %d inside the band, '
-              '%d with no later chain' % (total, survive, clipped, nolate))
+              '%d below both, %d with no later chain'
+              % (total, survive, clipped, below, nolate))
     print()
     print('Reading note: the early chain expires BEFORE the Kalshi contract')
     print('settles and the late one after it, so for a tail whose probability')
