@@ -1603,3 +1603,81 @@ comparison. Recorded now so it is not discovered after the number is computed.
 Five of the 61 snapshots carry no Kalshi stream: Kalshi was added on 2026-08-31
 and the mirror predates it. The inventory reports them rather than scoring them
 as empty.
+
+## D-082 — The intraday ladders, and why their first numbers mean nothing yet
+**Date:** 2026-09-15 · **Produced by:** `scripts/measure_band.py` · `scripts/write_findings.py`
+
+D-079 showed the year-end comparison losing two of its three findings to a
+seven-day expiry gap. The obvious response is a contract whose expiry gap is
+small. Kalshi's intraday BTC and ETH ladders settle the same day, and Deribit
+lists daily expiries, so they were brought into the measurement.
+
+### What was added
+Four series beside the two year-end ones:
+
+| label | series | shape |
+|---|---|---|
+| BTC / ETH intraday | KXBTC, KXETH | exhaustive buckets |
+| BTC / ETH intraday cum | KXBTCD, KXETHD | **cumulative** |
+
+The cumulative shape is new to this project. Every rung is `P(S > K)` at its own
+threshold, so the rungs overlap and summing them is not a density.
+`rungs()` now detects the shape and refuses to report `density_sum` for a
+cumulative ladder rather than publishing a number that looks like the
+exhaustiveness check and is not one.
+
+### Two bugs the intraday contracts exposed
+**Expiry selection compared DATES.** A Kalshi market closing 04:00 UTC would
+have accepted that day's 08:00 Deribit expiry as "not past the close" — four
+hours after it. Harmless on year-end ladders, wrong here. Now compared as
+instants.
+
+**There is no expiry before the close, ever.** Deribit's daily options settle
+08:00 UTC and are delisted immediately. A 13:17 snapshot reading a market that
+closes at 14:00 the same day finds that day's expiry already gone; the nearest
+listed one is **the next morning, 18 hours after**. So the intraday comparison
+cannot be two-sided, and `rungs()` now carries `expiry_side` rather than silently
+picking whatever is nearest.
+
+### The side matters more than the size
+| | year-end | intraday |
+|---|---|---|
+| gap | +165 h | **−18 h** |
+| side | option expires FIRST | option expires LATER |
+| bias on an upside tail | understates — flatters us | overstates — works against us |
+
+This is the part worth keeping. The year-end setup used an expiry seven days
+EARLY, and a tail probability grows with maturity, so the option number was
+systematically low and every gap we found was flattered by it. The intraday
+setup has the opposite sign: the option is measured 18 hours PAST the
+settlement and therefore overstates. A Kalshi price above it is evidence; a
+price below it proves nothing.
+
+Nine times closer, and on the conservative side.
+
+### The first reading, and why it is not a result
+| | year-end | intraday |
+|---|---|---|
+| rungs with an edge | 165 / 2418 quotable (6.8%) | 65 / 516 (12.6%) |
+| mean envelope | 6.2c | 12.8c |
+| median edge value | $0.86 | $18.53 |
+| **observations per rung** | **55** | **1** |
+
+**One.** Only the 2026-09-15T1317Z snapshot contains live intraday markets,
+because the collector's paging cap hid them until it was fixed the same day
+(D-080). "65 rungs always exceed" means 65 rungs exceeded in their single
+observation, which is what the stability module exists to stop anyone from
+saying. The 12.6% and the $18.53 are one reading of one moment.
+
+They are recorded because the pipeline producing them is now correct, not
+because they are findings. Nothing from the intraday block should be quoted
+until the rungs have been seen enough times to separate a standing difference
+from a snapshot.
+
+### One caveat already visible
+The intraday exhaustive ladders sum to 0.9904. For an option 18 hours out the
+discount factor is essentially 1, so that is a **1% shortfall** against a
+year-end shortfall of 0.2%. The strike grid is coarse relative to how far BTC
+moves in a few hours, which is the same discretisation effect D-079 measured at
+12.6% per digital — and it will be larger here, not smaller. Measuring it on
+the intraday chains is the next thing this block needs.
