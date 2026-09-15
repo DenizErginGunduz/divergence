@@ -111,11 +111,11 @@ def ladder_sum(KA, D_raw, series, currency, rule):
     for m in M:
         lo, hi = bounds(m, rule)
         # An unbounded lower edge is certainty, worth D today rather than 1.
-        dL = digital(ch, expiry, lo, F, idx, D) if lo is not None else {'p': D}
-        dH = digital(ch, expiry, hi, F, idx, D) if hi is not None else {'p': 0}
+        dL = digital(ch, expiry, lo, F, idx, D) if lo is not None else {'dsp': D}
+        dH = digital(ch, expiry, hi, F, idx, D) if hi is not None else {'dsp': 0}
         if not dL or not dH:
             continue
-        t += dL['p'] - dH['p']
+        t += dL['dsp'] - dH['dsp']
         n += 1
     return {'total': t, 'buckets': n, 'D': D, 'estimated': dis is not None,
             'ratio': t / D}
