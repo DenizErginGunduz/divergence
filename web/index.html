@@ -304,10 +304,17 @@ function digital(ch,e,K,F,idx,D){const t=K<F?'P':'C',o=ch[e][t]; if(!o)return nu
     1-D*Q(S<K); with D=1 the two coincide, which is why the old line looked
     right for so long (D-073). */
  const p=t==='C'?(A.mark-B.mark)/g:D-(B.mark-A.mark)/g;
- const se=(A.bid!=null&&A.ask!=null&&B.bid!=null&&B.ask!=null)
-  ?Math.sqrt(((A.ask-A.bid)/2)**2+((B.ask-B.bid)/2)**2)/g:null;
+ /* low/high are what the spread can be SOLD and BOUGHT for. The put branch
+    SUBTRACTS the spread, so its bid/ask pairing inverts — getting that the
+    wrong way round leaves every number plausible but inside out. Mirrors
+    scripts/measure_band.py:digital, pinned there by tests. se is kept as a
+    diagnostic and no longer decides anything. */
+ const two=A.bid!=null&&A.ask!=null&&B.bid!=null&&B.ask!=null;
+ const se=two?Math.sqrt(((A.ask-A.bid)/2)**2+((B.ask-B.bid)/2)**2)/g:null;
+ const low =!two?null:(t==='C'?(A.bid-B.ask)/g:D-(B.ask-A.bid)/g);
+ const high=!two?null:(t==='C'?(A.ask-B.bid)/g:D-(B.bid-A.ask)/g);
  const feeOf=x=>Math.min(.0003*idx,.125*x);
- return {p,se,fee:(feeOf(A.mark)+feeOf(B.mark))/g,pair:[a,b]};}
+ return {p,se,low,high,fee:(feeOf(A.mark)+feeOf(B.mark))/g,pair:[a,b]};}
 const MON={JAN:0,FEB:1,MAR:2,APR:3,MAY:4,JUN:5,JUL:6,AUG:7,SEP:8,OCT:9,NOV:10,DEC:11};
 const expiryMs=l=>{const m=l.match(/^(\d+)([A-Z]{3})(\d{2})$/);
  return m?Date.UTC(2000+ +m[3],MON[m[2]],+m[1],8,0,0):null;};
@@ -337,15 +344,27 @@ function buckets(KA,D,series,ccy){
   else{lo=Math.round(m.floor); hi=Math.round(m.cap+.01); label=short(m.floor)+' – '+short(m.cap);}
   /* An unbounded lower edge is certainty, and certainty is worth D today,
      not 1. That literal 1 is what pinned the bucket sum at 1 for any D. */
-  const dL=lo!=null?digital(ch,chosen.l,lo,F,idx,DF):{p:DF,se:0,fee:0};
-  const dH=hi!=null?digital(ch,chosen.l,hi,F,idx,DF):{p:0,se:0,fee:0};
+  const dL=lo!=null?digital(ch,chosen.l,lo,F,idx,DF):{p:DF,se:0,low:DF,high:DF,fee:0};
+  const dH=hi!=null?digital(ch,chosen.l,hi,F,idx,DF):{p:0,se:0,low:0,high:0,fee:0};
   const pm=(m.bid+m.ask)/2, spread=m.ask-m.bid;
   if(!dL||!dH){rows.push({label,pm,spread,oi:m.oi,skipped:'outside option strike range'});continue;}
   const opt=dL.p-dH.p; top+=opt; if(opt<0)neg++;
   const se=(dL.se==null||dH.se==null)?null:Math.sqrt(dL.se**2+dH.se**2);
-  const friction=dL.fee+dH.fee+spread/2, threshold=(se==null?0:1.96*se)+friction;
-  rows.push({label,pm,opt,gap:pm-opt,se,friction,threshold,spread,oi:m.oi,
-    ratio:opt>0?pm/opt:null, exceeds:Math.abs(pm-opt)>threshold, pair:[dL.pair,dH.pair]});
+  const fee=dL.fee+dH.fee;
+  /* The bucket is LONG the lower digital and SHORT the upper one, so its
+     cheapest executable value pairs the lower leg's bid side with the upper
+     leg's ask side. Then two trades, both priced at quotes that exist now. */
+  const qt=dL.low!=null&&dL.high!=null&&dH.low!=null&&dH.high!=null;
+  const optLow =qt?dL.low-dH.high:null;
+  const optHigh=qt?dL.high-dH.low:null;
+  const sellPm=qt?m.bid-(optHigh+fee):null;
+  const buyPm =qt?(optLow-fee)-m.ask:null;
+  const edge=qt?Math.max(sellPm,buyPm):null;
+  rows.push({label,pm,pmBid:m.bid,pmAsk:m.ask,opt,optLow,optHigh,
+    gap:pm-opt,se,fee,spread,oi:m.oi,
+    envelope:qt?optHigh-optLow:null, edge,
+    direction:qt?(sellPm>=buyPm?'sell prediction':'buy prediction'):'no two-sided option quote',
+    ratio:opt>0?pm/opt:null, exceeds:qt&&edge>0, pair:[dL.pair,dH.pair]});
  }
  return {rows,expiry:chosen.l,closeMs,F,idx,top,neg,series,D:DF,discEstimated:!!dis,
    pmBid:S.reduce((s,x)=>s+x.bid,0), pmAsk:S.reduce((s,x)=>s+x.ask,0)};
@@ -391,7 +410,9 @@ function notable(){
      first; those inside the band sit behind and faded. Only the display limit
      grew to fill the slider; the selection rule stayed the same and every card
      carries its own status on its face. */
-  const over=pool.filter(x=> x.r.exceeds).sort((a,b)=>Math.abs(b.r.gap)-Math.abs(a.r.gap));
+  /* Ranked by the edge itself, not by the mid-to-mid gap: the gap was never
+     the thing anyone could collect. */
+  const over=pool.filter(x=> x.r.exceeds).sort((a,b)=>b.r.edge-a.r.edge);
   const inside=pool.filter(x=>!x.r.exceeds).sort((a,b)=>b.r.ratio-a.r.ratio);
   const picked=[...over,...inside].slice(0,12);
   const caption = over.length
@@ -424,7 +445,8 @@ function notableCard(x){
       <span class="t12 dim" style="margin-left:auto">${c2(r.opt)}</span>
       <span class="t12" style="margin-left:9px;color:${r.ratio>1.5?'var(--accent)':'var(--text-3)'}">${r.ratio.toFixed(1)}×</span>
     </div>
-    <div class="t10 dim2" style="margin-top:6px">gap ${(Math.abs(r.gap)/r.threshold).toFixed(1)}× band${r.exceeds?'':' · inside band'}</div>
+    <div class="t10 dim2" style="margin-top:6px">${r.edge==null?'no two-sided option quote'
+      :(r.edge>0?'edge '+c2(r.edge)+' · '+r.direction:'no edge · short by '+c2(-r.edge))}</div>
   </div>`;
 }
 function chipsRow(){
@@ -517,7 +539,7 @@ function rungTable(){
       <th class="num" style="width:88px">PREDICTION</th>
       <th class="num" style="width:88px">OPTIONS IMPLY</th>
       <th class="num" style="width:62px">RATIO</th>
-      <th style="width:126px">GAP vs BAND</th>
+      <th style="width:126px">EDGE vs ENVELOPE</th>
       <th class="num" style="width:88px">OPEN INT</th>
     </tr></thead><tbody>${h.rows.map((r,i)=>rungRow(r,i)).join('')}</tbody></table>`;
   document.querySelectorAll('#rungs tr.clk').forEach(e=>e.onclick=()=>{
@@ -528,7 +550,10 @@ function rungRow(r,i){
     <td class="num">—</td><td class="num">—</td>
     <td class="t11">not measurable · ${r.skipped}</td>
     <td class="num">${r.oi.toLocaleString('en-US')}</td></tr>`;
-  const w=Math.min(100,Math.abs(r.gap)/.03*100), bw=Math.min(100,r.threshold/.03*100), isOpen=S.rung===i;
+  /* The bar now shows the executable envelope and where the prediction sits
+     inside it, so a wide bucket reads as wide rather than as certainty. */
+  const w=Math.min(100,Math.abs(r.edge||0)/.03*100),
+        bw=Math.min(100,(r.envelope||0)/.03*100), isOpen=S.rung===i;
   return `<tr class="clk ${isOpen?'open':''}" data-i="${i}">
     <td style="color:var(--text)">${r.label}</td>
     <td class="num">${c2(r.pm)}</td><td class="num dim">${c2(r.opt)}</td>
@@ -540,7 +565,7 @@ function rungRow(r,i){
 }
 /* [4] detail card */
 function detailPanel(r){
-  const h=S.calc[S.asset], mult=r.threshold>0?(Math.abs(r.gap)/r.threshold).toFixed(1):'—';
+  const h=S.calc[S.asset];
   return `<div class="detail">
     <div style="display:flex;align-items:baseline;gap:10px">
       <span class="w5">${S.asset} ${r.label}</span>
@@ -552,17 +577,21 @@ function detailPanel(r){
       <div><div>OPTIONS IMPLY</div><div class="dim">${c2(r.opt)}</div></div>
       <div><div>RICHER BY</div><div style="color:var(--accent)">${r.ratio?r.ratio.toFixed(1)+'×':'—'}</div></div>
     </div>
-    <div class="t10 dim" style="letter-spacing:.05em;margin-bottom:5px">GAP vs UNCERTAINTY + FRICTION</div>
+    <div class="t10 dim" style="letter-spacing:.05em;margin-bottom:5px">EDGE AT QUOTED PRICES</div>
     <div class="bar" style="height:20px;margin-bottom:5px">
-      <div class="band" style="top:6px;height:9px;width:${Math.min(100,r.threshold/.03*100)}%"></div>
-      <div class="gap" style="top:8px;height:5px;width:${Math.min(100,Math.abs(r.gap)/.03*100)}%;
+      <div class="band" style="top:6px;height:9px;width:${Math.min(100,(r.envelope||0)/.03*100)}%"></div>
+      <div class="gap" style="top:8px;height:5px;width:${Math.min(100,Math.abs(r.edge||0)/.03*100)}%;
         background:${r.exceeds?'var(--accent)':'#4a4137'}"></div></div>
     <div class="t11 dim" style="display:flex;margin-bottom:12px">
-      <span>band ${c2(r.threshold)}</span>
-      <span style="margin-left:auto">gap ${c2(Math.abs(r.gap))} —
-        <span style="color:var(--text)">${mult}× band</span></span></div>
+      <span>bucket ${c2(r.optLow)} – ${c2(r.optHigh)}</span>
+      <span style="margin-left:auto">${r.edge==null?'not quotable'
+        :(r.edge>0?'<span style="color:var(--text)">edge '+c2(r.edge)+' · '+r.direction+'</span>'
+                  :'short by '+c2(-r.edge))}</span></div>
     <div class="checks">
-      <div>uncertainty ${c2(r.se)} · friction ${c2(r.friction)} · prediction spread ${c2(r.spread)}</div>
+      <div>prediction ${c2(r.pmBid)} / ${c2(r.pmAsk)} · option fees ${c2(r.fee)}
+        · envelope ${c2(r.envelope)} · 1.96·SE was ${c2(r.se==null?null:1.96*r.se)}, no longer used</div>
+      <div style="color:var(--warn)">not in the edge: Kalshi fees (UNKNOWN), margin,
+        the 6d 21h expiry gap, BRTI vs the Deribit index (D-075)</div>
       <div>bucket set sums to
         <span style="color:${Math.abs(h.top-h.D)<.05?'var(--ok)':'var(--warn)'}">${h.top.toFixed(4)}</span>
         · target D ${h.D.toFixed(4)}
