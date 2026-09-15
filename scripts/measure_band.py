@@ -59,12 +59,35 @@ import json
 import math
 import re
 import sys
+from datetime import datetime, timezone
 
 import fees
 from archive import snapshot, stamps, summary, Missing
 from stability import Stability
 
-SERIES = [('BTC', 'KXBTCY', 'BTC'), ('ETH', 'KXETHY', 'ETH')]
+# (label, Kalshi series ticker, Deribit currency)
+#
+# Two tenors, and the tenor is the whole point. The year-end ladders settle on
+# 2027-01-01 and the nearest Deribit expiries miss it by 7 days and 84 days, a
+# gap wide enough to swallow two of the three findings (D-079). The intraday
+# ladders settle the same day, and Deribit lists daily expiries at 08:00 UTC, so
+# the bracket closes to about a day.
+#
+# Two SHAPES as well. KXBTCY / KXBTC are exhaustive bucket ladders and their
+# rungs sum to D. KXBTCD is the same event as a CUMULATIVE ladder: every rung is
+# P(S > K) at its own threshold, so the rungs overlap and summing them means
+# nothing. rungs() reports which shape it found instead of assuming.
+SERIES = [
+    ('BTC year-end', 'KXBTCY', 'BTC'),
+    ('ETH year-end', 'KXETHY', 'ETH'),
+    ('BTC intraday', 'KXBTC', 'BTC'),
+    ('ETH intraday', 'KXETH', 'ETH'),
+    ('BTC intraday cum', 'KXBTCD', 'BTC'),
+    ('ETH intraday cum', 'KXETHD', 'ETH'),
+]
+
+# Deribit settles its options at 08:00 UTC on the expiry date.
+EXPIRY_HOUR_UTC = 8
 
 MONTH = {'JAN': 1, 'FEB': 2, 'MAR': 3, 'APR': 4, 'MAY': 5, 'JUN': 6,
          'JUL': 7, 'AUG': 8, 'SEP': 9, 'OCT': 10, 'NOV': 11, 'DEC': 12}
@@ -84,6 +107,33 @@ def expiry_ord(label):
     if not m:
         return None
     return (2000 + int(m.group(3))) * 10000 + MONTH[m.group(2)] * 100 + int(m.group(1))
+
+
+def expiry_instant(label):
+    """Deribit expiry label -> the instant it settles, UTC.
+
+    Dates are not enough. A Kalshi intraday market can close at 04:00 UTC, and
+    comparing DATES would accept that day's 08:00 Deribit expiry as "not past
+    the close" when it is four hours after it. Harmless on the year-end
+    ladders, wrong on the intraday ones, which is why it only surfaced now.
+    """
+    m = EXPIRY.match(label)
+    if not m:
+        return None
+    return datetime(2000 + int(m.group(3)), MONTH[m.group(2)], int(m.group(1)),
+                    EXPIRY_HOUR_UTC, tzinfo=timezone.utc)
+
+
+def iso_instant(s):
+    """Kalshi close_time -> datetime. None when it is not the shape we know."""
+    if not s or len(s) < 19:
+        return None
+    try:
+        return datetime(int(s[0:4]), int(s[5:7]), int(s[8:10]),
+                        int(s[11:13]), int(s[14:16]), int(s[17:19]),
+                        tzinfo=timezone.utc)
+    except ValueError:
+        return None
 
 
 def chain(D, currency):
@@ -275,14 +325,18 @@ def rungs(KA, D_raw, series, currency):
     usable = [v for v in usable if expiry_ord(v)]
     if not usable:
         return None
-    # Nearest option expiry that does NOT run past the Kalshi close. Not equal:
-    # any remaining expiry gap biases the result in our favour, and that
-    # caveat is reported rather than hidden.
-    target = int(close[:4] + close[5:7] + close[8:10]) if len(close) >= 10 else None
-    ok = [v for v in usable if target is None or expiry_ord(v) <= target]
+    # Nearest option expiry that does NOT run past the Kalshi close, compared as
+    # INSTANTS. Not equal: any remaining expiry gap biases the result in our
+    # favour, and that caveat is reported rather than hidden.
+    close_at = iso_instant(close)
+    if close_at is None:
+        return None
+    ok = [v for v in usable
+          if expiry_instant(v) and expiry_instant(v) <= close_at]
     if not ok:
         return None
     expiry = ok[-1]
+    gap_hours = (close_at - expiry_instant(expiry)).total_seconds() / 3600.0
 
     # Discount first: forward() and digital() both need it.
     dis = discount(ch, expiry)
@@ -381,9 +435,16 @@ def rungs(KA, D_raw, series, currency):
                      'envelope': None if opt_low is None else opt_high - opt_low,
                      'edge': edge, 'direction': direction,
                      'spread': spread, 'exceeds': exceeds})
+    # An all-'greater' ladder is CUMULATIVE: the rungs overlap and their sum is
+    # not a density. Saying so beats publishing a number that looks like the
+    # exhaustiveness check and is not one.
+    kinds = set(m.get('strike_type') for m in S)
+    cumulative = kinds == {'greater'}
     return {'rows': rows, 'expiry': expiry, 'F': F, 'idx': idx,
-            'discount': dis, 'D': D,
-            'total': sum(r['opt'] for r in rows if 'opt' in r)}
+            'discount': dis, 'D': D, 'gap_hours': gap_hours,
+            'ladder': 'cumulative' if cumulative else 'exhaustive',
+            'total': None if cumulative
+            else sum(r['opt'] for r in rows if 'opt' in r)}
 
 
 def run(stamp, stab=None):
@@ -413,7 +474,12 @@ def run(stamp, stab=None):
             # The ladder is exhaustive, so this sums to D, not to 1. Before
             # D-073 it summed to 1 whatever D was, which is why the check
             # never caught the convention split.
-            'density_sum': round(h['total'], 4),
+            'ladder': h['ladder'],
+            # How far the option expiry sits before the Kalshi close. The
+            # single most consequential caveat in the project (D-079), so it
+            # travels with every number instead of living in a footnote.
+            'expiry_gap_hours': round(h['gap_hours'], 2),
+            'density_sum': None if h['total'] is None else round(h['total'], 4),
             'discount_factor': round(h['D'], 6),
             'discount_estimated': h['discount'] is not None,
             'discount_brackets': h['discount']['brackets'] if h['discount'] else 0,
@@ -473,10 +539,8 @@ def main():
     print('archive: %(snapshot_count)d snapshots / %(day_count)d days' % o)
     print('scanned: %d runs' % len(results))
     print()
-    print('%-18s %6s  %-30s %-30s'
-          % ('snapshot', 'window', 'BTC (edge/quotable/rungs)',
-             'ETH (edge/quotable/rungs)'))
-    print('-' * 90)
+    print('%-18s %6s  %s' % ('snapshot', 'window', 'edge/quotable/rungs per series'))
+    print('-' * 110)
 
     tot_over = tot_measured = 0
     fallbacks = 0
@@ -485,26 +549,22 @@ def main():
             print('%-18s  %s' % (s['stamp'], s['error']))
             continue
         cells = []
-        for v in ('BTC', 'ETH'):
-            d = s['series'].get(v, {})
+        for label, _tk, _cc in SERIES:
+            d = s['series'].get(label, {})
             if 'error' in d:
-                cells.append('%-30s' % d['error'][:30])
-            else:
-                mark = '' if d['discount_estimated'] else '!'
-                if not d['discount_estimated']:
-                    fallbacks += 1
-                cells.append('%-30s' % ('%d/%d/%d  (env %.3f  kfee %.4f)'
-                                        % (d['exceeding'], d['quotable'], d['measured'],
-                                           d['mean_envelope'] or 0,
-                                           d['mean_kalshi_fee'] or 0)))
-                tot_over += d['exceeding']
-                tot_measured += d['measured']
-        print('%-18s %6s  %s %s' % (s['stamp'], s['window'], cells[0], cells[1]))
-        for v in ('BTC', 'ETH'):
-            d = s['series'].get(v, {})
+                continue
+            if not d['discount_estimated']:
+                fallbacks += 1
+            cells.append('%s %d/%d/%d gap %.0fh'
+                         % (label, d['exceeding'], d['quotable'], d['measured'],
+                            d['expiry_gap_hours']))
+            tot_over += d['exceeding']
+            tot_measured += d['measured']
             if d.get('off_grid'):
-                print('%-18s  ::warning:: %s: %d quotes off the published price grid'
-                      % ('', v, d['off_grid']))
+                print('::warning::%s %s: %d quotes off the published price grid'
+                      % (s['stamp'], label, d['off_grid']))
+        if cells:
+            print('%-18s %6s  %s' % (s['stamp'], s['window'], ' | '.join(cells)))
 
     print('-' * 90)
     print('TOTAL: %d / %d rung-observations show a positive edge at quoted prices'
