@@ -21,6 +21,7 @@ import unittest
 sys.path.insert(0, os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'scripts'))
 
+import archive
 import fees
 import measure_band
 import measure_exhaustive
@@ -624,6 +625,42 @@ class KalshiFees(unittest.TestCase):
         """No order size rescues an edge smaller than the asymptotic fee."""
         rate = fees.rate(0.50)
         self.assertIsNone(fees.min_contracts(0.50, rate * 0.5))
+
+
+class MirrorIsolation(unittest.TestCase):
+    """DIVERGENCE_RAW moves every READER to the private mirror. It must never
+    move the DELETER.
+
+    prune_archive.py computes its own RAW from its own file location and does
+    not import archive.py. If someone ever "tidies" that duplication away, an
+    environment variable set to point at the mirror would point the pruner at
+    it too, and the mirror is the only copy of everything older than fourteen
+    days. These tests exist so that tidying fails loudly.
+    """
+
+    def test_the_reader_honours_the_environment(self):
+        self.assertTrue(hasattr(archive, 'RAW'))
+        self.assertIn('DIVERGENCE_RAW', open(archive.__file__, encoding='utf-8').read(),
+                      'archive.RAW must be overridable')
+
+    def test_the_pruner_does_not_import_the_reader(self):
+        src = open(prune_archive.__file__, encoding='utf-8').read()
+        self.assertNotIn('from archive import', src)
+        self.assertNotIn('import archive', src)
+
+    def test_the_pruner_never_reads_the_environment(self):
+        """Its RAW is derived from __file__ and nothing else."""
+        src = open(prune_archive.__file__, encoding='utf-8').read()
+        self.assertNotIn('DIVERGENCE_RAW', src)
+        self.assertNotIn('environ', src)
+
+    def test_the_two_roots_are_the_same_when_unset(self):
+        """With no override the pruner and the reader must agree, or the
+        window would be bounded somewhere the measurements are not reading."""
+        if os.environ.get('DIVERGENCE_RAW'):
+            self.skipTest('override is set; the roots are meant to differ')
+        self.assertEqual(os.path.abspath(archive.RAW),
+                         os.path.abspath(prune_archive.RAW))
 
 
 if __name__ == '__main__':
