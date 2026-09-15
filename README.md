@@ -50,7 +50,7 @@ repository — nothing is typed in by hand.
 |---|---|---|
 | Kalshi year-end buckets | 3 of 44 rungs show an edge at quoted prices after both venues' fees, in 45 of 45 observations each. Worth **$4.69** in total at the resting size. | model-free |
 | The same, against BOTH bracketing expiries | only **1 of the 3** clears the option value at either end. The other two cannot be separated from a seven-day expiry gap. | model-free |
-| Polymarket dailies | 27.1% of rung-observations beat the old band, but 247 of 316 rungs are inconsistent | model-free, noisy |
+| Polymarket dailies | 10.3% of quotable rungs show an edge under the same test. Was **24.2%** until the same repairs reached this script; more than half of it was method (D-085). | model-free, noisy |
 | Long-horizon touch bound | 0.2% arithmetic violations; 94.9% above the 2x bound | model-dependent, weak |
 
 The three Kalshi rungs are all tails: BTC above $150k, ETH above $5k, ETH **below**
