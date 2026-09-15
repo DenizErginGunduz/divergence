@@ -169,12 +169,12 @@ def run(stamp, stab):
                 # real violation the terminal has to come straight from option
                 # prices (the D-025 digital approach).
                 d = digital(ch, expiry, A, F, idx, D)
-                if not d or d['p'] <= 0:
+                if not d or d['dsp'] <= 0:
                     continue
                 pm = (float(bid) + float(ask)) / 2
                 if pm <= 0:
                     continue
-                terminal = d['p']
+                terminal = d['dsp']
                 ratio = pm / terminal
                 out['measured'] += 1
                 # VIOLATION: the probability of touching before expiry cannot be
