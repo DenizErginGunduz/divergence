@@ -252,14 +252,65 @@ trade against 790.
 concentration work needs, and both are already public on-chain — the hash is
 also what lets somebody else verify a row.
 
-This is the **only** deliberate exception to rule 2 (raw data stored as it
-arrives). It is allowed because the rule exists so that a changed methodology
+This is one of **two** deliberate exceptions to rule 2 (raw data stored as it
+arrives); `holders/` below is the other. It is allowed because the rule exists so that a changed methodology
 can be recomputed from the archive, and none of the dropped fields can enter a
 recomputation of a price, a probability or a fee. Files written before
 2026-09-16 still contain them.
 
 Per-run files rather than one appended file: git stores whole blobs, so appending to a
 growing file would re-store the entire history on every commit.
+
+---
+
+## `holders/` — who is on each side
+
+Gzipped JSON, fetched **once a day** at 05:00 UTC (three runs a day write every other
+stream; this one writes on the first). An object keyed by `conditionId`, each value a
+list of token groups, each group a list of holders. Up to 80 conditions, `limit=100`
+holders per token.
+
+```json
+{
+  "0xa1b2...": [
+    {
+      "token": "45438797913102633064...",
+      "holders": [
+        { "proxyWallet": "0x6dd4...", "amount": 153639.106938, "outcomeIndex": 0 }
+      ]
+    }
+  ]
+}
+```
+
+Three fields, and that is the whole row. **From archive version 5 (2026-09-16) eight
+vendor fields are dropped before writing** (D-088):
+
+| dropped | why |
+|---|---|
+| `name`, `pseudonym`, `bio`, `profileImage`, `profileImageOptimized`, `displayUsernamePublic`, `verified` | somebody's profile, not market data. `name` was populated on 9,622 of 10,409 rows in one file; `profileImageOptimized` on 0 of them. Nothing here reads any of them. 48.4% of the field bytes. |
+| `asset` | the token id, repeated on every holder row, and already the key of the group the row sits in. Equal on 10,409 of 10,409 rows, 0 mismatches — so this removal is **lossless**, unlike the one above. 25.1% of the field bytes. |
+
+Measured on the real 2026-09-15T0505Z file: 3,696,191 plain bytes → 1,010,677
+(−72.7%), 648,806 gzipped → 267,123 (−58.8%).
+
+`proxyWallet` is KEPT, for the reason given under `events/trades/`.
+
+This is the second deliberate exception to rule 2, on the same narrow grounds: a
+holder's display name cannot enter a recomputation of a price, a probability or a
+fee. Files written before 2026-09-16 still contain all of it.
+
+### Two things a reader must know before using this stream
+
+**It is a top-100 truncation, not a holder set.** 77 of 150 token groups in the file
+measured were at the `limit=100` cap. There is no tail and no total, so a Gini, an
+HHI or a true largest-holder share cannot be computed from it — only "how much do
+the top 100 hold". B-007 assumed otherwise.
+
+**A `null` value is not an empty market.** One condition returned a JSON `null` body
+rather than a list. It is stored exactly as it arrived, so `null` and "nobody holds
+this" look alike in the file. `_meta.holders_unexpected` counts these per run:
+`null` means the stage did not run, `0` means it ran and every payload was a list.
 
 ---
 
