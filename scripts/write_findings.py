@@ -138,10 +138,20 @@ def measure_band_all(all_stamps):
     return {t: band_block(rows[t], stabs[t]) for t in rows if rows[t]}
 
 def measure_polymarket_all(all_stamps):
+    """Polymarket terminal ladders, under the SAME test as Kalshi (D-085).
+
+    Until 2026-09-15 this block was computed with the pre-repair method: the
+    old discount convention, a 1.96*SE band around two mids, and no fee at all
+    on the prediction leg. Its number sat in findings/latest.json beside the
+    repaired Kalshi one as though the two were comparable. They were not.
+    """
     stab = Stability()
-    exceeding = measured = 0
-    near_exceeding = near_measured = 0
+    exceeding = quotable = seen = 0
+    near_exceeding = near_quotable = 0
     touch_excluded = 0
+    skipped = {}
+    envelopes = []
+    venue_fees = []
     for d in all_stamps:
         try:
             s = measure_polymarket.run(d)
@@ -149,24 +159,37 @@ def measure_polymarket_all(all_stamps):
             continue
         touch_excluded += s['touch_excluded']
         for h in s['ladders']:
-            rows = [r for r in h['rows'] if 'opt' in r]
-            if not rows:
-                continue
-            a = sum(1 for r in rows if r['exceeds'])
-            exceeding += a
-            measured += len(rows)
-            if abs(h['gap_hours']) <= 12:
-                near_exceeding += a
-                near_measured += len(rows)
-            for r in rows:
+            seen += len(h['rows'])
+            for r in h['rows']:
+                if 'exceeds' not in r:
+                    why = r.get('skipped', 'unknown')
+                    skipped[why] = skipped.get(why, 0) + 1
+                    continue
+                quotable += 1
+                envelopes.append(r['envelope'])
+                venue_fees.append(r['venue_fee'])
+                if r['exceeds']:
+                    exceeding += 1
+                if abs(h['gap_hours']) <= 12:
+                    near_quotable += 1
+                    if r['exceeds']:
+                        near_exceeding += 1
                 stab.add('%s:%s:%g' % (h['asset'], h['end'], r['K']), r['exceeds'])
     return {
         'model_free': True,
-        'exceeding': exceeding, 'measured': measured,
-        'percent': round(100.0 * exceeding / measured, 1) if measured else None,
-        'gap_12h_exceeding': near_exceeding, 'gap_12h_measured': near_measured,
-        'gap_12h_percent': round(100.0 * near_exceeding / near_measured, 1)
-        if near_measured else None,
+        # 'measured' is every rung the ladders offered; 'quotable' is the ones
+        # that produced a verdict. A rung with a one-sided option quote or an
+        # unrecognised fee schedule is neither evidence nor a zero.
+        'measured': seen, 'quotable': quotable, 'exceeding': exceeding,
+        'percent': round(100.0 * exceeding / quotable, 1) if quotable else None,
+        'gap_12h_exceeding': near_exceeding, 'gap_12h_quotable': near_quotable,
+        'gap_12h_percent': round(100.0 * near_exceeding / near_quotable, 1)
+        if near_quotable else None,
+        'mean_envelope': round(sum(envelopes) / len(envelopes), 4)
+        if envelopes else None,
+        'mean_venue_fee': round(sum(venue_fees) / len(venue_fees), 5)
+        if venue_fees else None,
+        'skipped': skipped,
         'touch_ladders_excluded': touch_excluded,
         'stability': stability_summary(stab),
     }
