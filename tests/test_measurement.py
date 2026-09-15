@@ -505,7 +505,16 @@ class TradeAtQuotedPrices(unittest.TestCase):
         top = h['rows'][-1]
         self.assertTrue(top['exceeds'])
         self.assertEqual(top['direction'], 'sell prediction')
-        self.assertAlmostEqual(top['edge'], 0.50 - (0.0344 + 0.006), places=9)
+        # Gross first: prediction bid, minus the bucket bought at its ask side,
+        # minus the two Deribit legs.
+        self.assertAlmostEqual(top['gross_edge'], 0.50 - (0.0344 + 0.006), places=9)
+        # Then Kalshi's taker fee on the contract actually traded, at its own
+        # price. 0.07 * 0.50 * 0.50 = 0.0175, the most expensive point on the
+        # whole schedule.
+        self.assertAlmostEqual(top['kalshi_fee'], 0.0175, places=9)
+        self.assertAlmostEqual(top['edge'], top['gross_edge'] - 0.0175, places=9)
+        # A 44-cent edge does not need size to survive a one-cent round-up.
+        self.assertEqual(top['min_size'], 1)
 
     def test_a_fair_prediction_quote_is_not_an_edge(self):
         """The bucket's mid is 0.02 and the prediction is quoted 0.01/0.03
@@ -525,7 +534,12 @@ class TradeAtQuotedPrices(unittest.TestCase):
         for r in h['rows']:
             recomputed = max(r['pm_bid'] - (r['opt_high'] + r['fee']),
                              (r['opt_low'] - r['fee']) - r['pm_ask'])
-            self.assertAlmostEqual(r['edge'], recomputed, places=12)
+            self.assertAlmostEqual(r['gross_edge'], recomputed, places=12)
+            # The Kalshi fee is charged at the quote actually hit, never at
+            # the mid — that is the other half of "no mid in the verdict".
+            price = r['pm_bid'] if r['direction'] == 'sell prediction' else r['pm_ask']
+            self.assertAlmostEqual(r['kalshi_fee'], fees.rate(price, 'KXBTCY'), places=12)
+            self.assertAlmostEqual(r['edge'], r['gross_edge'] - r['kalshi_fee'], places=12)
 
     def test_the_synthetic_ladder_still_sums_to_d(self):
         """The ladder partitions the line, so D-073 applies here too. If this
