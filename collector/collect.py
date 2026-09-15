@@ -158,12 +158,33 @@ def kalshi():
         KALSHI_OBSERVED_PATTERN, (x.get('title') or '') + ' ' + ' '.join(x.get('tags') or []), re.I)))
     crypto = crypto[:KALSHI_SERIES_CAP]
     observed = observed[:KALSHI_SERIES_CAP // 3]
-    out['selection'] = {'crypto': crypto, 'observed': observed}
+    out['selection'] = {'crypto': crypto, 'observed': observed,
+                        'truncated': [], 'open_pass_errors': {}}
+
+    PAGES, PER_PAGE = 5, 200
+    CAP = PAGES * PER_PAGE
 
     def markets(t):
+        """Every market of one series.
+
+        NO status filter on the main pass: resolved markets come too, and the
+        resolution outcomes ARE the calibration data set.
+
+        But the main pass stops at 5 x 200 = 1,000 rows, and for a busy series
+        Kalshi fills those rows with markets that are not tradable now.
+        Measured 2026-09-15: KXBTCD returned 1,000 of 1,000 'initialized', so
+        not one live daily quote had ever been archived, and KXBTC15M returned
+        946 finalized against 1 active. That is why the validation inventory
+        found 88 usable pairs out of 4,657 resolved markets (D-080).
+
+        So when the cap is hit — and only then — one more call asks for the
+        OPEN markets explicitly. Truncated series pay for it and the rest do
+        not, which keeps the sync window, itself a measured quality number,
+        from widening for nothing.
+        """
         page, cursor, all_rows = 0, '', []
-        while page < 5:
-            u = '%s/markets?series_ticker=%s&limit=200' % (KALSHI, t)
+        while page < PAGES:
+            u = '%s/markets?series_ticker=%s&limit=%d' % (KALSHI, t, PER_PAGE)
             if cursor:
                 u += '&cursor=%s' % cursor
             d = get(u, timeout=30)
@@ -173,6 +194,22 @@ def kalshi():
             if not cursor or not m:
                 break
             page += 1
+        if len(all_rows) < CAP:
+            return all_rows
+        out['selection']['truncated'].append(t)
+        try:
+            d = get('%s/markets?series_ticker=%s&status=open&limit=%d'
+                    % (KALSHI, t, PER_PAGE), timeout=30)
+        except Exception as e:
+            # Recorded, not swallowed: the main pass still stands, but a run
+            # where this failed has no live quotes for a truncated series and
+            # must not be mistaken for one where none existed.
+            out['selection']['open_pass_errors'][t] = str(e)[:150]
+            return all_rows
+        seen = set(r.get('ticker') for r in all_rows)
+        for r in (d.get('markets') or []):
+            if r.get('ticker') not in seen:
+                all_rows.append(r)
         return all_rows
 
     for key, tickers in (('markets', crypto), ('observed', observed)):
