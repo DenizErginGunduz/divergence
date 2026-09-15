@@ -10,6 +10,8 @@ This module answers one question: how do we read a snapshot off disk.
 Measurement scripts no longer fetch anything; they only compute. Raw data is
 never rewritten, so the same snapshot always yields the same number.
 
+Set DIVERGENCE_RAW to read a different archive root; see RAW below.
+
 Usage:
     from archive import snapshot, stamps
     g = snapshot()                       # newest
@@ -22,7 +24,17 @@ import json
 import os
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-RAW = os.path.join(ROOT, 'raw')
+
+# Where the raw archive lives. Overridable so that a measurement can run against
+# the private mirror, which holds every snapshot since 2026-08-30, instead of the
+# 14-day rolling window the public repository keeps for data rights
+# (docs/DATA_SOURCES.md). Everything in this module goes through RAW, so a single
+# environment variable moves every measurement script at once.
+#
+# prune_archive.py deliberately does NOT import this. It computes its own RAW
+# from its own location, so no environment variable can ever point the DELETER
+# at the mirror. tests/test_measurement.py pins that separation.
+RAW = os.environ.get('DIVERGENCE_RAW') or os.path.join(ROOT, 'raw')
 
 STREAMS = {
     'kalshi': 'kalshi',
