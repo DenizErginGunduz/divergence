@@ -204,45 +204,32 @@
   },
   "polymarket_terminal": {
    "model_free": true,
-   "exceeding": 1432,
-   "measured": 5927,
-   "percent": 24.2,
-   "gap_12h_exceeding": 1110,
-   "gap_12h_measured": 4218,
-   "gap_12h_percent": 26.3,
+   "measured": 7420,
+   "quotable": 4561,
+   "exceeding": 470,
+   "percent": 10.3,
+   "gap_12h_exceeding": 253,
+   "gap_12h_quotable": 3038,
+   "gap_12h_percent": 8.3,
+   "mean_envelope": 0.0462,
+   "mean_venue_fee": 0.00646,
+   "skipped": {
+    "outside the strike range": 1464,
+    "no two-sided option quote": 1395
+   },
    "touch_ladders_excluded": 1035,
    "stability": {
-    "distinct_rungs": 399,
-    "total_observations": 5927,
-    "observations_per_rung": 14.9,
-    "always_exceeds": 9,
-    "sometimes_exceeds": 298,
-    "never_exceeds": 92,
+    "distinct_rungs": 390,
+    "total_observations": 4561,
+    "observations_per_rung": 11.7,
+    "always_exceeds": 3,
+    "sometimes_exceeds": 173,
+    "never_exceeds": 214,
     "always_exceeding_list": [
      {
-      "rung": "BTC:2026-08-31:74000",
-      "observations": 7,
-      "exceeding": 7
-     },
-     {
-      "rung": "BTC:2026-08-31:86000",
-      "observations": 3,
-      "exceeding": 3
-     },
-     {
-      "rung": "ETH:2026-08-31:2800",
-      "observations": 3,
-      "exceeding": 3
-     },
-     {
-      "rung": "ETH:2026-09-01:2800",
-      "observations": 8,
-      "exceeding": 8
-     },
-     {
-      "rung": "ETH:2026-09-02:2700",
-      "observations": 11,
-      "exceeding": 10
+      "rung": "ETH:2026-09-05:1900",
+      "observations": 4,
+      "exceeding": 4
      },
      {
       "rung": "ETH:2026-09-08:2100",
@@ -250,19 +237,9 @@
       "exceeding": 2
      },
      {
-      "rung": "BTC:2026-09-13:90000",
+      "rung": "ETH:2026-09-09:2900",
       "observations": 2,
       "exceeding": 2
-     },
-     {
-      "rung": "ETH:2026-09-13:3000",
-      "observations": 2,
-      "exceeding": 2
-     },
-     {
-      "rung": "ETH:2026-09-14:2900",
-      "observations": 4,
-      "exceeding": 4
      }
     ]
    }
