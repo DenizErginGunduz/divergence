@@ -424,5 +424,115 @@ class ExhaustivenessTargetsD(unittest.TestCase):
         self.assertNotEqual(PARITY_D, 1.0)
 
 
+def kalshi_ladder(quotes):
+    """A three-rung Kalshi ladder over the parity chain: below 80k, the middle,
+    above 120k. quotes is a list of (bid, ask) in dollars, one per rung.
+
+    The close time is after the option expiry so that rungs() will select
+    25DEC26 — the same "nearest expiry not past the close" rule as production.
+    """
+    fields = [
+        ('KXBTCY-TEST-T80000.00', 'less', None, 80000.0),
+        ('KXBTCY-TEST-B100000', 'between', 80000.0, 119999.99),
+        ('KXBTCY-TEST-T119999.99', 'greater', 119999.99, None),
+    ]
+    M = []
+    for (ticker, kind, fl, cap), (bid, ask) in zip(fields, quotes):
+        M.append({'ticker': ticker, 'status': 'active',
+                  'close_time': '2027-01-01T05:00:00Z',
+                  'strike_type': kind, 'floor_strike': fl, 'cap_strike': cap,
+                  'yes_bid_dollars': bid, 'yes_ask_dollars': ask})
+    return {'markets': {'KXBTCY': M}}
+
+
+class TradeAtQuotedPrices(unittest.TestCase):
+    """The friction band stopped being a statistic and became a trade.
+
+    1.96*SE measured how uncertain our estimate of the mid was — a question
+    nobody can trade on. What replaced it is two trades priced at quotes that
+    exist. These tests pin the direction of the envelope, because a reversed
+    bid/ask pairing leaves every number plausible: still positive, still the
+    right size, just inside out.
+
+    On the numbers below: the top rung's bucket costs at most 0.0344 to buy
+    and the two option legs cost 0.006 in fees, so a prediction bid of 0.50 is
+    an edge and a bid of 0.01 against an ask of 0.03 is not.
+    """
+
+    def test_low_below_mid_and_high_above_on_the_call_side(self):
+        ch, idx = measure_band.chain(parity_chain(), 'BTC')
+        d = measure_band.digital(ch, EXPIRY, 120000.0, PARITY_F, idx, PARITY_D)
+        self.assertLess(d['low'], d['p'])
+        self.assertGreater(d['high'], d['p'])
+        self.assertAlmostEqual(d['p'], 0.02, places=9)
+
+    def test_low_below_mid_and_high_above_on_the_put_side(self):
+        """80,000 is under the forward, so this is the put branch — the one
+        where the spread is SUBTRACTED and the bid/ask pairing inverts."""
+        ch, idx = measure_band.chain(parity_chain(), 'BTC')
+        d = measure_band.digital(ch, EXPIRY, 80000.0, PARITY_F, idx, PARITY_D)
+        self.assertLess(d['low'], d['p'])
+        self.assertGreater(d['high'], d['p'])
+        self.assertAlmostEqual(d['p'], 0.97, places=9)
+
+    def test_the_envelope_is_the_cost_of_the_two_legs(self):
+        """Width = (spread of leg A + spread of leg B) / w. Not 1.96 of
+        anything, and not a confidence interval."""
+        ch, idx = measure_band.chain(parity_chain(), 'BTC')
+        d = measure_band.digital(ch, EXPIRY, 120000.0, PARITY_F, idx, PARITY_D)
+        C = ch[EXPIRY]['C']
+        a, b = 115000.0, 125000.0
+        expected = ((C[a]['ask'] - C[a]['bid']) + (C[b]['ask'] - C[b]['bid'])) / (b - a)
+        self.assertAlmostEqual(d['high'] - d['low'], expected, places=9)
+
+    def test_one_sided_quotes_produce_no_envelope(self):
+        """A leg quoted on one side only has no executable price. The answer
+        is None — a refusal — not a zero-width envelope."""
+        raw = parity_chain()
+        for row in raw['BTC']['book_summary']['result']:
+            if row['instrument_name'].endswith('-115000-C'):
+                row['bid_price'] = None
+        ch, idx = measure_band.chain(raw, 'BTC')
+        d = measure_band.digital(ch, EXPIRY, 120000.0, PARITY_F, idx, PARITY_D)
+        self.assertIsNotNone(d['p'], 'the mid still exists')
+        self.assertIsNone(d['low'])
+        self.assertIsNone(d['high'])
+
+    def test_a_rich_prediction_bid_is_an_edge_on_the_sell_side(self):
+        KA = kalshi_ladder([(0.01, 0.03), (0.90, 0.95), (0.50, 0.52)])
+        h = measure_band.rungs(KA, parity_chain(), 'KXBTCY', 'BTC')
+        top = h['rows'][-1]
+        self.assertTrue(top['exceeds'])
+        self.assertEqual(top['direction'], 'sell prediction')
+        self.assertAlmostEqual(top['edge'], 0.50 - (0.0344 + 0.006), places=9)
+
+    def test_a_fair_prediction_quote_is_not_an_edge(self):
+        """The bucket's mid is 0.02 and the prediction is quoted 0.01/0.03
+        around it. Under the old rule this was a coin toss decided by 1.96*SE;
+        under the new one neither trade survives its own spread."""
+        KA = kalshi_ladder([(0.01, 0.03), (0.90, 0.95), (0.50, 0.52)])
+        h = measure_band.rungs(KA, parity_chain(), 'KXBTCY', 'BTC')
+        bottom = h['rows'][0]
+        self.assertFalse(bottom['exceeds'])
+        self.assertLess(bottom['edge'], 0)
+
+    def test_no_mid_is_used_in_the_verdict(self):
+        """Moving the prediction mid without moving either quote must not
+        change anything, because the verdict never reads it."""
+        KA = kalshi_ladder([(0.01, 0.03), (0.90, 0.95), (0.50, 0.52)])
+        h = measure_band.rungs(KA, parity_chain(), 'KXBTCY', 'BTC')
+        for r in h['rows']:
+            recomputed = max(r['pm_bid'] - (r['opt_high'] + r['fee']),
+                             (r['opt_low'] - r['fee']) - r['pm_ask'])
+            self.assertAlmostEqual(r['edge'], recomputed, places=12)
+
+    def test_the_synthetic_ladder_still_sums_to_d(self):
+        """The ladder partitions the line, so D-073 applies here too. If this
+        breaks, the fixture is wrong and the two tests above mean nothing."""
+        KA = kalshi_ladder([(0.01, 0.03), (0.90, 0.95), (0.50, 0.52)])
+        h = measure_band.rungs(KA, parity_chain(), 'KXBTCY', 'BTC')
+        self.assertAlmostEqual(h['total'], PARITY_D, places=9)
+
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
