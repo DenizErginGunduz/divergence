@@ -1995,3 +1995,102 @@ finds an archived field missing can see it was a decision and read the reason.
 and it has not been looked at row by row. Whatever this record says about
 `events/` probably applies there too, and that inspection is the obvious next
 thing rather than an assumption.
+
+## D-088 — The holders file said who was holding which side, right now
+**Date:** 2026-09-16 · **Produced by:** `collector/collect.py` · archive version 5
+
+D-087 closed the `events/` half of the storage question and left this one open on
+purpose: "whatever this record says about `events/` probably applies there too, and
+that inspection is the obvious next thing rather than an assumption." This is the
+inspection. Most of it confirms D-087. Two things in it do not.
+
+### What one holders file actually contains
+`raw/holders/2026-09-15/holders_2026-09-15T0505Z.json.gz`, the newest one at the
+time of writing: 651,398 gzipped bytes, 3.70 MB plain, 80 conditions, 150 token
+groups, **10,409 holder rows, 5,864 distinct wallets**. Per row:
+
+    proxyWallet, amount, outcomeIndex
+    name, pseudonym, bio, profileImage, profileImageOptimized,
+    displayUsernamePublic, verified
+    asset
+
+`name` populated on 9,622 of 10,409 rows, `pseudonym` on 9,559, `bio` on 788.
+`profileImageOptimized` populated on **0** rows: the key and its empty string were
+stored 10,409 times a day for nothing. `verified` was true twice.
+
+The first line is 26.5% of the field bytes. The other two are the rest.
+
+### Why this stream is worse than the trade tape, not better
+A trade is something that already happened. A holding is a position that is open
+**now**. So each row named an account and said which side of a threshold it is
+sitting on and how much of it — refreshed daily, published, and mirrored. D-087's
+argument applies here with more force, not less.
+
+### Two categories of removal, kept apart
+**Profile — not recoverable, and not wanted.** `name`, `pseudonym`, `bio`,
+`profileImage`, `profileImageOptimized`, `displayUsernamePublic`, `verified`.
+48.4% of the field bytes. Nothing in this project reads any of them.
+
+**Redundant — exactly recoverable.** `asset` is the token id, repeated on every
+holder row, and it is already the key of the group the row sits inside. Checked:
+equal on **10,409 of 10,409 rows, 0 mismatches**. Removing it loses nothing at all;
+a reader can put it back from the key. 25.1% of the field bytes.
+
+These are not the same act and the code does not pretend they are. The second is
+compression. The first is a deliberate loss, and it is the one that needs the
+justification below.
+
+**Kept:** `proxyWallet`, `amount`, `outcomeIndex`. Same reasoning as D-087 — the
+wallet is an actor key that B-007 needs, it is already on-chain public, and it is
+not a profile.
+
+### Measured effect
+Applied to the real 2026-09-15T0505Z file: 3,696,191 plain bytes → 1,010,677
+(**−72.7%**), 648,806 gzipped → 267,123 (**−58.8%**). Field-byte prediction was
+−73.5%; the gap is the JSON structure outside the holder rows, which does not move.
+
+The pipeline itself is verified by the next scheduled holders fetch, 05:05 UTC.
+The stage runs once a day and today's had already run when the change landed, so
+unlike D-087 this one is not yet confirmed end-to-end. Stated rather than implied.
+
+### The first thing the inspection found that is not about storage
+**77 of the 150 token groups are at the `limit=100` cap.** The collector asks for
+a hundred holders and a hundred is what it gets, so for more than half the tokens
+this file is a *top-100 truncation*, not a holder set.
+
+That matters for what the stream can ever answer. A concentration measure — a
+Gini, an HHI, a true "share held by the largest wallets" — needs the tail or at
+least the total. This file has neither. B-007 was written assuming holders data
+would support it; on today's collector it supports "how much do the top 100 hold"
+and nothing below that line.
+
+Not fixed here, because raising the limit is a scope change and rule 5 applies.
+Recorded in `docs/BACKLOG.md` against B-007 so the assumption is not carried
+silently into whoever does that work.
+
+### The second thing
+One condition — `0x47914796a7…` — had a **JSON `null` body**. Not an exception, so
+the `try/except` around the fetch never saw it, and `null` was archived
+indistinguishably from "nobody holds this". One in eighty on the day it was
+looked at; unknown on the other thirteen days, because nothing counted.
+
+The payload is still written exactly as it arrived. What is new is a count:
+`holders_unexpected` in `_meta`, `None` on runs where the stage was skipped rather
+than `0`, so "not fetched" and "fetched, all fine" are different values. Rule 7 —
+the hole is surfaced, not closed.
+
+### What this does not undo
+Fourteen days of holders files already published still carry the profile fields,
+and so do the trade files written before D-087. Two separate horizons:
+
+- The **working tree** heals itself. `scripts/prune_archive.py` deletes whole day
+  folders older than 14 days across every stream, so the last file containing this
+  data leaves `main` around 2026-09-29 without anyone doing anything.
+- **Git history does not.** As `prune_archive.py` says in its own docstring, a
+  deletion commit does not remove the blob. Anyone cloning the full history still
+  gets it. Removing it there means rewriting published history, which breaks every
+  existing clone and every commit SHA this project has cited.
+
+That trade is not made here. It is a call for the repository owner, it is
+destructive and irreversible, and the cost side of it is real. Written down so the
+choice is visible rather than assumed away.
