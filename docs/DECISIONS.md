@@ -1808,3 +1808,84 @@ session for an unrelated reason — a virtualised CI log cannot be read past its
 first screen — and it caught a silent regression within the hour. That is the
 argument for D-070's rule holding generally: a number that only exists in a log
 is a number nobody checks.
+
+## D-085 — The Polymarket side had never been repaired, and it was half artefact
+**Date:** 2026-09-15 · **Produced by:** `scripts/measure_polymarket.py` · `scripts/fees.py`
+
+Everything from D-073 to D-084 was applied to `measure_band.py` and to the page.
+None of it was applied to `measure_polymarket.py`. Its number sat in the same
+`findings/latest.json` as the repaired one, formatted the same way, and nobody
+looked — including me, for two weeks.
+
+### What it was still doing
+| | Kalshi side | Polymarket side, until today |
+|---|---|---|
+| discount convention (D-073) | repaired | **absent** — `digital()` called without `D`, so the put branch returned the old quantity |
+| trade at quoted prices (D-076) | yes | **`1.96 * SE` around two mids** |
+| both venues' fees (D-077) | yes | prediction leg **free** |
+| expiry chosen by instant (D-082) | yes | day arithmetic with a hardcoded 8-hour offset |
+
+### Polymarket charges a taker fee, and the schedule was in our own archive
+The code carried this comment: *"Polymarket maker fee is treated as 0."* That
+confuses a maker rebate with a taker fee. Every market in the archived payload
+carries its own schedule, and has all along:
+
+    feesEnabled: true
+    feeType:     "crypto_fees_v2"
+    feeSchedule: {"exponent": 1, "rate": 0.07, "takerOnly": true,
+                  "rebateRate": 0.2}
+
+    fee = C x rate x p x (1 - p)
+
+Confirmed against Polymarket's published documentation. It is the **same
+formula and the same 0.07 coefficient as Kalshi**, taker only — and our trades
+cross the spread, so it applies. The measured average over the archive is
+**0.65 cents per share**, against edges of the same order.
+
+`fees.polymarket_rate()` reads the schedule from the market rather than hardcoding
+it: Polymarket sets it per market and has already moved the crypto rate once
+(0.072 to 0.07). It returns **None, not zero**, for a missing or unrecognised
+schedule, and those rungs are skipped rather than scored.
+
+### What the repair did to the number
+| | before | after |
+|---|---|---|
+| rungs with a verdict | 5,927 | 4,561 quotable of 7,420 |
+| exceeding | 1,432 | 470 |
+| **share** | **24.2%** | **10.3%** |
+| well-matched expiry (gap ≤ 12 h) | 26.3% | **8.3%** |
+| always / sometimes / never | 9 / 298 / 92 | **3 / 173 / 214** |
+
+More than half of it was method. The mass moved decisively from "sometimes" to
+"never": 92 rungs never cleared the old band, 214 never clear the new one. The
+three that always do have two to four observations each, which the stability
+module reports and which is not enough to call anything.
+
+### The sanity check that had been failing silently
+Look at the well-matched subset. A tighter expiry match should REDUCE apparent
+divergence — less of the gap can be the clock. Under the old method it went the
+other way: 26.3% against 24.2% overall, so the better-matched contracts
+disagreed *more*. That should have been read as a warning about the method.
+Under the repaired test it points the right way, 8.3% against 10.3%.
+
+Nobody noticed the sign because there was no reason to look at it. It is worth
+recording as a class of error: a number can be wrong in a way that is only
+visible in its relationship to another number, and neither one looks odd alone.
+
+### What this does and does not settle
+It does **not** say Polymarket and Kalshi are the same. 10.3% against the Kalshi
+year-end 6.8% is not a like-for-like comparison — different tenor, different
+ladder shape, different expiry alignment. Comparing them properly is a separate
+measurement.
+
+It does say that the Polymarket figure this project has been carrying was
+roughly half method. And it removes the asymmetry that made any statement about
+Polymarket unsafe: both venues are now measured by the same test, with both
+fee schedules, at instants rather than dates.
+
+### Why this was found at all
+Only because the question "should we apply for a Polymarket grant" forced a look
+at what the Polymarket measurement actually did. A repair programme that fixes
+the code it is looking at and leaves its neighbour untouched produces exactly
+this: one number that has survived scrutiny and one that has never been asked.
+Both in the same file, both rendered to one decimal place.
