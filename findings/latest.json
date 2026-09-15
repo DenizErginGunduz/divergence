@@ -28,6 +28,9 @@
     "ladders": [
      "exhaustive"
     ],
+    "expiry_side": [
+     "before"
+    ],
     "series": [
      "BTC year-end",
      "ETH year-end"
@@ -54,6 +57,146 @@
        "rung": "ETH year-end:KXETHY-27JAN0100-T4999.99",
        "observations": 55,
        "exceeding": 55
+      }
+     ]
+    }
+   },
+   "intraday": {
+    "model_free": true,
+    "exceeding": 65,
+    "measured": 625,
+    "quotable": 516,
+    "percent": 12.6,
+    "percent_of_all_rungs": 10.4,
+    "mean_envelope": 0.1277,
+    "edge_value_max": 330.74,
+    "edge_value_median": 18.53,
+    "edge_value_total": 2817.89,
+    "off_grid_quotes": 0,
+    "mean_density": 0.9904,
+    "mean_discount_factor": 0.999906,
+    "discount_fallbacks": 0,
+    "expiry_gap_hours_median": -18.0,
+    "ladders": [
+     "cumulative",
+     "exhaustive"
+    ],
+    "expiry_side": [
+     "after"
+    ],
+    "series": [
+     "BTC intraday",
+     "BTC intraday cum",
+     "ETH intraday",
+     "ETH intraday cum"
+    ],
+    "stability": {
+     "distinct_rungs": 625,
+     "total_observations": 625,
+     "observations_per_rung": 1.0,
+     "always_exceeds": 65,
+     "sometimes_exceeds": 0,
+     "never_exceeds": 560,
+     "always_exceeding_list": [
+      {
+       "rung": "BTC intraday cum:KXBTCD-26SEP1510-T72999.99",
+       "observations": 1,
+       "exceeding": 1
+      },
+      {
+       "rung": "BTC intraday cum:KXBTCD-26SEP1510-T73099.99",
+       "observations": 1,
+       "exceeding": 1
+      },
+      {
+       "rung": "BTC intraday cum:KXBTCD-26SEP1510-T73199.99",
+       "observations": 1,
+       "exceeding": 1
+      },
+      {
+       "rung": "BTC intraday cum:KXBTCD-26SEP1510-T73299.99",
+       "observations": 1,
+       "exceeding": 1
+      },
+      {
+       "rung": "BTC intraday cum:KXBTCD-26SEP1510-T73399.99",
+       "observations": 1,
+       "exceeding": 1
+      },
+      {
+       "rung": "BTC intraday cum:KXBTCD-26SEP1510-T73499.99",
+       "observations": 1,
+       "exceeding": 1
+      },
+      {
+       "rung": "BTC intraday cum:KXBTCD-26SEP1510-T73599.99",
+       "observations": 1,
+       "exceeding": 1
+      },
+      {
+       "rung": "BTC intraday cum:KXBTCD-26SEP1510-T73699.99",
+       "observations": 1,
+       "exceeding": 1
+      },
+      {
+       "rung": "BTC intraday cum:KXBTCD-26SEP1510-T73799.99",
+       "observations": 1,
+       "exceeding": 1
+      },
+      {
+       "rung": "BTC intraday cum:KXBTCD-26SEP1510-T73899.99",
+       "observations": 1,
+       "exceeding": 1
+      },
+      {
+       "rung": "BTC intraday cum:KXBTCD-26SEP1510-T73999.99",
+       "observations": 1,
+       "exceeding": 1
+      },
+      {
+       "rung": "BTC intraday cum:KXBTCD-26SEP1510-T74499.99",
+       "observations": 1,
+       "exceeding": 1
+      },
+      {
+       "rung": "BTC intraday cum:KXBTCD-26SEP1510-T74999.99",
+       "observations": 1,
+       "exceeding": 1
+      },
+      {
+       "rung": "BTC intraday cum:KXBTCD-26SEP1510-T75099.99",
+       "observations": 1,
+       "exceeding": 1
+      },
+      {
+       "rung": "BTC intraday cum:KXBTCD-26SEP1510-T75199.99",
+       "observations": 1,
+       "exceeding": 1
+      },
+      {
+       "rung": "BTC intraday cum:KXBTCD-26SEP1510-T75299.99",
+       "observations": 1,
+       "exceeding": 1
+      },
+      {
+       "rung": "BTC intraday cum:KXBTCD-26SEP1510-T75399.99",
+       "observations": 1,
+       "exceeding": 1
+      },
+      {
+       "rung": "BTC intraday cum:KXBTCD-26SEP1510-T75499.99",
+       "observations": 1,
+       "exceeding": 1
+      },
+      {
+       "rung": "BTC intraday cum:KXBTCD-26SEP1510-T75599.99",
+       "observations": 1,
+       "exceeding": 1
+      },
+      {
+       "rung": "BTC intraday cum:KXBTCD-26SEP1510-T75699.99",
+       "observations": 1,
+       "exceeding": 1
       }
      ]
     }
