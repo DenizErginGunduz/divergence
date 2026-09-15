@@ -75,6 +75,13 @@ jobs:
       - name: Long-horizon touch bound
         run: python scripts/measure_touch.py
 
+      # Two approximations under every digital: the strike grid it is
+      # differenced across, and the expiry date that is not the settlement
+      # date. Reported as a range, never as a correction — the point of a
+      # sensitivity test is a band.
+      - name: Sensitivity — strike grid and expiry band
+        run: python scripts/measure_sensitivity.py
+
       # Write the results to a file. Logs are not readable (the API needs admin
       # rights, the UI view is virtualised); a file is readable, durable, and the
       # page will read it. Record and screen become inseparable that way.
