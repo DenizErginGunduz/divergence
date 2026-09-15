@@ -1,0 +1,41 @@
+{
+ "archive": {
+  "day_count": 14,
+  "snapshot_count": 46,
+  "first": "2026-09-01T0515Z",
+  "last": "2026-09-15T1302Z"
+ },
+ "produced_by": "scripts/inventory_validation.py",
+ "bound": "The public archive is a 14-day rolling window. These are LOWER BOUNDS; the private mirror holds everything since 2026-08-30 and is not read here.",
+ "resolved_markets_seen": 4657,
+ "markets_with_a_prior_quote": 88,
+ "scorable_observations": 113,
+ "independent_events": 88,
+ "observations_per_independent_event": 1.3,
+ "outcomes": {
+  "yes": 44,
+  "no": 44
+ },
+ "by_series": {
+  "KXBTC15M": 43,
+  "KXETH15M": 42,
+  "KXBTCMAXMON": 1,
+  "KXETHMAXMON": 1,
+  "KXBTCPRICE": 1
+ },
+ "observations_by_series": {
+  "KXBTC15M": 43,
+  "KXETH15M": 42,
+  "KXBTCPRICE": 12,
+  "KXBTCMAXMON": 8,
+  "KXETHMAXMON": 8
+ },
+ "lead_hours": {
+  "min": 0.02,
+  "p25": 0.05,
+  "median": 0.23,
+  "p75": 0.27,
+  "max": 718.75
+ },
+ "snapshots_without_kalshi": 0
+}
