@@ -158,6 +158,43 @@ def forward(ch, expiry, idx, D=1.0):
     return v[len(v) // 2]
 
 
+def on_grid(price, ranges):
+    """Is this quote on the price grid the market says it uses?
+
+    price_ranges is a list of {start, end, step} in dollars. Kalshi does not
+    use one tick everywhere: our year-end ladders report a single uniform
+    0.0010 band, while other markets report finer ticks near 0 and 1
+    ("center_deci_edge_centi_cent"). Reading the field beats assuming a cent.
+
+    Returns None when the market did not publish ranges — unknown, not true.
+    """
+    if not ranges:
+        return None
+    for r in ranges:
+        lo, hi, step = float(r['start']), float(r['end']), float(r['step'])
+        if step <= 0:
+            continue
+        if lo <= price <= hi:
+            steps = (price - lo) / step
+            return abs(steps - round(steps)) < 1e-6
+    return False
+
+
+def size_fp(value):
+    """A Kalshi quantity field, in CONTRACTS.
+
+    The unit is derived, not assumed. yes_ask_size_fp and the quantity at the
+    best NO bid are the SAME number (698.86 at 0.9860 on 2026-09-15). A dollar
+    amount would not survive the yes/no flip — a no order at 0.986 commits
+    0.986 per contract while the same order shows as a yes offer worth 0.014 —
+    but a contract count does. Fractional, hence the two decimals.
+    """
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
 def bracket(o, K):
     """The two neighbouring strikes that bracket K."""
     ks = sorted(o)
@@ -279,6 +316,11 @@ def rungs(KA, D_raw, series, currency):
         dH = digital(ch, expiry, hi, F, idx, D) if hi is not None else edge_H
         bid = float(m['yes_bid_dollars'])
         ask = float(m['yes_ask_dollars'])
+        ranges = m.get('price_ranges')
+        grid_ok = on_grid(bid, ranges) and on_grid(ask, ranges) \
+            if ranges else None
+        bid_size = size_fp(m.get('yes_bid_size_fp'))
+        ask_size = size_fp(m.get('yes_ask_size_fp'))
         pm = (bid + ask) / 2          # reported, never traded on
         spread = ask - bid
         if not dL or not dH:
@@ -295,7 +337,7 @@ def rungs(KA, D_raw, series, currency):
         # upper leg's ask side, and vice versa.
         if None in (dL['low'], dL['high'], dH['low'], dH['high']):
             opt_low = opt_high = edge = None
-            gross = kalshi_fee = min_size = None
+            gross = kalshi_fee = min_size = depth = value = None
             direction = 'no two-sided option quote'
             exceeds = False
         else:
@@ -320,11 +362,22 @@ def rungs(KA, D_raw, series, currency):
             # None means no size up to the cap works.
             min_size = fees.min_contracts(pm_price, gross, series)
             exceeds = edge > 0 and min_size is not None
+            # How many contracts are actually resting at the quote we are
+            # hitting. Both size fields describe the BEST level only, so this
+            # is the trade available without walking the book — and the edge
+            # at the next level down is a different, smaller number.
+            depth = bid_size if direction == 'sell prediction' else ask_size
+            # What the edge is WORTH, in dollars, at that depth. The number
+            # that decides whether any of this is worth doing.
+            value = None if (depth is None or edge is None) else edge * depth
         rows.append({'label': label, 'pm': pm, 'pm_bid': bid, 'pm_ask': ask,
                      'opt': opt, 'opt_low': opt_low, 'opt_high': opt_high,
                      'gap': pm - opt, 'se': se, 'fee': fee,
                      'kalshi_fee': kalshi_fee, 'gross_edge': gross,
-                     'min_size': min_size,
+                     'min_size': min_size, 'depth': depth, 'value': value,
+                     'bid_size': bid_size, 'ask_size': ask_size,
+                     'price_level_structure': m.get('price_level_structure'),
+                     'on_grid': grid_ok,
                      'envelope': None if opt_low is None else opt_high - opt_low,
                      'edge': edge, 'direction': direction,
                      'spread': spread, 'exceeds': exceeds})
@@ -381,6 +434,12 @@ def run(stamp, stab=None):
             # that clears it at 2.
             'min_sizes': sorted(r['min_size'] for r in measured
                                 if r['exceeds'] and r['min_size'] is not None),
+            # The dollar value of every edge at the top of book, largest
+            # first. This is the number that says whether any of it matters.
+            'edge_values': sorted((round(r['value'], 2) for r in measured
+                                   if r['exceeds'] and r['value'] is not None),
+                                  reverse=True),
+            'off_grid': sum(1 for r in measured if r.get('on_grid') is False),
         }
     return out
 
@@ -441,6 +500,11 @@ def main():
                 tot_over += d['exceeding']
                 tot_measured += d['measured']
         print('%-18s %6s  %s %s' % (s['stamp'], s['window'], cells[0], cells[1]))
+        for v in ('BTC', 'ETH'):
+            d = s['series'].get(v, {})
+            if d.get('off_grid'):
+                print('%-18s  ::warning:: %s: %d quotes off the published price grid'
+                      % ('', v, d['off_grid']))
 
     print('-' * 90)
     print('TOTAL: %d / %d rung-observations show a positive edge at quoted prices'
@@ -465,6 +529,10 @@ def main():
     print('settlement fee. The fee rounds UP to a whole cent per ORDER, so the')
     print('min-size column is the smallest order at which that rounding stops')
     print('eating the edge.')
+    print()
+    print('DEPTH: the size columns describe the BEST level only, so the value')
+    print('column is what the edge is worth without walking the book. The next')
+    print('level down is a different price and therefore a different edge.')
     print()
     print('STILL NOT IN THIS NUMBER, and each one only makes it worse:')
     print('  - Margin on the option legs, which is posted for months.')
