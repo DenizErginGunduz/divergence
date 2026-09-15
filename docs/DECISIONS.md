@@ -1889,3 +1889,45 @@ at what the Polymarket measurement actually did. A repair programme that fixes
 the code it is looking at and leaves its neighbour untouched produces exactly
 this: one number that has survived scrutiny and one that has never been asked.
 Both in the same file, both rendered to one decimal place.
+
+## D-086 — The digital returns `dsp`, because `p` read as probability
+**Date:** 2026-09-15 · **Produced by:** seven files, one rename
+
+D-074 closed the discount repair with an open item: *"The internal key is still
+`p` and the ladder row key is still `opt`. The docstrings, the findings note and the
+page now all say 'discounted state price', but the identifiers have not been
+renamed, so the naming half of the Week 1 item is done in prose and not in
+code."* This closes it.
+
+### What changed
+`digital()` returns `dsp` instead of `p`, in Python and on the page. 35 call sites
+across `measure_band`, `measure_exhaustive`, `measure_touch`, `measure_polymarket`,
+`measure_sensitivity`, the tests and `web/index.html`.
+
+The reason is narrow and worth stating: `p` reads as "probability". The quantity
+is `D * Q(S > K)`, a discounted state price, and reading it as a probability is
+**precisely the error D-073 was about**. A name that invites the mistake the
+project has already made once is a bad name.
+
+### What deliberately did NOT change
+`opt`, `opt_low` and `opt_high` on the rung rows. They are discounted state prices
+too, and a fully consistent rename would have made them `opt_dsp`,
+`opt_dsp_low`, `opt_dsp_high`.
+
+They were left alone on a judgement: `opt` reads as "the option side", which is
+what it is and is not misleading, while `p` read as something the number is not.
+Renaming them would have touched `write_findings` and the page's display layer for
+no safety gain, and this project has already had a rename leak into markup once.
+A comment on the row construction says so, so the asymmetry is a decision rather
+than an oversight.
+
+### How the citation was checked
+The first push failed `ref-check`: the new comments cite D-086 and D-086 did not
+exist yet. That is the workflow doing its job — every decision number cited
+anywhere in the repository has to resolve to a real record, and a comment
+referring forward to an unwritten one is exactly the dangling reference it was
+built to catch.
+
+The tests passed on the same push, which is the other half: 54 cases over the
+renamed code, including the ones that pin the envelope direction and the
+discount convention.
