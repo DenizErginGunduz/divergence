@@ -39,9 +39,12 @@ Usage:
 """
 import re
 import sys
+from datetime import datetime, timezone
 
 from archive import snapshot, stamps, summary, Missing
-from measure_band import chain, forward, digital, MONTH
+import fees
+from measure_band import (chain, forward, digital, discount,
+                          expiry_instant)
 from stability import Stability
 
 ASSETS = [('BTC', 'bitcoin', 'BTC'), ('ETH', 'ethereum', 'ETH')]
@@ -51,21 +54,19 @@ TERMINAL = re.compile(r'^(Bitcoin|Ethereum) above ___ on ', re.I)
 # "What price will Bitcoin hit in 2026?" -> TOUCH, not comparable
 TOUCH = re.compile(r'\bhit\b', re.I)
 
-EXPIRY_LABEL = re.compile(r'^(\d+)([A-Z]{3})(\d{2})$')
+# The Deribit expiry label is parsed by measure_band.expiry_instant, which
+# returns the settlement INSTANT rather than a date. The local date-only
+# helpers this file used to carry were removed with it.
 
 
-def expiry_date(label):
-    """Deribit expiry label -> (year, month, day). Expiries settle 08:00 UTC."""
-    m = EXPIRY_LABEL.match(label)
-    if not m:
+def _iso_instant(s):
+    """'2026-09-15T16:00:00Z' -> datetime. None when it is not that shape."""
+    try:
+        return datetime(int(s[0:4]), int(s[5:7]), int(s[8:10]),
+                        int(s[11:13]), int(s[14:16]), int(s[17:19]),
+                        tzinfo=timezone.utc)
+    except (ValueError, IndexError):
         return None
-    return (2000 + int(m.group(3)), MONTH[m.group(2)], int(m.group(1)))
-
-
-def _day_number(y, mo, d):
-    """Coarse day counter — only ever used for DIFFERENCES, so calendar
-    accuracy is not required."""
-    return y * 372 + mo * 31 + d
 
 
 def parse_threshold(market):
@@ -83,29 +84,38 @@ def ladder(event, ch, idx):
     if len(M) < 3:
         return None
 
-    end = (event.get('endDate') or '')[:10]
-    if len(end) < 10:
+    iso = event.get('endDate') or ''
+    end = iso[:10]
+    if len(iso) < 19:
         return None
-    target = _day_number(int(end[:4]), int(end[5:7]), int(end[8:10]))
+    close_at = _iso_instant(iso)
+    if close_at is None:
+        return None
 
-    # The expiry with the SMALLEST gap is chosen; its direction and size are
-    # both reported.
+    # The expiry nearest the close, compared as INSTANTS. The old version did
+    # day arithmetic and then subtracted a hardcoded 8 hours for "Polymarket
+    # 16:00 against Deribit 08:00" — true for these ladders but an assumption
+    # where the payload states the fact.
     usable = []
     for v in ch:
         if not (ch[v].get('C') and ch[v].get('P')):
             continue
-        ed = expiry_date(v)
-        if not ed:
+        ts = expiry_instant(v)
+        if not ts:
             continue
-        usable.append((abs(_day_number(*ed) - target), _day_number(*ed) - target, v))
+        usable.append((abs((ts - close_at).total_seconds()),
+                       (ts - close_at).total_seconds() / 3600.0, v))
     if not usable:
         return None
     usable.sort()
-    _, day_gap, expiry = usable[0]
-    # Polymarket 16:00 UTC, Deribit 08:00 UTC -> same day means 8 hours earlier
-    gap_hours = day_gap * 24 - 8
+    _, gap_hours, expiry = usable[0]
 
-    F = forward(ch, expiry, idx)
+    # Carry the discount explicitly (D-073). Without it the put branch of
+    # digital() returns 1 - D*Q(S<K) instead of D - D*Q(S<K), which is a
+    # different quantity, and this script was still doing that.
+    dis = discount(ch, expiry)
+    D = dis['D'] if dis else 1.0
+    F = forward(ch, expiry, idx, D)
     if not F:
         return None
 
@@ -117,18 +127,42 @@ def ladder(event, ch, idx):
         bid, ask = m.get('bestBid'), m.get('bestAsk')
         if bid is None or ask is None:
             continue
-        d = digital(ch, expiry, K, F, idx)
+        d = digital(ch, expiry, K, F, idx, D)
         if not d:
             rows.append({'K': K, 'skipped': 'outside the strike range'})
             continue
-        pm = (float(bid) + float(ask)) / 2
-        spread = float(ask) - float(bid)
-        # Polymarket maker fee is treated as 0 (user's decision).
-        friction = d['fee'] + spread / 2
-        threshold = (0 if d['se'] is None else 1.96 * d['se']) + friction
-        rows.append({'K': K, 'pm': pm, 'opt': d['p'], 'gap': pm - d['p'],
-                     'threshold': threshold, 'spread': spread,
-                     'exceeds': abs(pm - d['p']) > threshold})
+        bid, ask = float(bid), float(ask)
+        pm = (bid + ask) / 2          # reported, never traded on
+        spread = ask - bid
+        # Every rung here is a single 'above K' claim, so the bucket IS the
+        # digital: no differencing, and the envelope is the digital's own.
+        if d['low'] is None or d['high'] is None:
+            rows.append({'K': K, 'pm': pm, 'opt': d['p'], 'spread': spread,
+                         'skipped': 'no two-sided option quote'})
+            continue
+        # Both venues charge a TAKER fee and this trade crosses on both.
+        # Polymarket's schedule is read from the market itself (D-085).
+        sched = m.get('feeSchedule')
+        enabled = m.get('feesEnabled', True)
+        sell_fee = fees.polymarket_rate(bid, sched, enabled)
+        buy_fee = fees.polymarket_rate(ask, sched, enabled)
+        if sell_fee is None or buy_fee is None:
+            rows.append({'K': K, 'pm': pm, 'opt': d['p'], 'spread': spread,
+                         'skipped': 'fee schedule UNKNOWN'})
+            continue
+        sell_pm = bid - (d['high'] + d['fee']) - sell_fee
+        buy_pm = (d['low'] - d['fee']) - ask - buy_fee
+        edge = max(sell_pm, buy_pm)
+        rows.append({'K': K, 'pm': pm, 'pm_bid': bid, 'pm_ask': ask,
+                     'opt': d['p'], 'opt_low': d['low'], 'opt_high': d['high'],
+                     'gap': pm - d['p'], 'spread': spread,
+                     'envelope': d['high'] - d['low'],
+                     'option_fee': d['fee'],
+                     'venue_fee': sell_fee if sell_pm >= buy_pm else buy_fee,
+                     'edge': edge,
+                     'direction': 'sell prediction' if sell_pm >= buy_pm
+                     else 'buy prediction',
+                     'exceeds': edge > 0})
     if not rows:
         return None
     return {'rows': rows, 'expiry': expiry, 'gap_hours': gap_hours,
@@ -189,7 +223,11 @@ def main():
             continue
         touch_excluded += s['touch_excluded']
         for h in s['ladders']:
-            measured = [r for r in h['rows'] if 'opt' in r]
+            # A row only counts when it produced a verdict. Rows skipped for a
+            # one-sided option quote or an unrecognised fee schedule carry an
+            # 'opt' but no 'exceeds', and counting them would be the same
+            # mistake as counting a rung nobody quotes (D-076).
+            measured = [r for r in h['rows'] if 'exceeds' in r]
             if not measured:
                 continue
             over = sum(1 for r in measured if r['exceeds'])
