@@ -86,6 +86,11 @@ def band_block(rows, stab):
         # not. A single pooled number would hide exactly that.
         'expiry_gap_hours_median': round(sorted(gaps)[len(gaps) // 2], 1) if gaps else None,
         'ladders': sorted(set(v['ladder'] for v in rows)),
+        # Which side of the Kalshi close the option expiry falls on. 'before'
+        # understates an upside tail and flatters the comparison; 'after'
+        # overstates and works against it. A block mixing both would be
+        # uninterpretable.
+        'expiry_side': sorted(set(v['expiry_side'] for v in rows)),
         'series': sorted(set(v['label'] for v in rows)),
         'stability': stability_summary(stab),
     }
