@@ -1014,8 +1014,15 @@ wording line up on every rung, and the thresholds match to the cent.
 
 ### 2. The ladders tile, so D-067 was a statement about contracts
 No gaps, no overlaps. Adjacent buckets end at .99 and begin at .00, exactly one
-tick apart, and `price_level_structure` says `deci_cent` — the 0.01 between them is
-not a reachable settlement value.
+tick apart.
+
+**CORRECTED 2026-09-15 (D-078).** The first version of this paragraph justified
+the claim with `price_level_structure`, saying it reports `deci_cent`. That field
+is the CONTRACT PRICE tick, and says nothing about the settlement value. The
+conclusion survives but the reason had to be replaced by a measurement: all
+1,892 numeric `expiration_value` entries in the archive carry exactly two
+decimals, so the 0.01 between adjacent buckets is not a reachable settlement
+value. See D-078.
 
 This matters more than it looks. The exhaustiveness constraint has been the
 single most productive check in this project, and it rested on the assumption
@@ -1245,3 +1252,98 @@ Neither was a bug — they were assertions about a world in which the prediction
 leg was free, and they broke the moment it stopped being. That is what a
 regression test is supposed to do when the thing it pins is deliberately
 changed.
+
+## D-078 — What the edge is worth, and a field read wrong
+**Date:** 2026-09-15 · **Produced by:** `scripts/measure_band.py` · `scripts/write_findings.py` · `web/index.html`
+
+Week 2's last item was "read `price_level_structure` and `price_ranges`". Reading
+them corrected an error in D-075 and, separately, produced the most deflating
+number this project has yet measured.
+
+### 1. The field I read wrong
+D-075 justified the bucket-tiling claim by saying `price_level_structure` reports
+`deci_cent`, and treating that as the granularity of the SETTLEMENT value. It is
+not. It is the tick on the contract's own price. The two have nothing to do
+with each other, and the mistake was mine, not the data's.
+
+The conclusion happens to survive, but only because it can be measured
+directly. Every finalized market in the archive carries `expiration_value`:
+
+- 1,892 numeric entries, from KXBTC15M (946) and KXETH15M (946)
+- **1,892 of 1,892 have exactly two decimals**
+- a further 83 non-numeric entries ("No", "Yes") belong to series that settle
+  on something other than a price, and 14 more are dollar-prefixed strings,
+  also to the cent
+
+So adjacent buckets ending at .99 and beginning at .00 really are touching.
+D-075 is corrected in place with a pointer here rather than quietly edited.
+
+### 2. What the field actually says
+For the year-end ladders:
+
+    price_level_structure: "deci_cent"
+    price_ranges: [{start: 0.0000, end: 1.0000, step: 0.0010}]
+
+One uniform tick of a tenth of a cent across the whole range. Not every Kalshi
+market is like this — a multivariate market sampled the same day reports
+`center_deci_edge_centi_cent` with three ranges, a finer 0.0001 tick below 0.01
+and above 0.99 and 0.0010 in between. Our tails do NOT get the finer tick.
+That is a fact about our markets that could only be learned by reading the
+field.
+
+`measure_band.on_grid()` now checks every quote against the published ranges.
+Across the archive: **0 off-grid quotes**. The check earns its place anyway,
+because the failure it guards against is a unit error, and a unit error is the
+kind of thing that looks fine until it does not.
+
+### 3. What `_fp` means, derived rather than assumed
+`yes_bid_size_fp` and `yes_ask_size_fp` are quantities with two decimals, and
+nothing in the payload says the unit. The archive settles it:
+
+    yes_ask_dollars  = 0.0140,  yes_ask_size_fp = 698.86
+    best NO bid      = 0.9860,  quantity        = 698.86
+
+The ask on the YES side IS the bid on the NO side, and Kalshi reports the same
+number for both. A dollar amount would not survive that flip — a no order at
+0.986 commits 0.986 per contract while the same order shows as a yes offer
+worth 0.014 — but a contract count does. **The unit is contracts**, fractional,
+two decimals.
+
+### 4. The number that matters
+The edge now has a size behind it: how many contracts are resting at the quote
+being hit, and therefore what the edge is worth in dollars.
+
+Live, 2026-09-15:
+
+| rung | net edge | resting | **worth** |
+|---|---|---|---|
+| ETH below $1,000 | 0.43c | 1,063.0 contracts | **$4.54** |
+| ETH above $5,000 | 1.11c | 10.0 contracts | **$0.11** |
+| BTC above $150,000 | 0.52c | 6.9 contracts | **$0.04** |
+
+**$4.69 in total.** Across the whole archive, 134 rung-observations with a
+positive edge: the median is worth **$0.63** and the largest seen in 45
+snapshots is **$125.52**.
+
+### What that means, stated plainly
+The three persistent divergences are real as prices and negligible as money.
+An edge of a cent on ten contracts is a price observation, not an opportunity,
+and the distinction was invisible for as long as the pipeline reported only
+cents per contract.
+
+This does not retract anything. The rungs still clear a test built from quotes
+that exist, and they have done so in essentially every snapshot for 45
+consecutive observations, which is itself a fact worth having: a persistent,
+reproducible price difference between two venues that nobody arbitrages away
+because it is not worth the trouble. That is a finding about market structure.
+It is not a trade.
+
+It also reframes what remains unmeasured. Option margin, the 6d 21h expiry gap
+and the BRTI basis were listed as reasons the edge might not survive. Against
+$4.69 they no longer need to be measured to settle that question — they are
+reasons to stop expecting a trade, not obstacles between here and one.
+
+### Sum with care
+`edge_value_total` reads $1,018.37 across the archive, and that number should
+not be quoted. It sums the same three rungs over 45 snapshots of the same
+standing orders. The median and the maximum are the honest summaries.
