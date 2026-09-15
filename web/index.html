@@ -315,7 +315,9 @@ function digital(ch,e,K,F,idx,D){const t=K<F?'P':'C',o=ch[e][t]; if(!o)return nu
  /* Both sides return D*Q(S>K). The put side reaches it as D-D*Q(S<K), not
     1-D*Q(S<K); with D=1 the two coincide, which is why the old line looked
     right for so long (D-073). */
- const p=t==='C'?(A.mark-B.mark)/g:D-(B.mark-A.mark)/g;
+ /* The DISCOUNTED STATE PRICE D*Q(S>K), not a probability. Named dsp so
+    nobody reads it as one — that misreading is what D-073 was (D-086). */
+ const dsp=t==='C'?(A.mark-B.mark)/g:D-(B.mark-A.mark)/g;
  /* low/high are what the spread can be SOLD and BOUGHT for. The put branch
     SUBTRACTS the spread, so its bid/ask pairing inverts — getting that the
     wrong way round leaves every number plausible but inside out. Mirrors
@@ -326,7 +328,7 @@ function digital(ch,e,K,F,idx,D){const t=K<F?'P':'C',o=ch[e][t]; if(!o)return nu
  const low =!two?null:(t==='C'?(A.bid-B.ask)/g:D-(B.ask-A.bid)/g);
  const high=!two?null:(t==='C'?(A.ask-B.bid)/g:D-(B.bid-A.ask)/g);
  const feeOf=x=>Math.min(.0003*idx,.125*x);
- return {p,se,low,high,fee:(feeOf(A.mark)+feeOf(B.mark))/g,pair:[a,b]};}
+ return {dsp,se,low,high,fee:(feeOf(A.mark)+feeOf(B.mark))/g,pair:[a,b]};}
 const MON={JAN:0,FEB:1,MAR:2,APR:3,MAY:4,JUN:5,JUL:6,AUG:7,SEP:8,OCT:9,NOV:10,DEC:11};
 const expiryMs=l=>{const m=l.match(/^(\d+)([A-Z]{3})(\d{2})$/);
  return m?Date.UTC(2000+ +m[3],MON[m[2]],+m[1],8,0,0):null;};
@@ -360,11 +362,11 @@ function buckets(KA,D,series,ccy){
   else{lo=Math.round(m.floor); hi=Math.round(m.cap+.01); label=short(m.floor)+' – '+short(m.cap);}
   /* An unbounded lower edge is certainty, and certainty is worth D today,
      not 1. That literal 1 is what pinned the bucket sum at 1 for any D. */
-  const dL=lo!=null?digital(ch,chosen.l,lo,F,idx,DF):{p:DF,se:0,low:DF,high:DF,fee:0};
-  const dH=hi!=null?digital(ch,chosen.l,hi,F,idx,DF):{p:0,se:0,low:0,high:0,fee:0};
+  const dL=lo!=null?digital(ch,chosen.l,lo,F,idx,DF):{dsp:DF,se:0,low:DF,high:DF,fee:0};
+  const dH=hi!=null?digital(ch,chosen.l,hi,F,idx,DF):{dsp:0,se:0,low:0,high:0,fee:0};
   const pm=(m.bid+m.ask)/2, spread=m.ask-m.bid;
   if(!dL||!dH){rows.push({label,pm,spread,oi:m.oi,skipped:'outside option strike range'});continue;}
-  const opt=dL.p-dH.p; top+=opt; if(opt<0)neg++;
+  const opt=dL.dsp-dH.dsp; top+=opt; if(opt<0)neg++;
   const se=(dL.se==null||dH.se==null)?null:Math.sqrt(dL.se**2+dH.se**2);
   const fee=dL.fee+dH.fee;
   /* The bucket is LONG the lower digital and SHORT the upper one, so its
