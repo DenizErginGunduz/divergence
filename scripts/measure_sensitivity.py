@@ -102,9 +102,21 @@ def neighbours(ch, close_at):
                    if ch[v].get('C') and ch[v].get('P') and expiry_instant(v))
     if not dated:
         return []
-    dated.sort(key=lambda p: abs((p[0] - close_at).total_seconds()))
+    before = [p for p in dated if p[0] <= close_at]
+    after = [p for p in dated if p[0] > close_at]
+    if before and after:
+        # A genuine bracket. Take the nearest on EACH side, not the two
+        # nearest overall — for the year-end ladders 27NOV26 is closer to the
+        # close than 26MAR27 is, so "the two nearest" quietly returned two
+        # chains that both expire early and the band of D-079 disappeared.
+        picks = [before[-1], after[0]]
+    elif before:
+        picks = before[-2:]
+    else:
+        picks = after[:2]
+    picks.sort(key=lambda p: abs((p[0] - close_at).total_seconds()))
     out = []
-    for ts, v in dated[:2]:
+    for ts, v in picks:
         hours = (ts - close_at).total_seconds() / 3600.0
         out.append({'expiry': v, 'hours': hours,
                     'side': 'after' if hours > 0 else 'before'})
