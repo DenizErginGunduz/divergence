@@ -81,7 +81,7 @@ def digital_at(ch, expiry, K, F, D, skip=0):
         return None
     p = ((o[a]['mark'] - o[b]['mark']) / w if kind == 'C'
          else D - (o[b]['mark'] - o[a]['mark']) / w)
-    return {'p': p, 'width': w, 'low': a, 'high': b, 'side': kind}
+    return {'dsp': p, 'width': w, 'low': a, 'high': b, 'side': kind}
 
 
 def neighbours(ch, close_at):
@@ -222,7 +222,7 @@ def run(stamp):
             for s in SKIPS:
                 d = digital_at(ch, first['expiry'], K, first['F'], first['D'], s)
                 if d:
-                    d['v'] = rung_value(d['p'], first['D'], kind)
+                    d['v'] = rung_value(d['dsp'], first['D'], kind)
                 grid.append(d)
             if not grid[0]:
                 continue
@@ -233,7 +233,7 @@ def run(stamp):
                     continue
                 others.append({'expiry': n['expiry'], 'hours': n['hours'],
                                'side': n['side'],
-                               'v': rung_value(d['p'], n['D'], kind)})
+                               'v': rung_value(d['dsp'], n['D'], kind)})
             rows.append({
                 'stamp': stamp,
                 'asset': asset, 'label': label, 'kind': kind, 'bid': bid,
