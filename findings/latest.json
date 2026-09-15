@@ -9,44 +9,54 @@
  "produced_by": "scripts/write_findings.py",
  "measurements": {
   "friction_band_kalshi": {
-   "model_free": true,
-   "exceeding": 165,
-   "measured": 2420,
-   "quotable": 2418,
-   "percent": 6.8,
-   "percent_of_all_rungs": 6.8,
-   "mean_envelope": 0.0615,
-   "edge_value_max": 125.52,
-   "edge_value_median": 0.86,
-   "edge_value_total": 1384.96,
-   "off_grid_quotes": 0,
-   "mean_density": 0.9859,
-   "mean_discount_factor": 0.988121,
-   "discount_fallbacks": 0,
-   "stability": {
-    "distinct_rungs": 44,
-    "total_observations": 2420,
-    "observations_per_rung": 55.0,
-    "always_exceeds": 3,
-    "sometimes_exceeds": 1,
-    "never_exceeds": 40,
-    "always_exceeding_list": [
-     {
-      "rung": "BTC:KXBTCY-27JAN0100-T149999.99",
-      "observations": 55,
-      "exceeding": 55
-     },
-     {
-      "rung": "ETH:KXETHY-27JAN0100-T1000.00",
-      "observations": 55,
-      "exceeding": 54
-     },
-     {
-      "rung": "ETH:KXETHY-27JAN0100-T4999.99",
-      "observations": 55,
-      "exceeding": 55
-     }
-    ]
+   "year_end": {
+    "model_free": true,
+    "exceeding": 165,
+    "measured": 2420,
+    "quotable": 2418,
+    "percent": 6.8,
+    "percent_of_all_rungs": 6.8,
+    "mean_envelope": 0.0615,
+    "edge_value_max": 125.52,
+    "edge_value_median": 0.86,
+    "edge_value_total": 1384.96,
+    "off_grid_quotes": 0,
+    "mean_density": 0.9859,
+    "mean_discount_factor": 0.988121,
+    "discount_fallbacks": 0,
+    "expiry_gap_hours_median": 165.0,
+    "ladders": [
+     "exhaustive"
+    ],
+    "series": [
+     "BTC year-end",
+     "ETH year-end"
+    ],
+    "stability": {
+     "distinct_rungs": 44,
+     "total_observations": 2420,
+     "observations_per_rung": 55.0,
+     "always_exceeds": 3,
+     "sometimes_exceeds": 1,
+     "never_exceeds": 40,
+     "always_exceeding_list": [
+      {
+       "rung": "BTC year-end:KXBTCY-27JAN0100-T149999.99",
+       "observations": 55,
+       "exceeding": 55
+      },
+      {
+       "rung": "ETH year-end:KXETHY-27JAN0100-T1000.00",
+       "observations": 55,
+       "exceeding": 54
+      },
+      {
+       "rung": "ETH year-end:KXETHY-27JAN0100-T4999.99",
+       "observations": 55,
+       "exceeding": 55
+      }
+     ]
+    }
    }
   },
   "polymarket_terminal": {
