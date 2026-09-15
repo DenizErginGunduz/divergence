@@ -1744,3 +1744,67 @@ It cannot reach zero gap: Kalshi settles every fifteen minutes and the collector
 runs three times a day, so 25 pairs inside a minute is what the archive happens
 to offer. A larger sample would tighten the bound but cannot change its sign —
 there is nothing there to find a sign for.
+
+## D-084 — The two tenors fail in opposite directions
+**Date:** 2026-09-15 · **Produced by:** `scripts/measure_sensitivity.py` · `findings/sensitivity.json`
+
+D-082 brought the intraday ladders in because their expiry gap is small.
+D-082's own closing line said the strike grid had to be measured on them next.
+It has been, and the answer is that the intraday instrument trades one defect
+for another.
+
+| | year-end | intraday |
+|---|---|---|
+| expiry gap | **−165 h** | **+18 h** |
+| bias on an upside tail | option expires FIRST, understates, flatters us | expires LATER, overstates, works against us |
+| straddles the close | yes: −165 h and +2019 h | **no** — both neighbours are after |
+| grid sensitivity, median | 11.5% | 5.2% |
+| grid sensitivity, p90 / worst | 18.3% / 23.9% | 29.9% / **53.3%** |
+| **rungs returning a duplicate digital** | **0.0%** | **67.4%** |
+| verdicts | 84 above both, 81 inside the band | 66 above the bound, 250 under |
+
+### The number that decides it
+**67.4% of intraday rungs return a digital identical to another rung of the
+same ladder in the same snapshot.**
+
+Kalshi steps its intraday thresholds by 100 dollars. Deribit's strikes are far
+wider, so runs of ten or more consecutive Kalshi rungs fall inside ONE option
+bracket and come back with the same number. The log shows it plainly: nine
+consecutive thresholds at 0.00554, then nine at 0.00373.
+
+Two thirds of that ladder is one number repeated. Those rungs are not
+independent measurements and the 66 that clear the bound are not 66 findings.
+
+### So neither tenor is clean, and the defects are complementary
+- **Year-end**: strikes fine enough that no two rungs collide, and an expiry
+  gap of 165 hours that D-079 showed swallowing two of three findings.
+- **Intraday**: an expiry gap of 18 hours on the conservative side, and an
+  option chain that cannot resolve the ladder it is being compared against.
+
+This is a structural statement about the comparison, not a bug to fix. The
+option chain's strike spacing is set by Deribit for its own purposes and the
+prediction ladder's step is set by Kalshi for theirs; where the two happen to
+be compatible is not something this project controls.
+
+### The question it raises
+A middle tenor — a weekly or monthly TERMINAL ladder against a Deribit weekly —
+could have both a small expiry gap and strikes fine enough to resolve it. That
+is the obvious next place to look, and it is recorded rather than built:
+Kalshi's monthly crypto series in the archive are MAX and MIN contracts, which
+are touch-type and a different comparison entirely (D-031). Whether a terminal
+weekly ladder exists at all is UNKNOWN and worth one inventory pass.
+
+### A regression this run caught in my own work
+The rewrite of `neighbours()` took "the two expiries nearest the close" by
+absolute distance. For the year-end ladders 27NOV26 is closer to 1 January than
+26MAR27 is, so both picks landed BEFORE the close and the band of D-079
+silently became a one-sided bound — the finding disappeared without any error.
+Fixed to take the nearest on EACH side, which restores −165 h and +2019 h.
+
+It is worth naming how this was caught: not by a test, but because
+`findings/sensitivity.json` printed `expiry_hours_by_tenor: {year_end: [-165]}`
+with one entry where there should have been two. The file was added in the same
+session for an unrelated reason — a virtualised CI log cannot be read past its
+first screen — and it caught a silent regression within the hour. That is the
+argument for D-070's rule holding generally: a number that only exists in a log
+is a number nobody checks.
