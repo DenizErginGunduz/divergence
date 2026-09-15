@@ -8,7 +8,11 @@ Prediction markets (Kalshi, Polymarket) quote a probability directly. Listed opt
 strikes. Same question, two answers, no model required to compare them.
 
 The short version of what that comparison found: the differences are real,
-reproducible across 45 consecutive snapshots, and worth about **five dollars**.
+reproducible across 55 consecutive observations, and worth about **five dollars**.
+
+**Start here: [Research Note 1 — Four dollars and sixty-nine cents](drafts/RESEARCH_NOTE_1.md).**
+It is the whole argument in one read: what was measured, what survived, what did
+not, and the mistakes found along the way.
 
 Not a betting app, not a trading bot, not a signal service.
 
