@@ -22,13 +22,15 @@
   }
  },
  "expiry_verdicts": {
-  "above the nearest": 165,
+  "above BOTH": 84,
+  "inside the band": 81,
   "under the bound": 250,
   "above the bound": 66
  },
  "expiry_hours_by_tenor": {
   "year_end": [
-   -165
+   -165,
+   2019
   ],
   "intraday": [
    18,
