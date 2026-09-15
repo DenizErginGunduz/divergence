@@ -1,6 +1,6 @@
 # Research Note 1 — Four dollars and sixty-nine cents
 
-**Divergence · 2026-09-15 · BTC and ETH, Kalshi against Deribit**
+**Divergence · 2026-09-15 · BTC and ETH, Kalshi and Polymarket against Deribit**
 
 We went looking for places where two markets disagree about the same future
 event. We found three. At the prices actually quoted, after both venues'
@@ -125,6 +125,47 @@ it finds. Intraday has an acceptable expiry gap and a chain that cannot resolve
 the ladder. That is a structural property of comparing two venues whose contract
 grids were designed for different purposes, not a bug with a fix.
 
+## The second venue, and the number that was half method
+
+Polymarket lists the same kind of ladder, and until this note was being written
+its figures were computed by the **old** method: the pre-repair discount
+convention, a 1.96·SE band around two mids, and — the worst of it — no fee at
+all on the prediction leg. The number sat in the same results file as the
+repaired Kalshi one, formatted the same way.
+
+Polymarket does charge. Every market in our archive carries its own schedule
+and always has:
+
+    feeSchedule: {"exponent": 1, "rate": 0.07, "takerOnly": true, ...}
+    fee = C × rate × p × (1 − p)
+
+The same formula and the same coefficient as Kalshi, taker only, and our trades
+cross. It averages **0.65 cents a share** — the same order as the edges being
+measured. The code had called it a maker fee and set it to zero.
+
+Under the same test as everything else:
+
+| | old method | same test as Kalshi |
+|---|---|---|
+| share of quotable rungs with an edge | **24.2%** | **10.3%** |
+| rungs where the expiry matched within 12 hours | 26.3% | **8.3%** |
+| always / sometimes / never | 9 / 298 / 92 | 3 / 173 / 214 |
+
+More than half of it was method, and the mass moved from "sometimes" to
+"never".
+
+**One detail is worth more than the headline.** A tighter expiry match should
+*reduce* apparent divergence — less of the gap can be the clock. Under the old
+method it did the opposite: the better-matched contracts disagreed *more*, 26.3%
+against 24.2%. That inversion was visible in the results file for two weeks and
+nobody read it, because neither number looks wrong on its own. Under the
+repaired test the sign points the right way.
+
+10.3% against Kalshi's 6.8% is **not** a like-for-like comparison — different
+tenor, different ladder shape, different expiry alignment. What it does say is
+that both venues are now measured by one test, with both fee schedules, at
+instants rather than dates.
+
 ## What cannot be said yet
 
 Nothing here is a statement about whether either market *forecasts* well. That
@@ -168,10 +209,17 @@ Recorded because a project that reports no mistakes is not reporting carefully:
 - a CI step that piped the test suite through `tee`, so a failing suite exited
   green and the only thing standing between a red run and a tick was a
   test-count floor
+- and the largest of them: a whole second venue left on the old method for two
+  weeks while its neighbour was repaired line by line, with a fee of zero where
+  the counterparty's own published schedule sat inside data we had been
+  archiving the entire time
 
 The third was caught not by a test but because a summary file printed one
-number where two belonged. The file had been added an hour earlier for an
-unrelated reason.
+number where two belonged; the file had been added an hour earlier for an
+unrelated reason. The last was caught only because someone asked an outside
+question — whether the project was ready to be shown to Polymarket — and
+answering it honestly required looking at what the Polymarket code actually
+did. Internal review had not asked.
 
 ## How to check any of this
 
@@ -181,7 +229,7 @@ the results are written to `findings/` rather than left in a log. Every claim in
 this note cites a numbered decision record in `docs/DECISIONS.md` that gives the
 measurement, the code that produced it, and what it does not license.
 
-The relevant records for this note are D-073 through D-084.
+The relevant records for this note are D-073 through D-085.
 
 ---
 
