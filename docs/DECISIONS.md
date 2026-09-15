@@ -1068,3 +1068,88 @@ around `snapshot()` and not around `g.kalshi`. Two things follow: the archive
 contains snapshots with no Kalshi file at all, which the audit now counts and
 reports; and a lazily raised exception is not caught by a try around the thing
 that looks like it does the work.
+
+## D-076 — The band stops being a statistic and becomes a trade
+**Date:** 2026-09-15 · **Produced by:** `scripts/measure_band.py` · `scripts/write_findings.py` · `web/index.html`
+
+The friction band used to read
+`|mid(prediction) - mid(option)| > 1.96*SE + fees + spread/2`. The 1.96*SE term
+described how uncertain our ESTIMATE of the option mid was. That is a question
+about our arithmetic, not about anything anyone can collect, and a rung could
+clear it while no trade existed at any price on either venue.
+
+### What replaced it
+Two trades, each leg priced at a quote that is standing right now:
+
+    sell the prediction at its BID, buy the bucket at its ASK side, pay the
+    Deribit fees.  Anything left?
+    buy the prediction at its ASK, sell the bucket at its BID side, pay the
+    fees.  Anything left?
+
+`edge = max(of the two)`, and a rung counts when `edge > 0`. The bucket's two
+prices come from the option quotes directly: `opt_high = dL.high - dH.low` and
+`opt_low = dL.low - dH.high`, because the bucket is long the lower digital and
+short the upper one. No mid appears anywhere in the verdict.
+
+The put branch inverts: the put spread is SUBTRACTED, so BUYING it (its ask
+side) gives the LOW digital. Reversing that pair leaves every number plausible
+— same sign, same magnitude, just inside out — so it is pinned by a test.
+
+### What it did to the numbers
+| | old rule | new rule |
+|---|---|---|
+| rungs with a verdict | 145 / 2068 | 136 / 1978 quotable |
+| share | 7.0% | 6.9% |
+| always / sometimes / never | 3 / 3 / 38 | 3 / 2 / 39 |
+
+(The denominator moved because the archive window rolled from 47 snapshots to
+45, and because rungs with a one-sided option quote are now excluded rather
+than counted on the strength of a mid that nobody is showing. BTC: 26 of 28
+rungs quotable. ETH: 18 of 18.)
+
+### Why the count barely moved, which is worth knowing
+It would be easy to describe this as a much harder test. It is not a much
+harder test; it is a test that means something. With comparable spreads on the
+four legs the two hurdles are almost the same size:
+
+- new: `opt_high - opt` = half the envelope on each digital = `2s/w`
+- old: `1.96 * SE` = `1.96 * sqrt(2) * (s*sqrt(2)/2) / w` = `1.96s/w`
+
+Two percent apart. The prediction spread was charged at half from the mid
+before and is charged at half from the mid now, so that part is identical too.
+The change is in what the number refers to, not in how big it is. Anyone
+reading this later should not claim the band was tightened.
+
+### The three rungs that survive it, with their arithmetic
+From the live page, 2026-09-15:
+
+- **ETH above $5,000.** Prediction bid 3.00c. Bucket costs 1.31c to buy at its
+  ask side, plus 0.37c of Deribit fees. Edge **1.32c**, by selling the
+  prediction.
+- **ETH below $1,000.** Bid 2.80c against 1.93c + 0.25c. Edge **0.62c**.
+- **BTC above $150,000.** Bid 1.20c against 0.47c + 0.13c. Edge **0.60c**.
+
+These are the same three rungs the old rule found, and they are the three
+year-end tails. Their envelopes are narrow — BTC's bucket spans 0.12c to 0.47c
+— because far out-of-the-money options are cheap in absolute terms even when
+their relative spreads are wide.
+
+### What is NOT in these numbers
+Every one of them makes the edge smaller, and none is measured yet:
+
+- **Kalshi's own fees.** UNKNOWN, not zero. An edge of 0.6c is small enough
+  that a fee of a fraction of a cent decides it.
+- **Margin on the option legs**, posted in crypto for three and a half months.
+- **The expiry gap**, 6 days 21 hours (D-075), on a contract with about 100
+  days to run.
+- **BRTI against the Deribit index** (D-075), size UNKNOWN.
+
+So `edge > 0` is a NECESSARY condition and nothing more. The page now says this
+in the rung detail rather than leaving it to the reader.
+
+### On the envelope width
+The mean envelope across quotable rungs is 6.2c archive-wide, and 5.6c on the
+current snapshot. That number is dominated by the mid-ladder buckets, where
+the option legs are expensive and their spreads are wide in absolute terms. It
+is not the right number to quote next to a tail edge of 0.6c, and it is
+recorded here so nobody quotes it that way.
