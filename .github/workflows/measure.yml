@@ -33,6 +33,46 @@ jobs:
         with:
           python-version: '3.12'
 
+      # Read the FULL archive instead of the 14-day public window, when that is
+      # possible. The private mirror holds every snapshot since 2026-08-30; the
+      # public repository keeps a rolling window for data rights
+      # (docs/DATA_SOURCES.md), and that decision is not reversed here —
+      # nothing new is published, only findings come out.
+      #
+      # workflow_dispatch ONLY. measure also runs on pull_request, and a
+      # same-repo PR can read secrets; a PR should prove the code, not be handed
+      # a credential. It is also the right scope: a PR measuring the 14-day
+      # window is a faster and perfectly valid check.
+      #
+      # Sparse on purpose. Measured 2026-09-15: events/, holders/ and coverage/
+      # are 55% of the archive and no measurement reads any of them. Cloning
+      # them would double the transfer for nothing.
+      #
+      # A missing or expired token is NOT a failure. The step exits and every
+      # measurement below runs on the public window, which is what it did before
+      # this step existed. The scope is printed by each script and recorded in
+      # findings/, so a narrowed run is visible rather than silent.
+      - name: Read the full archive from the private mirror
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          ARCHIVE_TOKEN_RO: ${{ secrets.ARCHIVE_TOKEN_RO }}
+        run: |
+          if [ -z "$ARCHIVE_TOKEN_RO" ]; then
+            echo "ARCHIVE_TOKEN_RO not set — measuring the 14-day public window."
+            exit 0
+          fi
+          if ! git clone --quiet --depth 1 --filter=blob:none --sparse \
+            "https://x-access-token:${ARCHIVE_TOKEN_RO}@github.com/DenizErginGunduz/divergence-archive.git" \
+            /tmp/mirror; then
+            echo "::warning::Mirror clone failed — most likely an expired ARCHIVE_TOKEN_RO."
+            echo "::warning::Measuring the 14-day public window instead."
+            exit 0
+          fi
+          cd /tmp/mirror
+          git sparse-checkout set raw/_meta raw/kalshi raw/deribit raw/polymarket_events
+          echo "DIVERGENCE_RAW=/tmp/mirror/raw" >> "$GITHUB_ENV"
+          echo "mirror: $(du -sh /tmp/mirror/raw | cut -f1), $(ls /tmp/mirror/raw/_meta | wc -l) days"
+
       # First prove the archive read path works. If this step is red, every
       # measurement after it is meaningless.
       - name: Archive read smoke test
