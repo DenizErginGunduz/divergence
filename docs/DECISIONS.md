@@ -1347,3 +1347,94 @@ reasons to stop expecting a trade, not obstacles between here and one.
 `edge_value_total` reads $1,018.37 across the archive, and that number should
 not be quoted. It sums the same three rungs over 45 snapshots of the same
 standing orders. The median and the maximum are the honest summaries.
+
+## D-079 — The expiry gap explains most of it
+**Date:** 2026-09-15 · **Produced by:** `scripts/measure_sensitivity.py` · workflow `measure`
+
+Two approximations have sat under every digital since the beginning and neither
+had been measured: the strike grid the difference is taken across, and the fact
+that no Deribit expiry falls on the Kalshi settlement date. Both are now
+reported as a RANGE. A sensitivity test that returns a corrected point estimate
+is not a sensitivity test.
+
+### 1. The strike grid costs about 12%
+The digital is recomputed on deliberately wider brackets — skipping one strike
+each side, then two. Latest snapshot:
+
+| rung | tight | skip 1 | skip 2 | spread |
+|---|---|---|---|---|
+| BTC above $150,000 | 0.00294 | 0.00282 | 0.00289 | 4.0% |
+| ETH above $5,000 | 0.00932 | 0.00857 | 0.00814 | 12.6% |
+| ETH below $1,000 | 0.01600 | — | — | — |
+
+Across all observations the relative spread has a **median of 12.6%**, p90
+18.8%, worst 23.9%. ETH below $1,000 has no wider bracket at all: the chain
+runs out of strikes underneath it.
+
+So roughly an eighth of every tail digital is a statement about how far apart
+Deribit puts its strikes. That does not flip any sign and does not change an
+order of magnitude, but it is not small either, and it is now a number rather
+than an assumption.
+
+### 2. The expiry band, and what it does to D-078
+The Kalshi ladders settle 2027-01-01 05:00 UTC. Deribit's nearest expiries are
+25DEC26 (seven days early) and 26MAR27 (84 days late). `measure_band` uses the
+early one and has always admitted the bias. Here both are computed.
+
+Latest snapshot:
+
+| rung | pred bid | early (25DEC26) | late (26MAR27) | verdict |
+|---|---|---|---|---|
+| ETH above $5,000 | 3.00c | 0.93c | 2.59c | **above BOTH** |
+| BTC above $150,000 | 1.20c | 0.29c | 1.21c | inside the band |
+| ETH below $1,000 | 2.80c | 1.60c | 4.61c | inside the band |
+
+Across all 135 rung-observations: **70 above both, 65 inside the band, 0 below
+both.**
+
+**Two of the three rungs from D-078 do not survive this.** BTC above $150,000
+is quoted at 1.20 cents and the March chain implies 1.21 — the entire
+difference is inside the seven-day gap, and it should not be reported as a
+divergence. ETH below $1,000 is the same story with more room. Only ETH above
+$5,000 clears both ends.
+
+### What "inside the band" does and does not mean
+It means the two contracts cannot be separated with a model-free comparison. It
+does NOT mean the gap is explained, and the band is not symmetric: the early
+chain misses the settlement date by 7 days and the late one by 84. The true
+value sits roughly 8% of the way along, far nearer the early end, so a rung
+sitting just under the late value is weaker evidence of "explained" than the
+word band suggests. Saying more than this needs a model of how a tail
+probability grows with maturity, and that model is exactly what D-025 refused.
+
+### The test sharpens itself
+Deribit lists weeklies about a month out. As 1 January 2027 approaches, expiries
+will appear on both sides of the Kalshi close and the band will close on its own.
+Nothing has to be built for that; the measurement simply gets stronger with time.
+Re-running this in December is worth more than any modelling done today.
+
+### A limitation this script does not cover
+The grid sensitivity is computed on the EARLY chain only. For ETH above $5,000
+the binding constraint is the LATE value, 2.59 cents against a 3.00-cent bid —
+a margin of 0.41 cents, which is smaller than the 12.6% grid uncertainty would
+be on that number (about 0.33 cents). The one rung that survives, survives by
+about the width of an effect that has not been measured on the chain that
+decides it. Stated here rather than resolved.
+
+### Where this leaves the project
+D-078 said the three divergences were real as prices and worth $4.69. D-079
+says two of the three are not clearly divergences at all once the expiry gap is
+admitted, and the third survives by a margin comparable to an unmeasured
+uncertainty.
+
+That is the fourth null result in two weeks, and it is the most consequential
+one. It is also the correct output of a programme whose stated purpose was to
+make the measurement defensible before making it larger.
+
+### A bug found and fixed on the way
+The first version of this script compared a 2.8-cent "ETH below $1,000" bid
+against 0.97657 and reported "below both". The digital is always `D*Q(S > K)`; a
+"below X" rung is worth `D` minus that. The number being compared was the chance
+of ETH being ABOVE $1,000. Fixed, and the verdict now orders the two ends
+rather than assuming early is the lower one — a "below X" rung loses value as
+maturity grows while an "above X" rung gains it.
