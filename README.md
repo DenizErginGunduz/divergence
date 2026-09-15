@@ -4,8 +4,11 @@ Two markets price the same future event. This measures how far apart they are, a
 how much of that distance survives contact with reality.
 
 Prediction markets (Kalshi, Polymarket) quote a probability directly. Listed options
-(Deribit) imply one through the price difference between neighbouring strikes. Same
-question, two answers, no model required to compare them.
+(Deribit) imply a discounted state price through the difference between neighbouring
+strikes. Same question, two answers, no model required to compare them.
+
+The short version of what that comparison found: the differences are real,
+reproducible across 45 consecutive snapshots, and worth about **five dollars**.
 
 Not a betting app, not a trading bot, not a signal service.
 
@@ -27,24 +30,36 @@ honest move is to measure the gap rather than assume it away.
 
 **A difference is not an opportunity.** Fees, spread, collateral cost, the variance
 risk premium and measurement error all live inside the gap. Most of what looks like
-mispricing is one of those.
+mispricing is one of those. This project has now charged both venues' published
+fees, priced the trade at quotes that actually stand, and counted the contracts
+resting behind them — and what is left is measured in cents on tens of contracts.
 
 ---
 
 ## What has actually been measured
 
-Archive: 13 days, 40 snapshots, three venues, collected three times daily since
+Archive: 14 days, 46 snapshots, three venues, collected three times daily since
 2026-08-30. Every number below is regenerated from that archive by a script in this
 repository — nothing is typed in by hand.
 
 | setup | result | strength |
 |---|---|---|
-| Kalshi year-end buckets | 3 of 44 rungs beat the cost band, in 34 of 34 observations each | model-free |
-| Polymarket dailies | 27.1% of rung-observations beat it, but 247 of 316 rungs are inconsistent | model-free, noisy |
+| Kalshi year-end buckets | 3 of 44 rungs show an edge at quoted prices after both venues' fees, in 45 of 45 observations each. Worth **$4.69** in total at the resting size. | model-free |
+| The same, against BOTH bracketing expiries | only **1 of the 3** clears the option value at either end. The other two cannot be separated from a seven-day expiry gap. | model-free |
+| Polymarket dailies | 27.1% of rung-observations beat the old band, but 247 of 316 rungs are inconsistent | model-free, noisy |
 | Long-horizon touch bound | 0.2% arithmetic violations; 94.9% above the 2x bound | model-dependent, weak |
 
-The three Kalshi rungs that survive are all tails: BTC above $150k, ETH above $5k,
-ETH above $1k. Nothing in the body of any distribution survives the cost band.
+The three Kalshi rungs are all tails: BTC above $150k, ETH above $5k, ETH **below**
+$1k. Nothing in the body of any distribution shows an edge. After the expiry band is
+admitted, only ETH above $5k is left, and it survives by about 0.4 cents — a margin
+comparable to an uncertainty that has not been measured on the chain that decides it.
+
+**Read that as a negative result, because it is one.** The project went looking for
+cross-market divergences, found three that persist across every snapshot for two
+weeks, and then established that two of them are an artefact of comparing contracts
+that settle a week apart, and that all three together are worth less than a cup of
+coffee. What remains is a fact about market structure — a reproducible price
+difference nobody arbitrages because it is not worth the trouble — not a trade.
 
 The touch result is worth reading carefully. A 0.2% violation rate is a pipeline
 validation, not a finding — if the digital calculation were wrong, impossible values
