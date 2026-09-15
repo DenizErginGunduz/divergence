@@ -202,13 +202,20 @@ def main():
     tiling_problems = Counter()
     ladders = 0
 
+    absent = 0
     for stamp in every:
+        # snapshot() succeeds even when a stream is missing; Missing is raised
+        # when the stream is actually READ. Touching g.kalshi inside the try is
+        # therefore not optional — the first version of this loop crashed on
+        # 2026-08-31T0508Z, a snapshot with no Kalshi file at all.
         try:
             g = snapshot(stamp)
+            KA = g.kalshi
         except Missing:
+            absent += 1
             continue
         for _asset, series, _ccy in SERIES:
-            rows, parsed = audit(g.kalshi, series)
+            rows, parsed = audit(KA, series)
             if not rows:
                 continue
             ladders += 1
@@ -226,6 +233,8 @@ def main():
     print('EVENT SEMANTICS — the rule text against the numeric fields')
     print('archive: %(snapshot_count)d snapshots / %(day_count)d days' % o)
     print('scanned: %d ladders' % ladders)
+    if absent:
+        print('skipped: %d snapshots with no Kalshi stream' % absent)
     print()
 
     total = sum(verdicts.values())
@@ -266,16 +275,18 @@ def main():
     if verbatim:
         print()
         print('4. EVERY RULE, IN FULL')
-        for stamp in every[-1:]:
+        for stamp in reversed(every):
             try:
                 g = snapshot(stamp)
+                KA = g.kalshi
             except Missing:
-                break
+                continue
             for _asset, series, _ccy in SERIES:
-                rows, _ = audit(g.kalshi, series)
+                rows, _ = audit(KA, series)
                 for r in rows:
                     print('   %-32s %s' % (r['ticker'], r['verdict']))
                     print('     "%s"' % (r['text'] or ''))
+            break
 
     # A mismatch is a reason to stop, not a line in a report. UNKNOWN is not:
     # it means this script does not recognise the sentence, which is a gap in
