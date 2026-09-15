@@ -43,7 +43,24 @@ DERIBIT = 'https://www.deribit.com/api/v2/public'
 KALSHI = 'https://external-api.kalshi.com/trade-api/v2'
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-ARCHIVE_VERSION = 3                          # schema version of the files we write
+ARCHIVE_VERSION = 4                          # schema version of the files we write
+
+# Trade fields dropped before writing. Two kinds, neither of them market data:
+#
+#   PROFILE — name, pseudonym, bio, profileImage. Who the trader says they
+#   are. Measured 2026-09-16: present on 6,568 of 7,081 trades in one run.
+#   Nothing in this project reads them, and publishing a rolling archive of
+#   which named person bought which contract is a different category of thing
+#   from publishing prices (D-087). proxyWallet is KEPT: concentration work
+#   (B-007) needs an actor key, and the wallet is already on-chain public.
+#
+#   REDUNDANT — icon, title, slug, eventSlug. Repeated on every trade row and
+#   already archived once per run in raw/polymarket_events/. conditionId
+#   resolves them.
+#
+# Together they were 47.5% of the bytes.
+TRADE_DROP = ('name', 'pseudonym', 'bio', 'profileImage',
+              'profileImageOptimized', 'icon', 'title', 'slug', 'eventSlug')
 
 ASSETS = ['bitcoin', 'ethereum']             # D-034: the V1 measured universe
 DERIBIT_CURRENCIES = ['BTC', 'ETH']
@@ -371,16 +388,23 @@ if 'kalshi' in bucket:
 
 flow_result = bucket.get('flow') or {'new_trades': [], 'coverage': []}
 
-# New trades: a separate gz file PER RUN. Vendor fields are preserved as-is
-# (rule 2). Why not append to one file: git stores files as whole blobs, so
-# appending to a growing NDJSON three times a day re-stores the entire file as a
-# new object each time. A file per run removes that growth. De-duplication is
-# already done by watermark, so append semantics are not needed.
+# New trades: a separate gz file PER RUN. Why not append to one file: git stores
+# files as whole blobs, so appending to a growing NDJSON three times a day
+# re-stores the entire file as a new object each time. A file per run removes
+# that growth. De-duplication is already done by watermark, so append semantics
+# are not needed.
+#
+# Vendor fields are preserved as-is EXCEPT TRADE_DROP. Rule 2 says raw data is
+# stored as it arrives, and this is the one deliberate exception: its purpose
+# is that a changed methodology can be recomputed from the archive, and none of
+# the dropped fields can affect any recomputation of a price. The reason for
+# dropping them is that four of them are somebody's profile (D-087).
 nd = os.path.join(ROOT, 'raw', 'events', 'trades', DAY, 'trades_%s.ndjson.gz' % STAMP)
 os.makedirs(os.path.dirname(nd), exist_ok=True)
 with gzip.open(nd, 'wt', encoding='utf-8') as f:
     for t in flow_result['new_trades']:
-        f.write(json.dumps(t, ensure_ascii=False, separators=(',', ':')) + '\n')
+        row = dict((k, v) for k, v in t.items() if k not in TRADE_DROP)
+        f.write(json.dumps(row, ensure_ascii=False, separators=(',', ':')) + '\n')
 written.append({'file': os.path.relpath(nd, ROOT), 'bytes': os.path.getsize(nd)})
 
 cp = os.path.join(ROOT, 'raw', 'coverage', DAY, 'coverage_%s.json' % STAMP)
