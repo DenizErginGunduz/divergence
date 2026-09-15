@@ -346,7 +346,11 @@ function buckets(KA,D,series,ccy){
  const dis=disc(ch,chosen.l), DF=dis?dis.D:1;
  const F=fwd(ch,chosen.l,idx,DF); if(!F)return null;
  const S=M.map(m=>({kind:m.strike_type,floor:m.floor_strike,cap:m.cap_strike,
-   bid:+m.yes_bid_dollars,ask:+m.yes_ask_dollars,oi:Math.round(+m.open_interest_fp||0)}))
+   bid:+m.yes_bid_dollars,ask:+m.yes_ask_dollars,oi:Math.round(+m.open_interest_fp||0),
+   /* Contracts resting at the BEST level. The unit is contracts, not dollars:
+      yes_ask_size_fp equals the quantity at the best NO bid, and a dollar
+      amount would not survive that yes/no flip. */
+   bidSize:+m.yes_bid_size_fp||null, askSize:+m.yes_ask_size_fp||null}))
    .sort((a,b)=>((a.floor??a.cap)-(b.floor??b.cap)));
  const rows=[]; let top=0,neg=0;
  for(const m of S){
@@ -379,8 +383,13 @@ function buckets(KA,D,series,ccy){
   const kFee=qt?kRate(pmPrice,series):null;
   const edge=qt?gross-kFee:null;
   const minSize=qt?kMinSize(pmPrice,gross,series):null;
+  /* The size fields describe the BEST level only, so this is the trade
+     available without walking the book. value is what the edge is WORTH in
+     dollars — the number that decides whether any of it matters. */
+  const depth=qt?(sellPm>=buyPm?m.bidSize:m.askSize):null;
+  const value=(qt&&depth!=null)?edge*depth:null;
   rows.push({label,pm,pmBid:m.bid,pmAsk:m.ask,opt,optLow,optHigh,
-    gap:pm-opt,se,fee,kFee,gross,minSize,spread,oi:m.oi,
+    gap:pm-opt,se,fee,kFee,gross,minSize,depth,value,spread,oi:m.oi,
     envelope:qt?optHigh-optLow:null, edge, direction:dir,
     ratio:opt>0?pm/opt:null, exceeds:qt&&edge>0&&minSize!=null, pair:[dL.pair,dH.pair]});
  }
@@ -464,7 +473,8 @@ function notableCard(x){
       <span class="t12" style="margin-left:9px;color:${r.ratio>1.5?'var(--accent)':'var(--text-3)'}">${r.ratio.toFixed(1)}×</span>
     </div>
     <div class="t10 dim2" style="margin-top:6px">${r.edge==null?'no two-sided option quote'
-      :(r.edge>0?'edge '+c2(r.edge)+' · '+r.direction:'no edge · short by '+c2(-r.edge))}</div>
+      :(r.edge>0?'edge '+c2(r.edge)+(r.value==null?'':' · $'+r.value.toFixed(2)+' at top of book')
+        :'no edge · short by '+c2(-r.edge))}</div>
   </div>`;
 }
 function chipsRow(){
@@ -610,6 +620,9 @@ function detailPanel(r){
         · Kalshi fee ${c2(r.kFee)} · envelope ${c2(r.envelope)}</div>
       <div>gross ${c2(r.gross)} before the Kalshi fee · smallest order that
         survives the fee rounding: ${r.minSize==null?'none up to 10,000':r.minSize+' contracts'}</div>
+      <div>resting at that quote: ${r.depth==null?'—':f2(r.depth)+' contracts'}
+        · <span style="color:${r.value>0?'var(--text)':'inherit'}">the edge is worth
+        ${r.value==null?'—':'$'+r.value.toFixed(2)}</span> at the top of book</div>
       <div style="color:var(--warn)">not in the edge: option margin, the 6d 21h
         expiry gap, BRTI vs the Deribit index (D-075)</div>
       <div>bucket set sums to
