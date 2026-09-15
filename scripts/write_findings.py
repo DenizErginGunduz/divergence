@@ -46,9 +46,10 @@ def stability_summary(stab):
 
 def measure_band_all(all_stamps):
     stab = Stability()
-    exceeding = measured = 0
+    exceeding = measured = quotable = 0
     density = []
     discounts = []
+    envelopes = []
     fallbacks = 0
     for d in all_stamps:
         try:
@@ -60,6 +61,9 @@ def measure_band_all(all_stamps):
                 continue
             exceeding += v['exceeding']
             measured += v['measured']
+            quotable += v['quotable']
+            if v['mean_envelope'] is not None:
+                envelopes.append(v['mean_envelope'])
             density.append(v['density_sum'])
             discounts.append(v['discount_factor'])
             if not v['discount_estimated']:
@@ -69,7 +73,14 @@ def measure_band_all(all_stamps):
         # The page counts this flag rather than a hand-typed number.
         'model_free': True,
         'exceeding': exceeding, 'measured': measured,
-        'percent': round(100.0 * exceeding / measured, 1) if measured else None,
+        # Since the friction band became a trade at quoted prices, the only
+        # denominator that means anything is the number of rungs with a
+        # two-sided option market. A rung nobody is quoting is not evidence
+        # either way; it used to be counted because its mid existed.
+        'quotable': quotable,
+        'percent': round(100.0 * exceeding / quotable, 1) if quotable else None,
+        'percent_of_all_rungs': round(100.0 * exceeding / measured, 1) if measured else None,
+        'mean_envelope': round(sum(envelopes) / len(envelopes), 4) if envelopes else None,
         # The ladder is exhaustive, so this sums to the DISCOUNT FACTOR, not
         # to 1 (D-073). Reporting it beside the mean D is the point: the two
         # should agree, and a gap between them is a measurement error rather
