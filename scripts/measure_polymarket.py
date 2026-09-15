@@ -137,7 +137,7 @@ def ladder(event, ch, idx):
         # Every rung here is a single 'above K' claim, so the bucket IS the
         # digital: no differencing, and the envelope is the digital's own.
         if d['low'] is None or d['high'] is None:
-            rows.append({'K': K, 'pm': pm, 'opt': d['p'], 'spread': spread,
+            rows.append({'K': K, 'pm': pm, 'opt': d['dsp'], 'spread': spread,
                          'skipped': 'no two-sided option quote'})
             continue
         # Both venues charge a TAKER fee and this trade crosses on both.
@@ -147,15 +147,15 @@ def ladder(event, ch, idx):
         sell_fee = fees.polymarket_rate(bid, sched, enabled)
         buy_fee = fees.polymarket_rate(ask, sched, enabled)
         if sell_fee is None or buy_fee is None:
-            rows.append({'K': K, 'pm': pm, 'opt': d['p'], 'spread': spread,
+            rows.append({'K': K, 'pm': pm, 'opt': d['dsp'], 'spread': spread,
                          'skipped': 'fee schedule UNKNOWN'})
             continue
         sell_pm = bid - (d['high'] + d['fee']) - sell_fee
         buy_pm = (d['low'] - d['fee']) - ask - buy_fee
         edge = max(sell_pm, buy_pm)
         rows.append({'K': K, 'pm': pm, 'pm_bid': bid, 'pm_ask': ask,
-                     'opt': d['p'], 'opt_low': d['low'], 'opt_high': d['high'],
-                     'gap': pm - d['p'], 'spread': spread,
+                     'opt': d['dsp'], 'opt_low': d['low'], 'opt_high': d['high'],
+                     'gap': pm - d['dsp'], 'spread': spread,
                      'envelope': d['high'] - d['low'],
                      'option_fee': d['fee'],
                      'venue_fee': sell_fee if sell_pm >= buy_pm else buy_fee,
