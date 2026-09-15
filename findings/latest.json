@@ -1,107 +1,112 @@
 {
  "archive": {
   "day_count": 14,
-  "snapshot_count": 49,
-  "first": "2026-08-31T0508Z",
-  "last": "2026-09-14T2105Z"
+  "snapshot_count": 45,
+  "first": "2026-09-01T0515Z",
+  "last": "2026-09-15T0505Z"
  },
  "produced_by": "scripts/write_findings.py",
  "measurements": {
   "friction_band_kalshi": {
    "model_free": true,
-   "exceeding": 145,
-   "measured": 2068,
+   "exceeding": 138,
+   "measured": 1980,
    "percent": 7.0,
    "mean_density": 0.9859,
-   "mean_discount_factor": 0.988094,
+   "mean_discount_factor": 0.988146,
    "discount_fallbacks": 0,
    "stability": {
     "distinct_rungs": 44,
-    "total_observations": 2068,
-    "observations_per_rung": 47.0,
+    "total_observations": 1980,
+    "observations_per_rung": 45.0,
     "always_exceeds": 3,
-    "sometimes_exceeds": 3,
-    "never_exceeds": 38,
+    "sometimes_exceeds": 2,
+    "never_exceeds": 39,
     "always_exceeding_list": [
      {
       "rung": "BTC:KXBTCY-27JAN0100-T149999.99",
-      "observations": 47,
-      "exceeding": 47
+      "observations": 45,
+      "exceeding": 45
      },
      {
       "rung": "ETH:KXETHY-27JAN0100-T1000.00",
-      "observations": 47,
-      "exceeding": 47
+      "observations": 45,
+      "exceeding": 45
      },
      {
       "rung": "ETH:KXETHY-27JAN0100-T4999.99",
-      "observations": 47,
-      "exceeding": 47
+      "observations": 45,
+      "exceeding": 45
      }
     ]
    }
   },
   "polymarket_terminal": {
    "model_free": true,
-   "exceeding": 1227,
-   "measured": 4802,
-   "percent": 25.6,
-   "gap_12h_exceeding": 940,
-   "gap_12h_measured": 3420,
-   "gap_12h_percent": 27.5,
-   "touch_ladders_excluded": 843,
+   "exceeding": 1096,
+   "measured": 4388,
+   "percent": 25.0,
+   "gap_12h_exceeding": 839,
+   "gap_12h_measured": 3133,
+   "gap_12h_percent": 26.8,
+   "touch_ladders_excluded": 781,
    "stability": {
-    "distinct_rungs": 396,
-    "total_observations": 4802,
-    "observations_per_rung": 12.1,
-    "always_exceeds": 14,
-    "sometimes_exceeds": 286,
-    "never_exceeds": 96,
+    "distinct_rungs": 379,
+    "total_observations": 4388,
+    "observations_per_rung": 11.6,
+    "always_exceeds": 15,
+    "sometimes_exceeds": 264,
+    "never_exceeds": 100,
     "always_exceeding_list": [
      {
-      "rung": "BTC:2026-08-31:74000",
-      "observations": 4,
-      "exceeding": 4
+      "rung": "BTC:2026-09-01:74000",
+      "observations": 2,
+      "exceeding": 2
      },
      {
-      "rung": "BTC:2026-09-01:84000",
-      "observations": 5,
-      "exceeding": 5
+      "rung": "BTC:2026-09-01:82000",
+      "observations": 2,
+      "exceeding": 2
      },
      {
       "rung": "BTC:2026-09-01:86000",
+      "observations": 1,
+      "exceeding": 1
+     },
+     {
+      "rung": "BTC:2026-09-02:86000",
+      "observations": 1,
+      "exceeding": 1
+     },
+     {
+      "rung": "ETH:2026-09-01:2200",
+      "observations": 2,
+      "exceeding": 2
+     },
+     {
+      "rung": "ETH:2026-09-01:2400",
+      "observations": 2,
+      "exceeding": 2
+     },
+     {
+      "rung": "ETH:2026-09-01:2500",
+      "observations": 2,
+      "exceeding": 2
+     },
+     {
+      "rung": "ETH:2026-09-02:2200",
       "observations": 5,
       "exceeding": 5
      },
      {
-      "rung": "BTC:2026-09-01:88000",
+      "rung": "ETH:2026-09-02:2700",
       "observations": 3,
       "exceeding": 3
      },
      {
-      "rung": "BTC:2026-09-02:86000",
-      "observations": 6,
-      "exceeding": 6
-     },
-     {
-      "rung": "ETH:2026-09-01:2700",
-      "observations": 5,
-      "exceeding": 5
-     },
-     {
-      "rung": "ETH:2026-09-01:2800",
-      "observations": 5,
-      "exceeding": 5
-     },
-     {
-      "rung": "ETH:2026-09-02:2200",
-      "observations": 10,
-      "exceeding": 10
-     },
-     {
-      "rung": "ETH:2026-09-02:2700",
-      "observations": 8,
-      "exceeding": 8
+      "rung": "ETH:2026-09-05:2900",
+      "observations": 1,
+      "exceeding": 1
      },
      {
       "rung": "ETH:2026-09-08:2100",
@@ -125,91 +130,81 @@
      },
      {
       "rung": "ETH:2026-09-20:2800",
-      "observations": 2,
-      "exceeding": 2
+      "observations": 3,
+      "exceeding": 3
      }
     ]
    }
   },
   "long_horizon_touch": {
    "model_free": false,
-   "measured": 1149,
-   "arithmetic_violations": 5,
-   "ratio_over_two": 1060,
+   "measured": 1088,
+   "arithmetic_violations": 4,
+   "ratio_over_two": 1006,
    "violation_percent": 0.4,
-   "ratio_over_two_percent": 92.3,
+   "ratio_over_two_percent": 92.5,
    "stability": {
-    "distinct_rungs": 44,
-    "total_observations": 1149,
-    "observations_per_rung": 26.1,
-    "always_exceeds": 26,
-    "sometimes_exceeds": 17,
+    "distinct_rungs": 47,
+    "total_observations": 1088,
+    "observations_per_rung": 23.1,
+    "always_exceeds": 31,
+    "sometimes_exceeds": 15,
     "never_exceeds": 1,
     "always_exceeding_list": [
      {
       "rung": "BTC:2027-01-01:200000",
-      "observations": 49,
-      "exceeding": 49
+      "observations": 45,
+      "exceeding": 45
      },
      {
       "rung": "BTC:2027-01-01:190000",
-      "observations": 49,
-      "exceeding": 49
+      "observations": 45,
+      "exceeding": 45
      },
      {
       "rung": "BTC:2027-01-01:180000",
-      "observations": 49,
-      "exceeding": 49
+      "observations": 45,
+      "exceeding": 45
      },
      {
       "rung": "BTC:2027-01-01:170000",
-      "observations": 49,
-      "exceeding": 49
+      "observations": 45,
+      "exceeding": 45
      },
      {
       "rung": "BTC:2027-01-01:160000",
-      "observations": 49,
-      "exceeding": 49
+      "observations": 45,
+      "exceeding": 45
      },
      {
       "rung": "BTC:2027-01-01:150000",
-      "observations": 49,
-      "exceeding": 49
+      "observations": 45,
+      "exceeding": 45
      },
      {
       "rung": "BTC:2027-01-01:140000",
-      "observations": 49,
-      "exceeding": 49
+      "observations": 45,
+      "exceeding": 45
      },
      {
       "rung": "BTC:2027-01-01:130000",
-      "observations": 49,
-      "exceeding": 49
+      "observations": 45,
+      "exceeding": 45
      },
      {
       "rung": "BTC:2027-01-01:120000",
-      "observations": 49,
-      "exceeding": 49
+      "observations": 45,
+      "exceeding": 45
      },
      {
       "rung": "BTC:2027-01-01:110000",
-      "observations": 49,
-      "exceeding": 49
+      "observations": 45,
+      "exceeding": 45
      },
      {
       "rung": "BTC:2027-01-01:100000",
-      "observations": 49,
-      "exceeding": 48
-     },
-     {
-      "rung": "BTC:2026-09-01:85000",
-      "observations": 5,
-      "exceeding": 5
-     },
-     {
-      "rung": "BTC:2026-09-01:87500",
-      "observations": 4,
-      "exceeding": 4
+      "observations": 45,
+      "exceeding": 45
      },
      {
       "rung": "BTC:2026-09-07:80000",
@@ -233,18 +228,28 @@
      },
      {
       "rung": "BTC:2026-10-01:92500",
-      "observations": 37,
-      "exceeding": 37
+      "observations": 38,
+      "exceeding": 38
      },
      {
       "rung": "BTC:2026-10-01:90000",
-      "observations": 37,
-      "exceeding": 37
+      "observations": 38,
+      "exceeding": 38
      },
      {
       "rung": "BTC:2026-10-01:87500",
-      "observations": 41,
-      "exceeding": 41
+      "observations": 42,
+      "exceeding": 42
+     },
+     {
+      "rung": "BTC:2026-10-01:85000",
+      "observations": 42,
+      "exceeding": 42
+     },
+     {
+      "rung": "BTC:2026-10-01:82500",
+      "observations": 42,
+      "exceeding": 42
      }
     ]
    },
@@ -252,22 +257,22 @@
   },
   "exhaustiveness_constraint": {
    "corrected": {
-    "measured": 94,
-    "mean_ratio_to_discount": 0.9978,
+    "measured": 90,
+    "mean_ratio_to_discount": 0.9977,
     "min_ratio_to_discount": 0.9945,
     "max_ratio_to_discount": 1.0,
     "departure_percent": -0.2
    },
    "naive_a": {
-    "measured": 94,
-    "mean_ratio_to_discount": 0.9978,
+    "measured": 90,
+    "mean_ratio_to_discount": 0.9977,
     "min_ratio_to_discount": 0.9945,
     "max_ratio_to_discount": 1.0,
     "departure_percent": -0.2
    },
    "naive_b": {
-    "measured": 94,
-    "mean_ratio_to_discount": 1.129,
+    "measured": 90,
+    "mean_ratio_to_discount": 1.1287,
     "min_ratio_to_discount": 1.0843,
     "max_ratio_to_discount": 1.1914,
     "departure_percent": 12.9
