@@ -60,6 +60,7 @@ import math
 import re
 import sys
 
+import fees
 from archive import snapshot, stamps, summary, Missing
 from stability import Stability
 
@@ -294,20 +295,36 @@ def rungs(KA, D_raw, series, currency):
         # upper leg's ask side, and vice versa.
         if None in (dL['low'], dL['high'], dH['low'], dH['high']):
             opt_low = opt_high = edge = None
+            gross = kalshi_fee = min_size = None
             direction = 'no two-sided option quote'
             exceeds = False
         else:
             opt_low = dL['low'] - dH['high']
             opt_high = dL['high'] - dH['low']
             # Two trades, both priced at quotes that exist right now.
+            # Both trades cross the spread on both venues, so both pay the
+            # Kalshi TAKER fee. fees.rate() is the per-contract cost before
+            # the schedule's round-up; the round-up is answered separately by
+            # min_size, because it makes the fee depend on order size and a
+            # single number would have to pick a size silently.
             sell_pm = bid - (opt_high + fee)     # sell the prediction, buy the bucket
             buy_pm = (opt_low - fee) - ask       # buy the prediction, sell the bucket
-            edge = max(sell_pm, buy_pm)
-            direction = 'sell prediction' if sell_pm >= buy_pm else 'buy prediction'
-            exceeds = edge > 0
+            gross = max(sell_pm, buy_pm)
+            if sell_pm >= buy_pm:
+                direction, pm_price = 'sell prediction', bid
+            else:
+                direction, pm_price = 'buy prediction', ask
+            kalshi_fee = fees.rate(pm_price, series)
+            edge = gross - kalshi_fee
+            # The smallest order at which the round-up stops eating the edge.
+            # None means no size up to the cap works.
+            min_size = fees.min_contracts(pm_price, gross, series)
+            exceeds = edge > 0 and min_size is not None
         rows.append({'label': label, 'pm': pm, 'pm_bid': bid, 'pm_ask': ask,
                      'opt': opt, 'opt_low': opt_low, 'opt_high': opt_high,
                      'gap': pm - opt, 'se': se, 'fee': fee,
+                     'kalshi_fee': kalshi_fee, 'gross_edge': gross,
+                     'min_size': min_size,
                      'envelope': None if opt_low is None else opt_high - opt_low,
                      'edge': edge, 'direction': direction,
                      'spread': spread, 'exceeds': exceeds})
@@ -357,6 +374,13 @@ def run(stamp, stab=None):
             if quotable else None,
             'best_edge': round(max(r['edge'] for r in quotable), 4)
             if quotable else None,
+            'mean_kalshi_fee': round(sum(r['kalshi_fee'] for r in quotable) / len(quotable), 5)
+            if quotable else None,
+            # The order sizes the surviving rungs need. A rung that clears the
+            # edge but needs 4,000 contracts is not the same finding as one
+            # that clears it at 2.
+            'min_sizes': sorted(r['min_size'] for r in measured
+                                if r['exceeds'] and r['min_size'] is not None),
         }
     return out
 
@@ -410,10 +434,10 @@ def main():
                 mark = '' if d['discount_estimated'] else '!'
                 if not d['discount_estimated']:
                     fallbacks += 1
-                cells.append('%-30s' % ('%d/%d/%d  (D %.4f%s  env %.3f)'
+                cells.append('%-30s' % ('%d/%d/%d  (env %.3f  kfee %.4f)'
                                         % (d['exceeding'], d['quotable'], d['measured'],
-                                           d['discount_factor'], mark,
-                                           d['mean_envelope'] or 0)))
+                                           d['mean_envelope'] or 0,
+                                           d['mean_kalshi_fee'] or 0)))
                 tot_over += d['exceeding']
                 tot_measured += d['measured']
         print('%-18s %6s  %s %s' % (s['stamp'], s['window'], cells[0], cells[1]))
@@ -436,8 +460,13 @@ def main():
     print('at its ask side, or the mirror of that. No mid is used anywhere in')
     print('the verdict, and 1.96*SE no longer appears in it.')
     print()
+    print('NOW IN THIS NUMBER: Kalshi\'s taker fee, 0.07*P*(1-P) per contract')
+    print('(scripts/fees.py, quoting their schedule). Kalshi charges no')
+    print('settlement fee. The fee rounds UP to a whole cent per ORDER, so the')
+    print('min-size column is the smallest order at which that rounding stops')
+    print('eating the edge.')
+    print()
     print('STILL NOT IN THIS NUMBER, and each one only makes it worse:')
-    print('  - Kalshi\'s own trading and settlement fees. UNKNOWN, not zero.')
     print('  - Margin on the option legs, which is posted for months.')
     print('  - The expiry gap between the two contracts (D-075: 6d 21h).')
     print('  - BRTI against the Deribit index (D-075: size UNKNOWN).')
