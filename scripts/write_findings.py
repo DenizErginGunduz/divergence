@@ -44,34 +44,17 @@ def stability_summary(stab):
     }
 
 
-def measure_band_all(all_stamps):
-    stab = Stability()
-    exceeding = measured = quotable = 0
-    density = []
-    discounts = []
-    envelopes = []
-    values = []
-    off_grid = 0
-    fallbacks = 0
-    for d in all_stamps:
-        try:
-            s = measure_band.run(d, stab)
-        except Missing:
-            continue
-        for v in s['series'].values():
-            if 'error' in v:
-                continue
-            exceeding += v['exceeding']
-            measured += v['measured']
-            quotable += v['quotable']
-            if v['mean_envelope'] is not None:
-                envelopes.append(v['mean_envelope'])
-            values.extend(v['edge_values'])
-            off_grid += v['off_grid']
-            density.append(v['density_sum'])
-            discounts.append(v['discount_factor'])
-            if not v['discount_estimated']:
-                fallbacks += 1
+def band_block(rows, stab):
+    """Aggregate one tenor's rung-observations into the shape the page reads."""
+    exceeding = sum(v['exceeding'] for v in rows)
+    measured = sum(v['measured'] for v in rows)
+    quotable = sum(v['quotable'] for v in rows)
+    envelopes = [v['mean_envelope'] for v in rows if v['mean_envelope'] is not None]
+    values = [x for v in rows for x in v['edge_values']]
+    # A cumulative ladder has no density sum; only the exhaustive ones do.
+    density = [v['density_sum'] for v in rows if v['density_sum'] is not None]
+    discounts = [v['discount_factor'] for v in rows]
+    gaps = [v['expiry_gap_hours'] for v in rows]
     return {
         # The digital comes from a price difference, so no model is assumed.
         # The page counts this flag rather than a hand-typed number.
@@ -85,26 +68,69 @@ def measure_band_all(all_stamps):
         'percent': round(100.0 * exceeding / quotable, 1) if quotable else None,
         'percent_of_all_rungs': round(100.0 * exceeding / measured, 1) if measured else None,
         'mean_envelope': round(sum(envelopes) / len(envelopes), 4) if envelopes else None,
-        # What every positive edge is worth in DOLLARS at the top of book,
-        # largest first. An edge with nothing resting behind it is a price
-        # observation, not an opportunity, and this is the field that says
-        # which one we are looking at.
+        # What every positive edge is worth in DOLLARS at the top of book.
+        # An edge with nothing resting behind it is a price observation, not
+        # an opportunity, and this is the field that says which one it is.
         'edge_value_max': round(max(values), 2) if values else None,
         'edge_value_median': round(sorted(values)[len(values) // 2], 2) if values else None,
         'edge_value_total': round(sum(values), 2) if values else None,
-        # Quotes that do not sit on the price grid the market itself
-        # publishes. Any non-zero here means a unit or a parsing error.
-        'off_grid_quotes': off_grid,
-        # The ladder is exhaustive, so this sums to the DISCOUNT FACTOR, not
-        # to 1 (D-073). Reporting it beside the mean D is the point: the two
-        # should agree, and a gap between them is a measurement error rather
-        # than a fact about the market.
+        'off_grid_quotes': sum(v['off_grid'] for v in rows),
+        # An exhaustive ladder sums to the DISCOUNT FACTOR, not to 1 (D-073).
+        # Reporting it beside the mean D is the point: the two should agree.
         'mean_density': round(sum(density) / len(density), 4) if density else None,
         'mean_discount_factor': round(sum(discounts) / len(discounts), 6) if discounts else None,
-        'discount_fallbacks': fallbacks,
+        'discount_fallbacks': sum(1 for v in rows if not v['discount_estimated']),
+        # The gap between the option expiry and the Kalshi close, in hours.
+        # It is the reason this block is split by tenor at all: at 165 hours
+        # it swallowed two of three findings (D-079); at about a day it does
+        # not. A single pooled number would hide exactly that.
+        'expiry_gap_hours_median': round(sorted(gaps)[len(gaps) // 2], 1) if gaps else None,
+        'ladders': sorted(set(v['ladder'] for v in rows)),
+        'series': sorted(set(v['label'] for v in rows)),
         'stability': stability_summary(stab),
     }
 
+
+class TenorRouter(object):
+    """One pass over the archive, one stability counter per tenor.
+
+    measure_band.run() writes its stability keys as '<series label>:<rung>',
+    and the label already carries the tenor, so routing on it avoids walking
+    the archive twice. A rung's consistency only means something against rungs
+    of the same kind: a year-end rung observed 61 times and an intraday rung
+    that exists for four hours are not comparable evidence.
+    """
+
+    def __init__(self, stabs):
+        self.stabs = stabs
+
+    def add(self, key, flag):
+        head = key.split(':', 1)[0]
+        self.stabs['year_end' if 'year-end' in head else 'intraday'].add(key, flag)
+
+
+def measure_band_all(all_stamps):
+    """The friction band, SPLIT BY TENOR.
+
+    Year-end and intraday ladders are the same measurement on contracts whose
+    expiry gap differs by two orders of magnitude — about 165 hours against
+    about a day. That gap swallowed two of three findings (D-079), so pooling
+    the two would produce one number describing neither.
+    """
+    stabs = {'year_end': Stability(), 'intraday': Stability()}
+    rows = {'year_end': [], 'intraday': []}
+    router = TenorRouter(stabs)
+    for d in all_stamps:
+        try:
+            s = measure_band.run(d, router)
+        except Missing:
+            continue
+        for label, v in s['series'].items():
+            if 'error' in v:
+                continue
+            tenor = 'year_end' if 'year-end' in label else 'intraday'
+            rows[tenor].append(dict(v, label=label))
+    return {t: band_block(rows[t], stabs[t]) for t in rows if rows[t]}
 
 def measure_polymarket_all(all_stamps):
     stab = Stability()
@@ -235,6 +261,8 @@ def main():
                            else '14-day public window'),
         'produced_by': 'scripts/write_findings.py',
         'measurements': {
+            # Two blocks, one per tenor: 'year_end' and 'intraday'. The
+            # numbers are not comparable across them and must not be pooled.
             'friction_band_kalshi': measure_band_all(all_stamps),
             'polymarket_terminal': measure_polymarket_all(all_stamps),
             'long_horizon_touch': measure_touch_all(all_stamps),
