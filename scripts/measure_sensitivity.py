@@ -38,6 +38,8 @@ Usage:
     python scripts/measure_sensitivity.py
     python scripts/measure_sensitivity.py --last 5
 """
+import json
+import os
 import sys
 
 from archive import snapshot, stamps, summary, Missing
@@ -45,6 +47,8 @@ from measure_band import (SERIES, chain, discount, forward,
                           expiry_instant, iso_instant, EXPIRY)
 
 # Skip levels tried on each side of the threshold. 0 is what production uses.
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 SKIPS = (0, 1, 2)
 
 
@@ -137,6 +141,40 @@ def rung_value(p, D, kind):
     return p if kind == 'greater' else D - p
 
 
+def rel_spread(r):
+    """How much one rung's digital moves when the bracket is widened, as a
+    share of its tight value."""
+    have = [d['v'] for d in r['grid'] if d and d.get('v') is not None]
+    if len(have) < 2 or not have[0]:
+        return None
+    return (max(have) - min(have)) / abs(have[0])
+
+
+def flat_share(rows):
+    """Share of rungs whose digital is IDENTICAL to another rung of the same
+    ladder in the same snapshot.
+
+    Kalshi's intraday thresholds step by 100 dollars and Deribit's strikes are
+    far wider, so a run of consecutive rungs can fall inside one bracket and
+    come back with one number. Those rungs are not independent measurements of
+    anything; only the first of each run carries information.
+    """
+    groups = {}
+    for r in rows:
+        d = r['grid'][0]
+        if not d or d.get('v') is None:
+            continue
+        groups.setdefault((r['stamp'], r['asset']), []).append(round(d['v'], 9))
+    dup = tot = 0
+    for vals in groups.values():
+        seen = {}
+        for v in vals:
+            seen[v] = seen.get(v, 0) + 1
+        tot += len(vals)
+        dup += sum(n - 1 for n in seen.values())
+    return round(100.0 * dup / tot, 1) if tot else None
+
+
 def run(stamp):
     g = snapshot(stamp)
     KA, D_raw = g.kalshi, g.deribit
@@ -185,6 +223,7 @@ def run(stamp):
                                'side': n['side'],
                                'v': rung_value(d['p'], n['D'], kind)})
             rows.append({
+                'stamp': stamp,
                 'asset': asset, 'label': label, 'kind': kind, 'bid': bid,
                 'K': K, 'grid': grid, 'chains': others,
                 'straddles': len(set(o['side'] for o in others)) == 2,
@@ -301,6 +340,39 @@ def main():
             '%+.0f/%+.0f' % (ch[0]['hours'], ch[1]['hours'])
             if len(ch) > 1 else ('%+.0f' % ch[0]['hours'] if ch else '-'),
             judge(r)))
+    # On the record, not only in a CI log. A virtualised log view cannot be
+    # read past its first screen, and a number nobody can read is a number
+    # nobody can check (D-070).
+    def grid_stats(sel):
+        v = sorted(x for r in sel for x in [rel_spread(r)] if x is not None)
+        if not v:
+            return None
+        return {'n': len(v), 'median_pct': round(100 * v[len(v) // 2], 1),
+                'p90_pct': round(100 * v[int(.9 * (len(v) - 1))], 1),
+                'worst_pct': round(100 * v[-1], 1)}
+
+    tenors = {'year_end': [r for r in all_rows if 'year-end' in r['asset']],
+              'intraday': [r for r in all_rows if 'year-end' not in r['asset']]}
+    record = {
+        'archive': o,
+        'produced_by': 'scripts/measure_sensitivity.py',
+        'rung_observations': len(all_rows),
+        'grid': {k: grid_stats(v) for k, v in tenors.items()},
+        'expiry_verdicts': tally,
+        'expiry_hours_by_tenor': {
+            k: sorted(set(round(c['hours']) for r in v for c in r['chains']))[:4]
+            for k, v in tenors.items() if v},
+        # Thresholds that return the IDENTICAL digital because they fall inside
+        # one Deribit bracket. A high share means the option chain cannot
+        # resolve the ladder at all.
+        'flat_rung_percent': {k: flat_share(v) for k, v in tenors.items() if v},
+    }
+    folder = os.path.join(ROOT, 'findings')
+    os.makedirs(folder, exist_ok=True)
+    with open(os.path.join(folder, 'sensitivity.json'), 'w',
+              encoding='utf-8') as f:
+        json.dump(record, f, ensure_ascii=False, indent=1)
+
     if tally:
         print('-' * 100)
         print('across all %d observations: %s'
