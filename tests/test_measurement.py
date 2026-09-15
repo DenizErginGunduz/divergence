@@ -12,6 +12,7 @@ give the same answer on an empty checkout.
 
     python -m unittest discover -s tests -v
 """
+import ast
 import os
 import sys
 import shutil
@@ -661,6 +662,99 @@ class MirrorIsolation(unittest.TestCase):
             self.skipTest('override is set; the roots are meant to differ')
         self.assertEqual(os.path.abspath(archive.RAW),
                          os.path.abspath(prune_archive.RAW))
+
+
+COLLECTOR = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    'collector', 'collect.py')
+
+
+def from_collector(*names):
+    """Lift named definitions out of collect.py without running it.
+
+    `collector/collect.py` IS the collector: its module level fetches from four
+    APIs and writes files. Importing it from a test would run a collection. So
+    the named top-level assignments and function definitions are taken out of
+    its AST and only those are executed. Nothing else in the module is touched.
+
+    A source-text assertion would have been simpler, but it would pass on code
+    that reads right and behaves wrong, and the point of these tests is the
+    behaviour.
+    """
+    wanted = set(names)
+    with open(COLLECTOR, encoding='utf-8') as f:
+        tree = ast.parse(f.read())
+    keep = []
+    for node in tree.body:
+        if isinstance(node, ast.FunctionDef) and node.name in wanted:
+            keep.append(node)
+        elif isinstance(node, ast.Assign):
+            if any(isinstance(target, ast.Name) and target.id in wanted
+                   for target in node.targets):
+                keep.append(node)
+    ns = {}
+    exec(compile(ast.Module(body=keep, type_ignores=[]), COLLECTOR, 'exec'), ns)
+    missing = wanted - set(ns)
+    if missing:
+        raise AssertionError('not found in collect.py: %s' % sorted(missing))
+    return ns
+
+
+def holder_row():
+    """One row as the venue returns it, field for field."""
+    return {'proxyWallet': '0x6dd4cbdd901d61124bef8e2afdb4c803cdf685aa',
+            'bio': '', 'asset': 'T1', 'pseudonym': 'Parallel-Jalapeno',
+            'amount': 153639.106938, 'displayUsernamePublic': True,
+            'outcomeIndex': 0, 'name': 'geniusBacon521', 'profileImage': '',
+            'profileImageOptimized': '', 'verified': False}
+
+
+class CollectorFieldDrops(unittest.TestCase):
+    """D-087 and D-088: the two deliberate exceptions to rule 2.
+
+    Dropping a field from the archive is irreversible — the run that would have
+    written it is gone. These tests pin which fields go and, more importantly,
+    which ones must not: `proxyWallet` and `transactionHash` are what make a row
+    attributable to an actor and verifiable by somebody else, and `amount`,
+    `price`, `size` and `timestamp` are the measurement itself. Someone tidying
+    the drop lists later should fail here rather than quietly lose them.
+    """
+
+    def setUp(self):
+        self.ns = from_collector('strip_holders', 'HOLDER_DROP',
+                                 'HOLDERS_UNEXPECTED', 'TRADE_DROP')
+
+    def test_only_the_three_market_fields_survive(self):
+        out = self.ns['strip_holders']([{'token': 'T1',
+                                         'holders': [holder_row()]}])
+        self.assertEqual(sorted(out[0]['holders'][0]),
+                         ['amount', 'outcomeIndex', 'proxyWallet'])
+
+    def test_asset_is_recoverable_from_the_key_it_sat_under(self):
+        """Why dropping `asset` is lossless and dropping a name is not."""
+        group = {'token': 'T1', 'holders': [holder_row()]}
+        original = group['holders'][0]['asset']
+        out = self.ns['strip_holders']([group])
+        self.assertNotIn('asset', out[0]['holders'][0])
+        self.assertEqual(out[0]['token'], original)
+
+    def test_a_null_payload_is_returned_untouched_and_counted(self):
+        """One condition really did come back as JSON null. It must stay in the
+        file exactly as it arrived AND show up in the count."""
+        before = len(self.ns['HOLDERS_UNEXPECTED'])
+        self.assertIsNone(self.ns['strip_holders'](None))
+        self.assertEqual(len(self.ns['HOLDERS_UNEXPECTED']), before + 1)
+
+    def test_the_actor_key_is_never_dropped(self):
+        self.assertNotIn('proxyWallet', self.ns['HOLDER_DROP'])
+        self.assertNotIn('proxyWallet', self.ns['TRADE_DROP'])
+        self.assertNotIn('transactionHash', self.ns['TRADE_DROP'])
+
+    def test_the_numbers_are_never_dropped(self):
+        for field in ('amount', 'outcomeIndex'):
+            self.assertNotIn(field, self.ns['HOLDER_DROP'])
+        for field in ('price', 'size', 'timestamp', 'conditionId'):
+            self.assertNotIn(field, self.ns['TRADE_DROP'])
 
 
 if __name__ == '__main__':
