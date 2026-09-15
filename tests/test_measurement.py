@@ -104,13 +104,13 @@ class DigitalSideSelection(unittest.TestCase):
         ch, idx = measure_band.chain(build(), 'BTC')
         d = measure_band.digital(ch, EXPIRY, 105000.0, 100000.0, idx)
         # (8000 - 4000) / 10000
-        self.assertAlmostEqual(d['p'], 0.4, places=6)
+        self.assertAlmostEqual(d['dsp'], 0.4, places=6)
 
     def test_downside_uses_puts_and_matches_the_hand_computation(self):
         ch, idx = measure_band.chain(build(), 'BTC')
         d = measure_band.digital(ch, EXPIRY, 95000.0, 100000.0, idx)
         # 1 - (8000 - 5000) / 10000
-        self.assertAlmostEqual(d['p'], 0.7, places=6)
+        self.assertAlmostEqual(d['dsp'], 0.7, places=6)
 
     def test_no_put_chain_means_no_downside_number(self):
         """The rule from D-032: with no puts, produce nothing. Not a fallback
@@ -348,14 +348,14 @@ class DiscountConvention(unittest.TestCase):
         the same bracket the call side is (C(90k) - C(95k))/5,000 = 0.97."""
         ch, idx = measure_band.chain(parity_chain(), 'BTC')
         d = measure_band.digital(ch, EXPIRY, 92500.0, PARITY_F, idx, PARITY_D)
-        self.assertAlmostEqual(d['p'], 0.97, places=9)
+        self.assertAlmostEqual(d['dsp'], 0.97, places=9)
 
     def test_the_old_put_expression_was_high_by_one_minus_d(self):
         """The bug, pinned. Passing D=1 reproduces it exactly, which is also
         why it survived so long: with D=1 the two expressions coincide."""
         ch, idx = measure_band.chain(parity_chain(), 'BTC')
         old = measure_band.digital(ch, EXPIRY, 92500.0, PARITY_F, idx, 1.0)
-        self.assertAlmostEqual(old['p'] - 0.97, 1.0 - PARITY_D, places=9)
+        self.assertAlmostEqual(old['dsp'] - 0.97, 1.0 - PARITY_D, places=9)
 
     def test_call_side_was_never_affected(self):
         """Above the forward the call side is used, and it was already
@@ -363,7 +363,7 @@ class DiscountConvention(unittest.TestCase):
         ch, idx = measure_band.chain(parity_chain(), 'BTC')
         a = measure_band.digital(ch, EXPIRY, 107500.0, PARITY_F, idx, PARITY_D)
         b = measure_band.digital(ch, EXPIRY, 107500.0, PARITY_F, idx, 1.0)
-        self.assertAlmostEqual(a['p'], b['p'], places=12)
+        self.assertAlmostEqual(a['dsp'], b['dsp'], places=12)
 
     def test_forward_is_exact_once_d_is_carried(self):
         ch, idx = measure_band.chain(parity_chain(), 'BTC')
@@ -414,10 +414,10 @@ class ExhaustivenessTargetsD(unittest.TestCase):
         total = 0.0
         for lo, hi in zip(edges[:-1], edges[1:]):
             dL = (measure_band.digital(ch, EXPIRY, lo, PARITY_F, idx, PARITY_D)
-                  if lo is not None else {'p': PARITY_D})
+                  if lo is not None else {'dsp': PARITY_D})
             dH = (measure_band.digital(ch, EXPIRY, hi, PARITY_F, idx, PARITY_D)
-                  if hi is not None else {'p': 0.0})
-            total += dL['p'] - dH['p']
+                  if hi is not None else {'dsp': 0.0})
+            total += dL['dsp'] - dH['dsp']
         self.assertAlmostEqual(total, PARITY_D, places=9)
 
     def test_the_unbounded_edge_is_worth_d(self):
@@ -464,18 +464,18 @@ class TradeAtQuotedPrices(unittest.TestCase):
     def test_low_below_mid_and_high_above_on_the_call_side(self):
         ch, idx = measure_band.chain(parity_chain(), 'BTC')
         d = measure_band.digital(ch, EXPIRY, 120000.0, PARITY_F, idx, PARITY_D)
-        self.assertLess(d['low'], d['p'])
-        self.assertGreater(d['high'], d['p'])
-        self.assertAlmostEqual(d['p'], 0.02, places=9)
+        self.assertLess(d['low'], d['dsp'])
+        self.assertGreater(d['high'], d['dsp'])
+        self.assertAlmostEqual(d['dsp'], 0.02, places=9)
 
     def test_low_below_mid_and_high_above_on_the_put_side(self):
         """80,000 is under the forward, so this is the put branch — the one
         where the spread is SUBTRACTED and the bid/ask pairing inverts."""
         ch, idx = measure_band.chain(parity_chain(), 'BTC')
         d = measure_band.digital(ch, EXPIRY, 80000.0, PARITY_F, idx, PARITY_D)
-        self.assertLess(d['low'], d['p'])
-        self.assertGreater(d['high'], d['p'])
-        self.assertAlmostEqual(d['p'], 0.97, places=9)
+        self.assertLess(d['low'], d['dsp'])
+        self.assertGreater(d['high'], d['dsp'])
+        self.assertAlmostEqual(d['dsp'], 0.97, places=9)
 
     def test_the_envelope_is_the_cost_of_the_two_legs(self):
         """Width = (spread of leg A + spread of leg B) / w. Not 1.96 of
@@ -496,7 +496,7 @@ class TradeAtQuotedPrices(unittest.TestCase):
                 row['bid_price'] = None
         ch, idx = measure_band.chain(raw, 'BTC')
         d = measure_band.digital(ch, EXPIRY, 120000.0, PARITY_F, idx, PARITY_D)
-        self.assertIsNotNone(d['p'], 'the mid still exists')
+        self.assertIsNotNone(d['dsp'], 'the mid still exists')
         self.assertIsNone(d['low'])
         self.assertIsNone(d['high'])
 
