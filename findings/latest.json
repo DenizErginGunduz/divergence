@@ -9,11 +9,11 @@
  "measurements": {
   "friction_band_kalshi": {
    "model_free": true,
-   "exceeding": 136,
+   "exceeding": 134,
    "measured": 1980,
    "quotable": 1978,
-   "percent": 6.9,
-   "percent_of_all_rungs": 6.9,
+   "percent": 6.8,
+   "percent_of_all_rungs": 6.8,
    "mean_envelope": 0.0619,
    "mean_density": 0.9859,
    "mean_discount_factor": 0.988146,
@@ -23,8 +23,8 @@
     "total_observations": 1980,
     "observations_per_rung": 45.0,
     "always_exceeds": 3,
-    "sometimes_exceeds": 2,
-    "never_exceeds": 39,
+    "sometimes_exceeds": 0,
+    "never_exceeds": 41,
     "always_exceeding_list": [
      {
       "rung": "BTC:KXBTCY-27JAN0100-T149999.99",
