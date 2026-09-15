@@ -5,16 +5,24 @@ THE QUESTION
 Is the gap between a prediction-market price and the digital implied by the
 option chain LARGER than what it would cost to trade that gap?
 
-Cost has three parts:
-  1. Option fee      — Deribit: 0.03% of the underlying, capped at 12.5%
-                       of the option price. Paid on both legs.
-  2. Prediction spread — half the bid-ask.
-  3. Measurement error — the digital comes from the price difference of two
-                       neighbouring strikes, so each leg's spread carries
-                       error into the result. 1.96 * standard error (~95%).
+WHAT THE TEST IS NOW (was: 1.96*SE + friction)
+Every price here is a quote someone is standing behind, so the question is
+asked as a trade rather than as a statistic:
 
-threshold = 1.96*SE + friction.  |PM - option| > threshold means "clears
-the band".
+  sell the prediction at its BID, buy the option bucket at its ASK side, pay
+  the option fees. Is there anything left?
+  or the mirror: buy the prediction at its ASK, sell the bucket at its BID
+  side, pay the fees. Is there anything left?
+
+The bucket's two executable prices come from the option quotes directly:
+  opt_high — what buying the spread costs: ask on the long leg, bid on the
+             short one.
+  opt_low  — what selling it pays: the other way round.
+The width between them is a cost, not a confidence interval, which is the
+whole reason for the change. 1.96*SE was a statement about how uncertain our
+ESTIMATE of the mid was; it answered a question nobody can trade on. The
+standard error is still computed and reported, but it no longer decides
+anything.
 
 WHAT THE OPTION NUMBER IS (D-073)
 It is a DISCOUNTED STATE PRICE, D*Q(lo < S_T < hi), not a probability. Q is
@@ -170,6 +178,16 @@ def digital(ch, expiry, K, F, idx, D=1.0):
     Both sides return the SAME quantity, D*Q(S>K). The put side reaches it as
     D - D*Q(S<K) rather than 1 - D*Q(S<K); with D=1 the two coincide, which is
     why the old expression looked right (D-073).
+
+    Three numbers come back:
+      p    — from the marks. The midpoint estimate. Reported, not traded on.
+      high — what it costs to BUY the spread: ask on the leg you are long,
+             bid on the leg you are short.
+      low  — what selling it pays. low <= p <= high, and the width between
+             them is the bid-ask cost of two option legs.
+    low and high are None when either leg is quoted on one side only. That is
+    a refusal, not a zero: a bucket with no two-sided market has no executable
+    price and must not be given one.
     """
     kind = 'P' if K < F else 'C'
     o = ch[expiry].get(kind)
@@ -183,13 +201,26 @@ def digital(ch, expiry, K, F, idx, D=1.0):
     A, B = o[a], o[b]
     p = (A['mark'] - B['mark']) / w if kind == 'C' else D - (B['mark'] - A['mark']) / w
     if None in (A['bid'], A['ask'], B['bid'], B['ask']):
-        se = None
+        se = low = high = None
     else:
+        # Kept as a diagnostic only. It no longer enters any verdict.
         se = math.sqrt(((A['ask'] - A['bid']) / 2) ** 2 +
                        ((B['ask'] - B['bid']) / 2) ** 2) / w
+        if kind == 'C':
+            # Long the low strike, short the high one.
+            low = (A['bid'] - B['ask']) / w
+            high = (A['ask'] - B['bid']) / w
+        else:
+            # The put spread is SUBTRACTED, so buying it (its ask side) gives
+            # the LOW digital. Getting this pair the wrong way round inverts
+            # the envelope while leaving every number plausible, which is why
+            # tests/test_measurement.py pins it.
+            low = D - (B['ask'] - A['bid']) / w
+            high = D - (B['bid'] - A['ask']) / w
     # Deribit: 0.03% of the underlying, capped at 12.5% of the option price
     fee = lambda x: min(0.0003 * idx, 0.125 * x)
-    return {'p': p, 'se': se, 'fee': (fee(A['mark']) + fee(B['mark'])) / w}
+    return {'p': p, 'se': se, 'low': low, 'high': high,
+            'fee': (fee(A['mark']) + fee(B['mark'])) / w}
 
 
 def rungs(KA, D_raw, series, currency):
@@ -240,10 +271,15 @@ def rungs(KA, D_raw, series, currency):
         label = m.get('ticker') or ('%s-%s' % (lo, hi))
         # An unbounded lower edge is a certainty, and a certainty is worth D
         # today, not 1. An unbounded upper edge is worth nothing either way.
-        dL = digital(ch, expiry, lo, F, idx, D) if lo is not None else {'p': D, 'se': 0, 'fee': 0}
-        dH = digital(ch, expiry, hi, F, idx, D) if hi is not None else {'p': 0, 'se': 0, 'fee': 0}
-        pm = (float(m['yes_bid_dollars']) + float(m['yes_ask_dollars'])) / 2
-        spread = float(m['yes_ask_dollars']) - float(m['yes_bid_dollars'])
+        # Both are exact, so their envelope has zero width.
+        edge_L = {'p': D, 'se': 0, 'low': D, 'high': D, 'fee': 0}
+        edge_H = {'p': 0, 'se': 0, 'low': 0, 'high': 0, 'fee': 0}
+        dL = digital(ch, expiry, lo, F, idx, D) if lo is not None else edge_L
+        dH = digital(ch, expiry, hi, F, idx, D) if hi is not None else edge_H
+        bid = float(m['yes_bid_dollars'])
+        ask = float(m['yes_ask_dollars'])
+        pm = (bid + ask) / 2          # reported, never traded on
+        spread = ask - bid
         if not dL or not dH:
             rows.append({'label': label, 'skipped': 'outside the strike range',
                          'pm': pm, 'spread': spread})
@@ -251,11 +287,30 @@ def rungs(KA, D_raw, series, currency):
         opt = dL['p'] - dH['p']
         se = None if (dL['se'] is None or dH['se'] is None) else \
             math.sqrt(dL['se'] ** 2 + dH['se'] ** 2)
-        friction = dL['fee'] + dH['fee'] + spread / 2
-        threshold = (0 if se is None else 1.96 * se) + friction
-        rows.append({'label': label, 'pm': pm, 'opt': opt, 'gap': pm - opt,
-                     'se': se, 'friction': friction, 'threshold': threshold,
-                     'spread': spread, 'exceeds': abs(pm - opt) > threshold})
+        fee = dL['fee'] + dH['fee']
+
+        # The bucket is LONG the lower digital and SHORT the upper one, so its
+        # cheapest executable value pairs the lower leg's bid side with the
+        # upper leg's ask side, and vice versa.
+        if None in (dL['low'], dL['high'], dH['low'], dH['high']):
+            opt_low = opt_high = edge = None
+            direction = 'no two-sided option quote'
+            exceeds = False
+        else:
+            opt_low = dL['low'] - dH['high']
+            opt_high = dL['high'] - dH['low']
+            # Two trades, both priced at quotes that exist right now.
+            sell_pm = bid - (opt_high + fee)     # sell the prediction, buy the bucket
+            buy_pm = (opt_low - fee) - ask       # buy the prediction, sell the bucket
+            edge = max(sell_pm, buy_pm)
+            direction = 'sell prediction' if sell_pm >= buy_pm else 'buy prediction'
+            exceeds = edge > 0
+        rows.append({'label': label, 'pm': pm, 'pm_bid': bid, 'pm_ask': ask,
+                     'opt': opt, 'opt_low': opt_low, 'opt_high': opt_high,
+                     'gap': pm - opt, 'se': se, 'fee': fee,
+                     'envelope': None if opt_low is None else opt_high - opt_low,
+                     'edge': edge, 'direction': direction,
+                     'spread': spread, 'exceeds': exceeds})
     return {'rows': rows, 'expiry': expiry, 'F': F, 'idx': idx,
             'discount': dis, 'D': D,
             'total': sum(r['opt'] for r in rows if 'opt' in r)}
@@ -276,6 +331,7 @@ def run(stamp, stab=None):
             out['series'][asset] = {'error': 'no ladder'}
             continue
         measured = [r for r in h['rows'] if 'opt' in r]
+        quotable = [r for r in measured if r['edge'] is not None]
         if stab is not None:
             for r in measured:
                 stab.add('%s:%s' % (asset, r.get('label')), r['exceeds'])
@@ -292,8 +348,15 @@ def run(stamp, stab=None):
             'discount_estimated': h['discount'] is not None,
             'discount_brackets': h['discount']['brackets'] if h['discount'] else 0,
             'discount_spread': round(h['discount']['spread'], 8) if h['discount'] else None,
-            'mean_threshold': round(sum(r['threshold'] for r in measured) / len(measured), 4)
-            if measured else None,
+            # How many rungs even have a two-sided option market. A rung
+            # without one is not evidence of anything; it is a rung nobody is
+            # quoting, and it used to be counted as measured because the mid
+            # existed.
+            'quotable': len(quotable),
+            'mean_envelope': round(sum(r['envelope'] for r in quotable) / len(quotable), 4)
+            if quotable else None,
+            'best_edge': round(max(r['edge'] for r in quotable), 4)
+            if quotable else None,
         }
     return out
 
@@ -328,7 +391,8 @@ def main():
     print('scanned: %d runs' % len(results))
     print()
     print('%-18s %6s  %-30s %-30s'
-          % ('snapshot', 'window', 'BTC (over/measured)', 'ETH (over/measured)'))
+          % ('snapshot', 'window', 'BTC (edge/quotable/rungs)',
+             'ETH (edge/quotable/rungs)'))
     print('-' * 90)
 
     tot_over = tot_measured = 0
@@ -346,15 +410,17 @@ def main():
                 mark = '' if d['discount_estimated'] else '!'
                 if not d['discount_estimated']:
                     fallbacks += 1
-                cells.append('%-30s' % ('%d/%d  (sum %.3f  D %.4f%s)'
-                                        % (d['exceeding'], d['measured'],
-                                           d['density_sum'], d['discount_factor'], mark)))
+                cells.append('%-30s' % ('%d/%d/%d  (D %.4f%s  env %.3f)'
+                                        % (d['exceeding'], d['quotable'], d['measured'],
+                                           d['discount_factor'], mark,
+                                           d['mean_envelope'] or 0)))
                 tot_over += d['exceeding']
                 tot_measured += d['measured']
         print('%-18s %6s  %s %s' % (s['stamp'], s['window'], cells[0], cells[1]))
 
     print('-' * 90)
-    print('TOTAL: %d / %d rung-observations cleared the band' % (tot_over, tot_measured))
+    print('TOTAL: %d / %d rung-observations show a positive edge at quoted prices'
+          % (tot_over, tot_measured))
     if tot_measured:
         print('       %.1f%% — this is a ratio, NOT a count of opportunities.' %
               (100.0 * tot_over / tot_measured))
@@ -364,13 +430,21 @@ def main():
         print('         their two digital sides are on different footings.')
     stab.report('STABILITY — Kalshi bucket rungs')
     print()
-    print('Reading note: "over" means the gap exceeds friction + 1.96*SE.')
-    print('The option column is a DISCOUNTED STATE PRICE D*Q(lo<S<hi), not a')
-    print('probability; the Kalshi price it is compared against is a present')
-    print('value too, so the two are on the same footing. The sum column is')
-    print('the exhaustive ladder total and should sit near D, not near 1.')
-    print('Clearing the band does not mean the gap is tradable; margin cost,')
-    print('expiry gap and settlement-source difference are NOT in this figure.')
+    print('Reading note: a rung counts when ONE of the two trades leaves')
+    print('something after the option fees, with every leg priced at a quote')
+    print('that exists: prediction sold at its bid against the bucket bought')
+    print('at its ask side, or the mirror of that. No mid is used anywhere in')
+    print('the verdict, and 1.96*SE no longer appears in it.')
+    print()
+    print('STILL NOT IN THIS NUMBER, and each one only makes it worse:')
+    print('  - Kalshi\'s own trading and settlement fees. UNKNOWN, not zero.')
+    print('  - Margin on the option legs, which is posted for months.')
+    print('  - The expiry gap between the two contracts (D-075: 6d 21h).')
+    print('  - BRTI against the Deribit index (D-075: size UNKNOWN).')
+    print('So a positive edge here is a NECESSARY condition for a trade and')
+    print('nothing more. The option column is a discounted state price')
+    print('D*Q(lo<S<hi), not a probability, and the sum column is the')
+    print('exhaustive ladder total, which should sit near D rather than 1.')
     return 0
 
 
