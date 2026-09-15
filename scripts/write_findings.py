@@ -227,6 +227,12 @@ def main():
 
     result = {
         'archive': o,
+        # Which archive produced these numbers. A run against the private
+        # mirror covers everything since 2026-08-30; a run without it covers
+        # the 14-day public window. The same figure computed over different
+        # spans is not the same figure, so the span is on the record.
+        'archive_source': ('private mirror' if os.environ.get('DIVERGENCE_RAW')
+                           else '14-day public window'),
         'produced_by': 'scripts/write_findings.py',
         'measurements': {
             'friction_band_kalshi': measure_band_all(all_stamps),
