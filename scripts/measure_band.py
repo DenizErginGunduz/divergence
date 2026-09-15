@@ -268,7 +268,9 @@ def digital(ch, expiry, K, F, idx, D=1.0):
     why the old expression looked right (D-073).
 
     Three numbers come back:
-      p    — from the marks. The midpoint estimate. Reported, not traded on.
+      dsp  — from the marks. The DISCOUNTED STATE PRICE, D*Q(S>K). It was
+             called 'p' until D-086; 'p' reads as "probability", which is the
+             exact misreading D-073 was about. Reported, not traded on.
       high — what it costs to BUY the spread: ask on the leg you are long,
              bid on the leg you are short.
       low  — what selling it pays. low <= p <= high, and the width between
@@ -307,7 +309,7 @@ def digital(ch, expiry, K, F, idx, D=1.0):
             high = D - (B['bid'] - A['ask']) / w
     # Deribit: 0.03% of the underlying, capped at 12.5% of the option price
     fee = lambda x: min(0.0003 * idx, 0.125 * x)
-    return {'p': p, 'se': se, 'low': low, 'high': high,
+    return {'dsp': p, 'se': se, 'low': low, 'high': high,
             'fee': (fee(A['mark']) + fee(B['mark'])) / w}
 
 
@@ -383,8 +385,8 @@ def rungs(KA, D_raw, series, currency):
         # An unbounded lower edge is a certainty, and a certainty is worth D
         # today, not 1. An unbounded upper edge is worth nothing either way.
         # Both are exact, so their envelope has zero width.
-        edge_L = {'p': D, 'se': 0, 'low': D, 'high': D, 'fee': 0}
-        edge_H = {'p': 0, 'se': 0, 'low': 0, 'high': 0, 'fee': 0}
+        edge_L = {'dsp': D, 'se': 0, 'low': D, 'high': D, 'fee': 0}
+        edge_H = {'dsp': 0, 'se': 0, 'low': 0, 'high': 0, 'fee': 0}
         dL = digital(ch, expiry, lo, F, idx, D) if lo is not None else edge_L
         dH = digital(ch, expiry, hi, F, idx, D) if hi is not None else edge_H
         bid = float(m['yes_bid_dollars'])
@@ -400,7 +402,7 @@ def rungs(KA, D_raw, series, currency):
             rows.append({'label': label, 'skipped': 'outside the strike range',
                          'pm': pm, 'spread': spread})
             continue
-        opt = dL['p'] - dH['p']
+        opt = dL['dsp'] - dH['dsp']
         se = None if (dL['se'] is None or dH['se'] is None) else \
             math.sqrt(dL['se'] ** 2 + dH['se'] ** 2)
         fee = dL['fee'] + dH['fee']
@@ -443,6 +445,10 @@ def rungs(KA, D_raw, series, currency):
             # What the edge is WORTH, in dollars, at that depth. The number
             # that decides whether any of this is worth doing.
             value = None if (depth is None or edge is None) else edge * depth
+        # opt, opt_low and opt_high are all DISCOUNTED STATE PRICES of the
+        # bucket. They kept their names in D-086: "opt" reads as "the option
+        # side", which is what it is, while "p" read as "probability", which
+        # it never was.
         rows.append({'label': label, 'pm': pm, 'pm_bid': bid, 'pm_ask': ask,
                      'opt': opt, 'opt_low': opt_low, 'opt_high': opt_high,
                      'gap': pm - opt, 'se': se, 'fee': fee,
