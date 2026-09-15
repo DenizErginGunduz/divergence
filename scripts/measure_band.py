@@ -325,17 +325,36 @@ def rungs(KA, D_raw, series, currency):
     usable = [v for v in usable if expiry_ord(v)]
     if not usable:
         return None
-    # Nearest option expiry that does NOT run past the Kalshi close, compared as
-    # INSTANTS. Not equal: any remaining expiry gap biases the result in our
-    # favour, and that caveat is reported rather than hidden.
+    # The nearest option expiry to the Kalshi close, compared as INSTANTS, with
+    # which SIDE it falls on carried forward. The two sides mean opposite
+    # things and must not be pooled:
+    #
+    #   'before' — the option expires first, so for an upside tail it
+    #              UNDERSTATES the settlement-date value. The comparison is
+    #              biased in our favour. This is the year-end case, seven days
+    #              early, and D-079 showed that bias swallowing two of three
+    #              findings.
+    #   'after'  — the option expires later and OVERSTATES. The bias now works
+    #              against us, so a Kalshi price above it is real evidence and
+    #              a price below it proves nothing.
+    #
+    # Intraday ladders are always 'after', and not by choice: Deribit's daily
+    # options settle 08:00 UTC and are delisted immediately, so by the time a
+    # 13:17 snapshot reads a market closing at 14:00 the same day, that day's
+    # expiry is already gone. The nearest listed one is the next morning.
     close_at = iso_instant(close)
     if close_at is None:
         return None
-    ok = [v for v in usable
-          if expiry_instant(v) and expiry_instant(v) <= close_at]
-    if not ok:
+    dated = [(expiry_instant(v), v) for v in usable if expiry_instant(v)]
+    before = [v for ts, v in dated if ts <= close_at]
+    after = [v for ts, v in dated if ts > close_at]
+    if before:
+        expiry, expiry_side = before[-1], 'before'
+    elif after:
+        expiry, expiry_side = after[0], 'after'
+    else:
         return None
-    expiry = ok[-1]
+    # Positive when the option expires BEFORE the close, negative when after.
     gap_hours = (close_at - expiry_instant(expiry)).total_seconds() / 3600.0
 
     # Discount first: forward() and digital() both need it.
@@ -442,6 +461,7 @@ def rungs(KA, D_raw, series, currency):
     cumulative = kinds == {'greater'}
     return {'rows': rows, 'expiry': expiry, 'F': F, 'idx': idx,
             'discount': dis, 'D': D, 'gap_hours': gap_hours,
+            'expiry_side': expiry_side,
             'ladder': 'cumulative' if cumulative else 'exhaustive',
             'total': None if cumulative
             else sum(r['opt'] for r in rows if 'opt' in r)}
@@ -475,6 +495,7 @@ def run(stamp, stab=None):
             # D-073 it summed to 1 whatever D was, which is why the check
             # never caught the convention split.
             'ladder': h['ladder'],
+            'expiry_side': h['expiry_side'],
             # How far the option expiry sits before the Kalshi close. The
             # single most consequential caveat in the project (D-079), so it
             # travels with every number instead of living in a footnote.
@@ -555,7 +576,7 @@ def main():
                 continue
             if not d['discount_estimated']:
                 fallbacks += 1
-            cells.append('%s %d/%d/%d gap %.0fh'
+            cells.append('%s %d/%d/%d gap %+.0fh'
                          % (label, d['exceeding'], d['quotable'], d['measured'],
                             d['expiry_gap_hours']))
             tot_over += d['exceeding']
@@ -596,7 +617,10 @@ def main():
     print()
     print('STILL NOT IN THIS NUMBER, and each one only makes it worse:')
     print('  - Margin on the option legs, which is posted for months.')
-    print('  - The expiry gap between the two contracts (D-075: 6d 21h).')
+    print('  - The expiry gap. It is printed per series and SIGNED: positive')
+    print('    means the option expires first and understates an upside tail,')
+    print('    which flatters us; negative means it expires later and')
+    print('    overstates, which does not.')
     print('  - BRTI against the Deribit index (D-075: size UNKNOWN).')
     print('So a positive edge here is a NECESSARY condition for a trade and')
     print('nothing more. The option column is a discounted state price')
