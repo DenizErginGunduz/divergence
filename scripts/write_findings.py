@@ -286,6 +286,37 @@ def measure_exhaustive_all(all_stamps):
     return out
 
 
+def kill_test_block():
+    """The ETH 5,000 verdict, small enough for the page to carry.
+
+    G1 in docs/DECISION_GATES.md requires Note 1, README.md AND THE INTERFACE to
+    use the verdict's exact words. The interface reads one file, findings/
+    latest.json, and holds no number of its own (D-090); the kill test writes its
+    own 240 KB record with one row per snapshot, which is not a file to hand a
+    browser. So the summary is copied here: the rung, the decision, and the
+    verdict block WITHOUT the per-snapshot array.
+
+    Copied rather than recomputed. kill_test_eth5k.py runs earlier in the same
+    measure workflow and is the only thing that judges this; recomputing the
+    verdict here would make two places able to disagree about it.
+
+    Returns None when the file is absent — a run without the kill test is a
+    smaller run, not a broken one, and the page shows the quoted-price claim
+    alone rather than an error.
+    """
+    path = os.path.join(ROOT, 'findings', 'kill_test_eth5k.json')
+    try:
+        with open(path, encoding='utf-8') as f:
+            k = json.load(f)
+    except (OSError, ValueError):
+        return None
+    verdict = k.get('verdict')
+    if not isinstance(verdict, dict):
+        return None
+    return {'rung': k.get('rung'), 'decision': k.get('decision'),
+            'archive': k.get('archive'), 'verdict': verdict}
+
+
 def main():
     all_stamps = stamps('_meta')
     o = summary()
@@ -307,6 +338,11 @@ def main():
             'polymarket_terminal': measure_polymarket_all(all_stamps),
             'long_horizon_touch': measure_touch_all(all_stamps),
             'exhaustiveness_constraint': measure_exhaustive_all(all_stamps),
+            # Not a measurement this script performs: the verdict recorded by
+            # scripts/kill_test_eth5k.py earlier in the same workflow, carried
+            # so the interface can print its exact words (G1). None if that
+            # step did not run.
+            'kill_test_eth5k': kill_test_block(),
         },
     }
 
@@ -318,6 +354,12 @@ def main():
 
     print('written: findings/latest.json')
     for name, m in result['measurements'].items():
+        if not isinstance(m, dict):
+            print('  %-26s absent' % name)
+            continue
+        if name == 'kill_test_eth5k':
+            print('  %-26s %s' % (name, m['verdict'].get('verdict')))
+            continue
         k = m.get('stability') or {}
         if k:
             print('  %-26s distinct rungs %-4s always exceeding %-4s'
