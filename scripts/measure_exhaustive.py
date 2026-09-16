@@ -51,7 +51,7 @@ import sys
 
 from archive import snapshot, stamps, summary, Missing
 from measure_band import (SERIES, chain, forward, digital, discount,
-                          expiry_ord)
+                          expiry_ord, event_ladder, ladder_shape)
 
 RULES = ('corrected', 'naive_a', 'naive_b')
 
@@ -82,11 +82,23 @@ def bounds(m, rule):
 
 
 def ladder_sum(KA, D_raw, series, currency, rule):
-    """Sum of the bucket prices of one ladder under the given rule."""
-    M = [m for m in (KA.get('markets', {}).get(series) or [])
-         if m.get('status') == 'active']
+    """Sum of the bucket prices of one ladder under the given rule.
+
+    One event only, and only if the ladder is a partition (D-105). A
+    cumulative ladder (every rung P(S > K) at its own threshold) has
+    overlapping rungs and no density; an incomplete one (the archive holds a
+    ladder with a hole in it) has a sum that says nothing about the
+    computation. Both come back with the shape named and no ratio, instead of
+    a number that looks like the constraint and is not one.
+    """
+    M, events = event_ladder(KA, series)
     if not M:
         return None
+    shape, breaks = ladder_shape(M)
+    if shape != 'exhaustive':
+        return {'ladder': shape, 'breaks': breaks, 'total': None, 'ratio': None,
+                'buckets': len(M), 'events': events, 'D': None,
+                'estimated': False}
     ch, idx = chain(D_raw, currency)
     close = M[0].get('close_time', '')
     usable = [v for v in ch if ch[v].get('C') and ch[v].get('P') and expiry_ord(v)]
@@ -117,8 +129,8 @@ def ladder_sum(KA, D_raw, series, currency, rule):
             continue
         t += dL['dsp'] - dH['dsp']
         n += 1
-    return {'total': t, 'buckets': n, 'D': D, 'estimated': dis is not None,
-            'ratio': t / D}
+    return {'ladder': 'exhaustive', 'breaks': 0, 'total': t, 'buckets': n,
+            'events': events, 'D': D, 'estimated': dis is not None, 'ratio': t / D}
 
 
 def main():
@@ -138,6 +150,7 @@ def main():
 
     pooled = {k: [] for k in RULES}
     fallbacks = 0
+    set_aside = {'cumulative': 0, 'incomplete': 0}
     for stamp in every:
         try:
             g = snapshot(stamp)
@@ -151,6 +164,13 @@ def main():
                 try:
                     r = ladder_sum(KA, D_raw, series, currency, rule)
                 except (KeyError, TypeError, ValueError):
+                    r = None
+                if r and r['ratio'] is None:
+                    # Not a partition: named once, never summed (D-105).
+                    if rule == RULES[0]:
+                        set_aside[r['ladder']] += 1
+                        print('%-18s %-5s %9s %10s' % (stamp, asset, '-', r['ladder']
+                              + (' (%d breaks)' % r['breaks'] if r['breaks'] else '')))
                     r = None
                 if r:
                     # Pool the RATIO, not the raw total: totals from chains with
@@ -183,6 +203,13 @@ def main():
         print('%-14s %8s departure from D: %+.1f%%'
               % ('', '', 100.0 * (mean - 1.0)))
 
+    if any(set_aside.values()):
+        print()
+        print('Set aside, not summed (D-105): %d cumulative ladders (rungs overlap,'
+              % set_aside['cumulative'])
+        print('no density) and %d incomplete ones (a hole in the archived ladder,'
+              % set_aside['incomplete'])
+        print('so the sum says nothing about the computation).')
     if fallbacks:
         print()
         print('WARNING: %d ladders could not estimate D and fell back to D=1' % fallbacks)
