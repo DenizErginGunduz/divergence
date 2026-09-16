@@ -2090,7 +2090,64 @@ and so do the trade files written before D-087. Two separate horizons:
   deletion commit does not remove the blob. Anyone cloning the full history still
   gets it. Removing it there means rewriting published history, which breaks every
   existing clone and every commit SHA this project has cited.
+- **The private mirror does not either.** It is append-only by design (`cp -rn`),
+  which is what makes it safe to prune the public copy. So every holders and trade
+  file since 2026-08-30 keeps its profile fields there, permanently. Private, not
+  published, and not read by any measurement — the sparse checkout does not even
+  fetch `holders/` — but it is there, and leaving it out of this list would have
+  made the paragraph above read better than the truth.
 
 That trade is not made here. It is a call for the repository owner, it is
 destructive and irreversible, and the cost side of it is real. Written down so the
 choice is visible rather than assumed away.
+
+## D-089 — The archive window stays at fourteen days, and the reason changed
+**Date:** 2026-09-16 · **Applies to:** `scripts/prune_archive.py` (`ARCHIVE_DAYS`)
+
+Open since the sprint plan was written: keep the public `raw/` window at 14 days, or
+extend it to roughly 90? Closing it, because the argument that opened it no longer
+exists.
+
+### Why extending was ever on the table
+To give the measurements more to read. A friction band over 49 snapshots is a
+different claim from one over three hundred, and at the time the only archive the
+measurements could see was the public one.
+
+### Why that argument is now void
+`measure.yml` runs on `workflow_dispatch` and on `pull_request`. **There is no
+schedule.** Every published number therefore comes from a manual run, and a manual
+run clones the private mirror and sets `DIVERGENCE_RAW` to it — every snapshot since
+2026-08-30, not fourteen days of them. Extending the public window would not add one
+observation to any finding this project publishes. It would only publish more.
+
+### What the window is actually for now
+Two things, and they pull in opposite directions.
+
+**Against a longer window.** `docs/DATA_SOURCES.md` quotes Kalshi's clause verbatim:
+the named practice is "providing archived or cached data sets containing Kalshi Data
+to another person or entity". A rolling sample is a weaker instance of that than a
+growing feed. And since D-087 and D-088, a longer window also means the files written
+before 2026-09-16 — the ones carrying strangers' profile fields — stay in the working
+tree longer. Fourteen days is what makes that self-healing; ninety would have kept
+them up for three months.
+
+**For a longer window.** An outside reader can only re-derive what is public. The
+findings report numbers computed over the full mirror; anyone checking them from the
+public repository gets 14 days, currently 49 snapshots. That gap is the real cost of
+this decision and it is not small — it is the difference between "reproducible" and
+"reproducible in the small". `findings/` records the scope of each run so a reader can
+at least see which one they are looking at.
+
+### The decision
+14 days. Not because the balance is comfortable, but because extending buys nothing
+measurable and costs on both of the other two axes. If the reproducibility gap is to
+be closed, the way to do it is to publish the mirror or hand out read access — a
+different decision, with the data-rights question fully reopened — not to widen the
+window a little and hope it covers both.
+
+### What this decision does not claim
+Unchanged from `docs/DATA_SOURCES.md` and repeated here so it is not lost: the window
+bounds the **working tree**, not the repository. A full clone still reaches every
+snapshot ever committed, and `.git` grows at the same rate either way. Bounding the
+repository itself would take history rewriting or never committing raw payloads
+publicly at all. Neither is done, and the claim is limited to what is measured.
