@@ -359,18 +359,24 @@ not used for it. Added (D-096): **declared family** and **forward holdout**.
 
 ## 7. Still open
 
-- **Validation has not started.** 4,657 markets resolved inside the 14-day window
-  and only 88 were ever seen with a live quote, at a median of 14 minutes before
-  settlement (D-080). The cause was a paging cap in the collector, fixed
-  2026-09-15; daily ladders now arrive live for the first time. Scoring should
-  wait for the corrected collector to accumulate rather than run on this.
-- The one rung that survives the expiry band, ETH above $5,000, survives by about
-  0.4 cents — a margin comparable to the strike-grid uncertainty on the chain that
-  decides it (D-079). A pre-committed local-grid kill test is specified in D-092 and
-  its verdict is pending.
-- The discount factor has one estimator. Referees — the parity slope as an
-  estimator-consistency check, the futures basis from `underlying_price`, an external
-  rate as a dated constant — are specified in D-093 and pending.
+- **Validation has not started.** 121 independent events on the public window,
+  most of them fifteen-minute markets quoted minutes before settlement
+  (`findings/validation_inventory.json`). Outcome capture is reliable for those
+  series and structurally absent for the hourly ladders until the collector asks
+  for settled markets (D-106, B-023). The design is being written in
+  `VALIDATION_SPEC.md` and is frozen before any holdout is opened.
+- ~~The one rung that survives the expiry band, ETH above $5,000, survives by
+  about 0.4 cents.~~ The pre-committed kill test of D-092 ran: **not a surviving
+  discrepancy** — the margin against the worst local executable estimate is
+  positive in 0 of 62 snapshots (D-103). The 0.4 cents was a mark comparison.
+- ~~The discount factor has one estimator.~~ The referees of D-093 ran (D-104): the
+  futures basis from `underlying_price` agrees with the current estimator to within
+  a basis point on every dated chain; the parity slope agrees by construction; SOFR
+  sits about a percentage point below the BTC chains and is a basis, not an error.
+  Listed-or-synthetic per expiry is still `UNKNOWN` (B-018).
+- The exhaustiveness check summed cumulative ladders, two events per series and
+  ladders with a hole in them for a day (D-105). It now sums one event per series
+  and only partitions; incomplete intraday ladders are a collector limit (B-022).
 - BRTI against the Deribit index: measured, 63 paired readings, median under a
   basis point (`findings/settlement_basis.json`, D-075). The averaging window and the instant
   remain unmeasured.
