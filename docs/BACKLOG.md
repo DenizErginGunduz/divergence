@@ -104,6 +104,43 @@ and B-002 with it.
 Not deleted, because the question is live. Logged so the next person does not have
 to reconstruct the intent from a comment.
 
+## B-018 — A Deribit futures stream in the collector (2026-09-16)
+The archive holds no futures. Every Deribit option row carries `underlying_price`
+for its expiry — the listed future where one exists, a synthetic otherwise — and
+the discount-factor referee (D-093) reads it, but the payload does not say which
+of the two it is, so that field is `UNKNOWN` per expiry in `findings/`. A
+`get_book_summary_by_currency` call with `kind=future` would settle it and would
+also give the dated-futures basis and roll that `docs/EXPOSURE_ENGINE.md` needs
+(layer D). Not done here because it changes the archive format
+(`ARCHIVE_VERSION`, `docs/ARCHIVE_SCHEMA.md`) and the collector is the one thing
+that must not be touched casually. Asked about before it is built (D-101).
+
+## B-019 — Perpetual funding ingest, minimal (2026-09-16)
+The exposure-design branch (D-091, Layer B) cannot compute a perpetual's carry
+without a funding stream, and V1 of the product (D-099) cannot show a
+perpetual column without it. What is needed is small: the funding rate per
+period for the BTC and ETH perpetuals on one venue, timestamped, alongside the
+existing snapshots. Which venue, which endpoint, and its terms: `UNKNOWN` until
+read. A collector change, so it is planned, its terms are quoted in
+`docs/DATA_SOURCES.md` first, and it is asked about before it is built. Gate G6
+in `docs/DECISION_GATES.md` depends on it.
+
+## B-020 — A volatility surface for the year-end gap — REJECTED (2026-09-16)
+Recorded as rejected rather than as an idea. An SVI or any other fitted surface
+would let the year-end digital be read at the settlement date instead of at the
+two bracketing expiries. It is not built (D-094, D-101): it replaces a stated
+uncertainty with a model whose error is not stated; the nearer expiries that
+close the gap arrive in December without any work; and a measurement that has
+avoided a model since D-025 does not adopt one to rescue a 0.4-cent margin. If a
+surface is ever built, it is for a different question and under a new decision.
+
+## B-021 — Three competitors named in the review could not be found (2026-09-16)
+`docs/COMPETITORS.md` entries 1–3: "Fabi et al. / Fair Odds" and "PolyGap"
+returned no page under those names; "FairOdds" exists and is a sports odds
+converter. Either the names are wrong, or the work is private or unindexed. The
+owner is asked for URLs; until then no document cites them. Logged so the search
+is not repeated from scratch.
+
 ---
 
 # REMOVED IN THE CORRECTNESS SPRINT — recoverable on purpose
