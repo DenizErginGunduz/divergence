@@ -313,10 +313,73 @@ def digital(ch, expiry, K, F, idx, D=1.0):
             'fee': (fee(A['mark']) + fee(B['mark'])) / w}
 
 
-def rungs(KA, D_raw, series, currency):
-    """Band arithmetic for every rung of one Kalshi bucket ladder."""
+def event_ladder(KA, series):
+    """The active markets of ONE event of a series, plus how many events the
+    snapshot held for it (D-105).
+
+    A series is not a ladder. The archive's open pass returns up to 200 open
+    markets per series, and for the intraday series that page spans two events
+    — 120 rungs closing at 22:00 and 80 closing the next evening, say. Summed
+    together they are not a partition of anything, and judged together they
+    put rungs of a later event under an earlier close. So the ladder is the
+    earliest-closing event's markets, and the number of events is reported so
+    the reader knows a choice was made. Year-end series hold one event and are
+    unchanged by this.
+    """
     M = [m for m in (KA.get('markets', {}).get(series) or [])
          if m.get('status') == 'active']
+    if not M:
+        return [], 0
+    by_event = {}
+    for m in M:
+        key = m.get('event_ticker') or m.get('close_time') or ''
+        by_event.setdefault(key, []).append(m)
+    first = min(by_event, key=lambda k: (by_event[k][0].get('close_time') or '', k))
+    return by_event[first], len(by_event)
+
+
+def ladder_shape(M):
+    """What kind of ladder the active markets of one event make (D-105).
+
+    Returns (shape, breaks). 'cumulative' is an all-'greater' ladder: every
+    rung is P(S > K) at its own threshold, the rungs overlap, and their sum is
+    not a density. 'exhaustive' is a partition: one open lower end, one open
+    upper end, and every bucket's ceiling is the next bucket's floor under the
+    boundary rule in use (D-067). Anything else is 'incomplete', with the
+    number of breaks — the archive's open pass stops at 200 markets and an
+    intraday event can lose its middle to that cap, which shows up here as a
+    ladder whose 'less' rung ends at 68,200 and whose first 'between' starts
+    at 75,000. Summing that is not a check of anything, so it is not summed.
+    """
+    kinds = set(m.get('strike_type') for m in M)
+    if not M:
+        return 'incomplete', 0
+    if kinds == {'greater'}:
+        return 'cumulative', 0
+
+    def edges(m):
+        kind = m.get('strike_type')
+        if kind == 'less':
+            return None, round(m['cap_strike'])
+        if kind == 'greater':
+            return round(m['floor_strike'] + .01), None
+        return round(m['floor_strike']), round(m['cap_strike'] + .01)
+    S = sorted(M, key=lambda m: edges(m)[0] if edges(m)[0] is not None else -1)
+    E = [edges(m) for m in S]
+    breaks = 0
+    if E[0][0] is not None:
+        breaks += 1                                 # no open lower end
+    if E[-1][1] is not None:
+        breaks += 1                                 # no open upper end
+    for (_lo, hi), (lo, _hi) in zip(E[:-1], E[1:]):
+        if hi is None or lo is None or hi != lo:
+            breaks += 1
+    return ('exhaustive' if breaks == 0 else 'incomplete'), breaks
+
+
+def rungs(KA, D_raw, series, currency):
+    """Band arithmetic for every rung of one Kalshi bucket ladder."""
+    M, events = event_ladder(KA, series)
     if not M:
         return None
     ch, idx = chain(D_raw, currency)
@@ -460,17 +523,14 @@ def rungs(KA, D_raw, series, currency):
                      'envelope': None if opt_low is None else opt_high - opt_low,
                      'edge': edge, 'direction': direction,
                      'spread': spread, 'exceeds': exceeds})
-    # An all-'greater' ladder is CUMULATIVE: the rungs overlap and their sum is
-    # not a density. Saying so beats publishing a number that looks like the
-    # exhaustiveness check and is not one.
-    kinds = set(m.get('strike_type') for m in S)
-    cumulative = kinds == {'greater'}
+    # Only a ladder that is actually a partition has a density sum (D-105).
+    shape, breaks = ladder_shape(S)
     return {'rows': rows, 'expiry': expiry, 'F': F, 'idx': idx,
             'discount': dis, 'D': D, 'gap_hours': gap_hours,
-            'expiry_side': expiry_side,
-            'ladder': 'cumulative' if cumulative else 'exhaustive',
-            'total': None if cumulative
-            else sum(r['opt'] for r in rows if 'opt' in r)}
+            'expiry_side': expiry_side, 'events_in_series': events,
+            'ladder': shape, 'breaks': breaks,
+            'total': sum(r['opt'] for r in rows if 'opt' in r)
+            if shape == 'exhaustive' else None}
 
 
 def run(stamp, stab=None):
