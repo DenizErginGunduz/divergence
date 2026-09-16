@@ -2151,3 +2151,93 @@ bounds the **working tree**, not the repository. A full clone still reaches ever
 snapshot ever committed, and `.git` grows at the same rate either way. Bounding the
 repository itself would take history rewriting or never committing raw payloads
 publicly at all. Neither is done, and the claim is limited to what is measured.
+
+## D-090 — Denetim 3: what the documents claim against what the code does
+**Date:** 2026-09-16 · **Checked:** every `.md` in the repository against the code,
+the workflows and `findings/latest.json`
+
+The third audit. Denetim 1 asked whether the pipeline was healthy, Denetim 2 whether
+every number on screen could be recomputed. This one asks a different question: does
+the writing still describe the thing?
+
+### What is clean, and it is most of it
+- **The methodology documents are current.** Every mention of `1.96 · SE`, of mid
+  prices, of an undiscounted digital, appears in the past tense explaining what it
+  replaced. `METHODOLOGY.md`, `scripts/README.md` and `RESEARCH_NOTE_1.md` all match
+  the code after weeks 1-4. This was the thing most likely to be wrong and it was not.
+- **No document names a script that does not exist.** Zero phantom references.
+- **The constants agree** where a document states one: `ARCHIVE_DAYS = 14`, the three
+  crons at 05:00 / 13:00 / 21:00 UTC, `GENERAL = 0.07` and `INDEX = 0.035`,
+  `always_above = 0.9`, `ARCHIVE_VERSION = 5`.
+- **The interface cannot go stale.** `web/index.html` reads `findings/latest.json` and
+  contains no percentage of its own. Checked by searching it for literal figures:
+  none.
+- **`RESEARCH_NOTE_1.md` matches the findings file exactly** — 61 snapshots, 16 days,
+  $4.69.
+
+### What was wrong
+**The README's results table had drifted from the findings file it describes.**
+
+| README said | findings say |
+|---|---|
+| "in 45 of 45 observations each" | 55 observations per rung, and the three are 55, 55 and **54** |
+| "0.2% arithmetic violations" | 0.4% |
+| "94.9% above the 2x bound" | 93% |
+| "14 days, 46 snapshots" | the findings were computed over 61 snapshots and 16 days, from the mirror |
+| "148 of 446 flow markets hit the fetch limit" | 149 of 460, in the run of 2026-09-16T0504Z |
+
+Nothing in the pipeline had failed. The numbers were copied into prose once, by hand,
+and prose is not recomputed. Two lines further down the same README said "every number
+on screen traces to a script — enforced in CI", which was true of the screen and not
+of the README saying it.
+
+### The one that is worse than stale
+"In 45 of 45 observations each" is not a number that went out of date. It is the
+overclaim **D-072 already found and fixed** — `stability.py` calls a rung
+always-exceeding when its share is above `always_above`, which is **0.9, not 1.0**, so
+"every one of N" says something the classifier never checked. D-072 corrected the
+interface card to "in over 90% of their observations" and left the identical sentence
+standing in the README.
+
+At the time it was accidentally true — all three rungs really were 45 of 45. It is not
+true now: one of them is 54 of 55. A fix applied in one place and not the other stayed
+invisible for as long as the wrong sentence happened to be right.
+
+### The rest
+- **`scripts/README.md` is the script index and was missing three scripts that CI runs
+  on every measurement**: `measure_sensitivity.py`, `measure_basis.py`,
+  `inventory_validation.py` — the three added in weeks 3 and 4. A reader taking that
+  page at its word would think the pipeline has nine measurements. It runs eleven.
+- **`DATA_SOURCES.md` said "about 42 snapshots"**; the window holds 47.
+- **Four of the five workflows are named in no document at all**: `collect.yml`,
+  `tests.yml`, `ref_check.yml`, `verify_index.yml`. The first three are described in
+  prose without their filenames, which is survivable. `verify_index.yml` is not: it is
+  an unlabelled experiment (can a GitHub runner pull an index option chain from
+  Yahoo?) sitting in the repository with no record of why it is there or what it
+  returned. Logged in `BACKLOG.md` rather than deleted.
+
+### The pattern, which is the actual finding
+Every stale claim was on a **hand-written** surface. Every **generated** surface was
+correct — the interface, `findings/`, `state/latest.json`. The failure is not
+carelessness, it is that copying a computed number into a sentence creates a second
+copy with no owner.
+
+### What was done about it
+`scripts/check_readme.py` rebuilds the README's result sentences from
+`findings/latest.json` and fails the build if they are not in the file verbatim. It
+reads `always_above` out of `stability.py` too, so changing the classifier forces the
+README's wording to change with it — the specific thing D-072 could not enforce.
+
+It is deliberately rigid: reword a sentence and it fails. That is the same choice
+`audit_semantics.py` makes about Kalshi's rule text, for the same reason — a checker
+that tolerates rewording tolerates the number changing underneath it. Rewording then
+costs one edit here, at the moment somebody is looking at the current value anyway.
+
+Like `ref_check.py` it self-tests first: a checker that catches nothing also stays
+green.
+
+### What is still not checked, and is not pretended to be
+Prose in `docs/` carries numbers that nothing verifies — the 6 days 21 hours in
+`METHODOLOGY.md`, the coverage figures in `ARCHIVE_SCHEMA.md`, everything in this log.
+Eight claims in one file are now machine-checked. The rest rests on audits like this
+one, which is why they are numbered and repeated rather than treated as finished.
