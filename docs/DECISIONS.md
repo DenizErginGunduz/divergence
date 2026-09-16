@@ -2640,3 +2640,79 @@ only three outputs may exist in six months they are: Research Note 1; the
 resolved-event dataset with its validation specification; and the Polymarket-native
 payoff / hedge card MVP only if discovery supports it, otherwise an exposure-design
 research note in its place.
+
+## D-103 — ETH above $5,000 is not a surviving discrepancy: the pre-committed kill test, run
+**Date:** 2026-09-16 · **Produced by:** `scripts/kill_test_eth5k.py` on the full mirror (`measure` run #25, 68 snapshots / 17 days, 2026-08-30T1611Z … 2026-09-16T1314Z) · **Record:** `findings/kill_test_eth5k.json` · **Applies the rules of:** D-092 · **Closes gate:** G1 in `docs/DECISION_GATES.md`
+
+### The verdict, in the words D-092 fixed before the number
+**Not a surviving discrepancy.** The margin against the worst local executable
+estimate is positive in **0 of 62** judged snapshots (six snapshots had no Kalshi
+stream or no rung and were reported, not scored). Minimum margin −0.0523, median
+−0.0298. Under D-092 the rung needed to clear that estimate in at least 90% of
+snapshots; it clears it in none.
+
+### The numbers behind it, so the verdict can be checked without the JSON
+Kalshi `yes_bid` on the rung ranged 0.021–0.035 (mode 0.030); net of the taker fee,
+0.019–0.033. Margins per estimator, `kalshi_net − (executable high + Deribit fee on the
+crossed prices)`, over the 62 snapshots:
+
+| chain | estimator | n | positive | min | median | max |
+|---|---|---|---|---|---|---|
+| early (25DEC26, −165 h) | tight 4,800–5,200 | 62 | 62 | +0.0041 | +0.0092 | +0.0176 |
+| early | skip-1 | 62 | 62 | +0.0085 | +0.0140 | +0.0208 |
+| early | skip-2 | 62 | 62 | +0.0116 | +0.0172 | +0.0238 |
+| early | one-sided 4,800→5,000 | 62 | 33 | −0.0065 | +0.0005 | +0.0110 |
+| early | one-sided 5,000→5,200 | 62 | 53 | −0.0073 | +0.0032 | +0.0110 |
+| late (26MAR27, +2,019 h) | tight 4,800–5,500 | 62 | **3** | −0.0156 | −0.0053 | +0.0026 |
+| late | skip-1 | 62 | 31 | −0.0073 | 0.0000 | +0.0075 |
+| late | skip-2 | 10 | 10 | +0.0059 | +0.0066 | +0.0090 |
+| late | one-sided 4,800→5,000 | 62 | **0** | −0.0523 | −0.0298 | −0.0170 |
+| late | one-sided 5,000→5,500 | 62 | 5 | −0.0164 | −0.0060 | +0.0009 |
+
+The worst estimator was the late chain's one-sided 4,800→5,000 quotient in all 62
+snapshots — a 200-dollar-wide bracket where the two legs' bid-ask spread and the
+per-leg fee, both divided by a narrow width, dominate. **The verdict does not rest
+on it.** The late chain's own production bracket, tight 4,800–5,500, is positive in
+3 of 62 snapshots (4.8%), which fails the persistence rule on its own. The rung
+survives the early chain in every estimator and every snapshot; it does not survive
+the late chain's executable prices. Skip-2 on the late chain is positive in the 10
+snapshots where it was quotable — a bracket 4,500–7,000 wide, which says more about
+the strike spacing than about the rung (the grid sensitivity of D-079).
+
+### What changed since the review package said "survives by about 0.4 cents"
+Nothing in the data; the comparison did. The 0.4 cents was `yes_bid` against the late
+chain's **mark** discounted state price (`measure_sensitivity.judge()`), with no
+executable side and no option fee. Pricing the late leg at the ask one would pay,
+charging Deribit's fee on the crossed prices, and charging Kalshi's taker fee turns
++0.004 into −0.005 at the median. The stress test of D-079 was a mark test; D-092 made
+it an executable one, and that is the whole difference.
+
+### Two things the record has to say so nobody reads it wrong
+1. **The early-chain edge is real at quoted prices and is not a trade.** Since
+   2026-09-15T2104Z a resting bid of about 50,000 contracts sits at 0.025 on the rung
+   (`yes_bid_size_fp`; it was 10 contracts a day earlier). Against the early chain
+   the quoted edge times that depth reads as several hundred dollars, and
+   `findings/latest.json` now carries `edge_value_total` and `edge_value_max`
+   figures an order of magnitude larger than the $4.69 the README quoted. That is a
+   **quoted-executable discrepancy** on a chain that expires a week before the
+   contract settles (D-095), and the chain that expires after it prices the same
+   payoff above the bid. Neither number is a size-executable opportunity, and the
+   README's "$4.69" is retired with this record rather than replaced by a bigger one.
+2. **The interpolant (D-094) is reported and decides nothing.** On the newest
+   snapshot: early 0.00737, late 0.02072, linear-in-time at the close 0.00837 with
+   weight 0.076 on the late chain. It sits near the early value because the band is
+   asymmetric; it is a sensitivity, not the settlement-date value.
+
+### Consequences
+- Family-level statement for the frozen 44 (D-096): **0 of 44 current year-end rungs
+  survive the declared test** — the executable envelope with both venues' fees,
+  survival at both bracketing expiries, and the local-grid kill test.
+- The rung is not called a finding, alpha, a mispricing, an artefact, or noise. It is
+  "not a surviving discrepancy", and the verdict's exact words are used on every
+  surface (G1).
+- Research Note 1 is written to this result (D-097). The README's result sentences
+  are rebuilt from the new findings in the same sitting, because `check_readme.py`
+  now fails on six of eight claims — the measure run that produced this record also
+  advanced the archive to 68 snapshots and 17 days.
+- December's weeklies straddling 1 January will let the same test run with a band of
+  days rather than weeks. Nothing is built for that; it is waited for (D-101).
