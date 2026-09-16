@@ -141,6 +141,16 @@ converter. Either the names are wrong, or the work is private or unindexed. The
 owner is asked for URLs; until then no document cites them. Logged so the search
 is not repeated from scratch.
 
+## B-022 — The open pass truncates intraday events; a full ladder needs more than one page (2026-09-16)
+The collector's open-market pass asks Kalshi for one page of 200 open markets per
+series. For KXBTC / KXETH (and their cumulative twins) that page spans two events
+and cuts the first one's middle out — the archive holds `less` to 68,200 and
+`between` from 75,000, nothing in between (D-105). The measurement now names such
+a ladder `incomplete` and does not sum it; curing it means paging the open pass
+(or filtering by event) in `collector/collect.py`, which changes what the archive
+holds and widens the sync window by a call or two. Collector change: the owner
+decides. Not started.
+
 ---
 
 # REMOVED IN THE CORRECTNESS SPRINT — recoverable on purpose
