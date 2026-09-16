@@ -2836,3 +2836,129 @@ referees, which never read a ladder sum.
   two different bases, and the mirror's value follows at the next `measure` run);
   that block is not on the README and is not part of any claim. Its
   `expiry_gap_hours_median` now describes the event actually judged.
+
+## D-106 — Resolved-event capture is reliable for the fifteen-minute series and structurally absent for the hourly ladders; the validation specification is opened
+**Date:** 2026-09-16 · **Produced by:** `scripts/inventory_validation.py` and a count over the public window (`collector/collect.py` unchanged) · **Produces:** `docs/VALIDATION_SPEC.md` (DRAFT v0) · **Roadmap step:** 4 of D-091's order
+
+### What was checked
+Whether a market seen live with a two-sided quote is later seen resolved, so that
+Note 2 could pair a price with an outcome. On the public 14-day window, for markets
+whose close lies more than 24 hours before the last snapshot: KXBTC15M 40 of 40,
+KXETH15M 39 of 39, KXBTCPRICE 1 of 2 (the other `closed`, pending settlement, not
+lost). The archive-wide inventory reads 5,041 resolved markets, 157 with a prior
+quote, 121 independent events, lead median 6.87 h.
+
+### What was found
+For the hourly ladders — KXBTC, KXETH and their cumulative twins KXBTCD, KXETHD —
+every snapshot holds 1,000 rows `initialized` and 200 `active`, and **no resolved
+row at all**. The main pass fetches 5 × 200 rows with no status filter and the API
+fills them with not-yet-open hourly markets (200-plus rungs per future event, days
+listed ahead); the settled ones are never reached, and the open pass adds live
+quotes only. So the tenor with the tight expiry match — the natural Note 2 sample —
+has prices in the archive and no outcomes. The fifteen-minute series escape this
+only because their future rows are few (59) and their settled rows fill the page;
+the row order that makes this work is not documented and is not relied on.
+
+### Decisions
+- Outcome capture is **reliable** for KXBTC15M / KXETH15M and the small monthly and
+  yearly series, and **absent** for the hourly ladders. Both statements go in the
+  specification with the numbers behind them.
+- The cure is a collector change — an additional pass for the truncated series that
+  asks for settled markets, whose exact parameters are `UNKNOWN` until Kalshi's
+  documentation is read — and it is **asked for, not made**: B-023. The collector is
+  not touched in this sprint, by the working rule.
+- `docs/VALIDATION_SPEC.md` is opened as DRAFT v0: unit of analysis (independent
+  event), the capture table above, six requirements R1–R6 with their measured
+  status, and the list of design choices that will be frozen before any holdout is
+  opened (scoring rules, the option-derived quantity, lead-time bins, independence,
+  the holdout split, the D-101 thresholds). Nothing in it licenses a score; the
+  freeze is a later record with a version number.
+- The roadmap's "nine informative independent events" is retired: the inventory now
+  counts 121 independent events on the public window, most of them fifteen-minute
+  markets quoted a median of eleven minutes before settlement, and whether those
+  are forecasts at all is a question for the frozen design, not a number to quote.
+
+## D-107 — Note 1's analytical specification is frozen at v1
+**Date:** 2026-09-16 · **Produces:** the "Frozen specification (v1)" table in `docs/RESEARCH_ROADMAP.md` · **Roadmap step:** 5 of D-091's order · **Gate:** G2's freeze condition
+
+### What is frozen
+The claim set (the 44 year-end rungs, D-096), the unit and the persistence rule, the
+option-side quantity and its discount factor with referees, the five controls in
+order — execution, maturity, settlement, grid, and the pre-committed kill test — the
+second-venue and touch-bound treatment, the absence of a multiplicity correction, the
+one-event-per-series exhaustiveness rule (D-105), the terminology (D-095), and the
+two lists of what the note may and may not claim. Each row names the script and the
+findings file that produce its number.
+
+### What freezing means here
+- Re-running the same lines on a longer archive — including December's weeklies
+  straddling 1 January, which turn the maturity band from weeks into days — is a
+  re-run of v1. The numbers may change; the specification does not.
+- Changing any row is v2, under a new decision record that says what changed and
+  why. A change made after looking at a result, to improve the result, is the thing
+  this record exists to make visible.
+- The draft at `drafts/RESEARCH_NOTE_1.md` is written to this specification. G2's
+  remaining conditions are mechanical: green checkers and reproduced numbers.
+
+### Why now and not earlier
+The specification could not be frozen before the kill test ran (D-103) and the
+referees reported (D-104), because both were open questions about which controls
+belong in the list. With the verdict "not a surviving discrepancy" and a discount
+factor its referees agree with, the list is complete for the question Note 1 asks.
+
+## D-108 — The exposure engine's first worked example is specified before it is computed
+**Date:** 2026-09-16 · **Produces:** `docs/EXPOSURE_ENGINE.md` §5 (methodology v0.1) · **Roadmap step:** 6 of D-091's order · **Gate:** the precondition of Note 4's gate and of G6
+
+### What is fixed
+One BTC view — "above K on 1 January 2027", K taken from the Kalshi year-end ladder
+so that a binary at that threshold exists — expressed four ways: the Kalshi binary,
+a Deribit call spread K / K+w on each of the two bracketing chains, the Polymarket
+touch at K (present and flagged as a different payoff class, never compared as
+equal), and a long perpetual (present and `UNKNOWN` in every field until B-019). The
+eight layers are applied row by row with what the archive supplies today named and
+every gap written as the word `UNKNOWN`. Scenarios are six named terminal prices;
+the maturity gap of the chains is shown as two columns, not interpolated (D-094).
+
+### Why specify before computing
+The engine's risk, stated in the review, is that it reproduces the textbook answer
+— binaries are cheap carry and expensive convexity — and dresses it up. Fixing the
+instruments, the layers, the scenarios and the allowed conclusions before any number
+exists is the only way to tell that outcome from a chosen one. If the example shows
+nothing beyond the textbook answer, Note 4 says so and stops.
+
+### What is not decided
+No rate for the binary's collateral cost (a dated constant if entered, else
+`UNKNOWN`); no perpetual venue; no engine code. The example reuses
+`measure_band.rungs()`'s executable envelope and `fees.py` rather than re-deriving
+either.
+
+## D-109 — V0 requirements are defined in four groups, and two of them are not ours to answer
+**Date:** 2026-09-16 · **Produces:** `docs/PRODUCT_ROADMAP.md` "V0 requirements" · **Roadmap step:** 7 of D-091's order, the last · **Gate:** G4's first condition
+
+### What is defined
+Six functional requirements the pipeline already satisfies (one card per market,
+the state price with its envelope and expiry side, the market's own fee schedule,
+touch markets get a bound not a reference, unresolvable rungs say so, every number
+traces to a script and a stamp); six non-functional ones that hold whoever the user
+is (freshness and staleness, no number without its envelope, `UNKNOWN` as a value,
+the forbidden words, no arithmetic in the browser, no numbers in the interface);
+five discovery questions (Q1–Q5) that need a named person; and three data-rights
+questions (R1–R3) that need a reading of Deribit's, Polymarket's and — for anything
+later than V0 — Kalshi's terms.
+
+### What is decided
+- The card is built against `findings/latest.json` in the pattern of `web/index.html`;
+  it computes nothing (working rule 5). This makes group A true by construction and
+  means the card cannot drift from the research.
+- Group C (Q1–Q5) is not answered by hypothesis. The repeated-job hypothesis stays
+  written as a hypothesis until a user says it in their words (D-099).
+- Group D (R1–R3) is not answered by reading here: the Builders terms and the Kalshi
+  Developer Agreement are unread, and the Deribit position in `DATA_SOURCES.md`
+  says a product changes the analysis. Those readings are the owner's, and the card
+  is not shown to anyone before them.
+
+### What this closes
+D-091's seven-step order. Steps 1–7 each have a record: D-103 (kill test), D-104
+(referees), D-097 with the rewritten draft (findings language), D-106 (outcome
+capture), D-107 (Note 1 frozen), D-108 (exposure example), D-109 (this). What
+remains open is listed in `DECISION_GATES.md` and `BACKLOG.md`, not here.
