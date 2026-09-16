@@ -94,6 +94,14 @@ jobs:
       - name: Put-call cross-check
         run: python scripts/measure_parity.py
 
+      # Four estimates of the discount factor side by side, as implied rates
+      # (D-093): the current estimator, the parity slope (an estimator-
+      # consistency check, not independent), the futures basis from
+      # underlying_price, and a dated external rate. Writes
+      # findings/discount_referee.json. No referee is declared right.
+      - name: Discount-factor referees
+        run: python scripts/discount_referee.py
+
       # Friction band: does the gap beat the cost of trading it? The whole
       # archive is scanned, because no single snapshot can carry significance.
       - name: Friction band
