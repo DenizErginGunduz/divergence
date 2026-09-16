@@ -391,6 +391,35 @@
     "cumulative": 10,
     "incomplete": 7
    }
+  },
+  "kill_test_eth5k": {
+   "rung": {
+    "series": "KXETHY",
+    "label": "ETH above 5000",
+    "K": 5000.0
+   },
+   "decision": "D-092",
+   "archive": {
+    "day_count": 17,
+    "snapshot_count": 68,
+    "first": "2026-08-30T1611Z",
+    "last": "2026-09-16T1314Z"
+   },
+   "verdict": {
+    "snapshots_judged": 62,
+    "snapshots_positive": 0,
+    "share_positive": 0.0,
+    "min_margin": -0.052326,
+    "median_margin": -0.02983,
+    "min_value_at_depth_usd": -1305.55,
+    "rules": {
+     "persistence": 0.9,
+     "tiny_margin": 0.01,
+     "tiny_value_usd": 1.0
+    },
+    "verdict": "not a surviving discrepancy",
+    "reason": "margin against the worst local executable estimate is positive in 0 of 62 snapshots (0.0%), below 90%"
+   }
   }
  }
 }
