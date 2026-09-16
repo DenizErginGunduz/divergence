@@ -20,8 +20,12 @@ python scripts/measure_band.py          # is there an edge at quoted prices?
 python scripts/measure_exhaustive.py    # does a bucket ladder sum to D?
 python scripts/measure_polymarket.py    # Polymarket daily terminal ladders
 python scripts/measure_touch.py         # long-horizon touch bound
+python scripts/measure_sensitivity.py   # strike grid and expiry band, as a range
+python scripts/measure_basis.py         # BRTI against the Deribit index
+python scripts/inventory_validation.py  # how much could ever be scored, and how much is independent
 python scripts/write_findings.py        # run them all, write findings/latest.json
 python scripts/ref_check.py --list      # every D-XXX reference resolves?
+python scripts/check_readme.py          # does the README still match findings/?
 python scripts/prune_archive.py         # dry run: what would leave the window?
 ```
 
@@ -47,8 +51,12 @@ local checkout, run the workflow from the Actions tab.
 | `measure_exhaustive.py` | Does a bucket ladder sum to the discount factor D under three different boundary rules? (D-067, D-073) | Kalshi + Deribit |
 | `measure_polymarket.py` | Same band question on Polymarket daily terminal ladders. Excludes touch ladders. | Polymarket + Deribit |
 | `measure_touch.py` | Is the touch price inside the theoretical bound above terminal? | Polymarket + Deribit |
+| `measure_sensitivity.py` | Two approximations under every digital: the strike grid it is differenced across, and the expiry that is not the settlement date. Reported as a band, never as a correction. (D-079) | Kalshi + Deribit |
+| `measure_basis.py` | The third settlement difference, measured rather than left UNKNOWN: Kalshi settles on BRTI, Deribit on its own index. (D-075) | Kalshi + Deribit |
+| `inventory_validation.py` | How many observations could ever be scored against an outcome, and how many of those are independent events. Counting before scoring. | `raw/` |
 | `write_findings.py` | Calls every measurement, writes `findings/latest.json`. | — |
 | `ref_check.py` | Does every decision number cited anywhere actually exist? | repo text |
+| `check_readme.py` | Does the README's results table still say what `findings/latest.json` says? Rebuilds the sentences and demands them verbatim. (D-090) | `findings/` |
 | `prune_archive.py` | Bounds `raw/` to a rolling 14-day window. Runs in CI only after the private mirror is confirmed. | `raw/` |
 
 `stability.py` exists because a ratio over repeated observations is
