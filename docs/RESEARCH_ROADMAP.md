@@ -15,8 +15,9 @@ scored on the same data is a description, not a result.
 
 ## Note 1 — How much apparent prediction-market / options divergence survives execution, maturity, settlement and strike-grid controls?
 
-**Status:** ACTIVE — being finished, not expanded. Draft at `drafts/RESEARCH_NOTE_1.md`
-(its 2026-09-15 framing is superseded by D-097 and is being rewritten).
+**Status:** ANALYTICAL SPECIFICATION FROZEN — v1, 2026-09-16 (D-107). Draft at
+`drafts/RESEARCH_NOTE_1.md`, written to D-097 and to the kill-test verdict of D-103.
+What remains before publication is the G2 checklist, not more analysis.
 
 **Question.** Of the gaps that appear when a prediction-market price is put next to
 the option-implied discounted state price for the same threshold, how much is left
@@ -25,24 +26,39 @@ after: pricing every leg at a quote that exists (D-076); both venues' published 
 D-094); the settlement-source difference (D-075, measured); and the strike grid
 (sensitivity, `findings/sensitivity.json`)?
 
-**Required data.** Already in the archive: Kalshi year-end and intraday ladders,
-Polymarket daily terminal ladders, Deribit chains, all with microsecond timestamps and
-a recorded sync window. Nothing new is collected for this note.
+**Frozen specification (v1).** Changing any line below is a new version under a new
+decision record; re-running the same lines on a longer archive is not.
 
-**Method.** `METHODOLOGY.md` in full. The claim set is the frozen family of 44
-year-end rungs (D-096); the one rung that survives the maturity stress test is subject
-to the pre-committed kill test of D-092; the discount factor carries the referees of
-D-093. Terminology per D-095.
+| element | fixed as | produced by |
+|---|---|---|
+| claim set | the 44 Kalshi year-end rungs of BTC and ETH, frozen by D-096; no rung is added or dropped after the fact | `scripts/measure_band.py`, `findings/latest.json` → `friction_band_kalshi.year_end` |
+| unit | one rung-observation = one rung in one snapshot; persistence = positive edge in ≥ 90% of a rung's observations (`stability.py`) | same |
+| option-side quantity | discounted state price `D·Q` from the vertical spread on the nearest chain; `D` from the put-call residual (D-073), with the referees of D-093 recorded beside it | `measure_band.digital()`, `discount()`; `scripts/discount_referee.py` |
+| execution control | sell the prediction at its bid, buy the bucket at ask-on-long / bid-on-short, both venues' published fees (D-076, D-077); no mid in the verdict | `measure_band.rungs()`, `fees.py` |
+| maturity control | both bracketing expiries, read as a stress test not a bound (D-094); the interpolant reported as a sensitivity only | `scripts/measure_sensitivity.py` |
+| settlement control | BRTI-vs-index basis measured and reported, not corrected for (D-075) | `scripts/measure_basis.py` |
+| grid control | the same digital at skip-1 and skip-2 brackets; the relative spread reported as an uncertainty, not a correction (D-079) | `scripts/measure_sensitivity.py` |
+| kill test | the pre-committed test of D-092 on any rung that clears the maturity stress test; verdict words used as written (D-103) | `scripts/kill_test_eth5k.py`, `findings/kill_test_eth5k.json` |
+| second venue | Polymarket daily terminal ladders under the identical test (D-085); not compared like-for-like with Kalshi | `scripts/measure_polymarket.py` |
+| touch bound | model-dependent, reported as a pipeline validation and a statement about the bound, never as mispricing | `scripts/measure_touch.py` |
+| multiplicity | no Benjamini–Hochberg or other correction; the claim is persistence of named rungs, tested by forward holdout (D-096) | — |
+| exhaustiveness | one event per series, partitions only (D-105); a set-aside ladder is named, not summed | `scripts/measure_exhaustive.py` |
+| terminology | D-095: quoted-executable discrepancy vs size-executable opportunity; no "edge", "signal", "arbitrage", "true probability" | every surface |
+| what the note may claim | how much survives each control, with the numbers; the verdict of D-103 in its words; errors found in our own work | — |
+| what it may not claim | forecast quality (Note 2); a dollar figure as a trade (D-095); anything about assets beyond BTC and ETH (D-100) | — |
 
-**Kill / continue gate.** The note is published when: the kill test has run and its
-verdict is recorded (D-092 → a later decision); the discount referees have run and
-their spread is recorded; `check_readme.py` and `ref_check.py` are green; and every
-number in the note is reproduced by a named script from `findings/`. No forecast-
-quality claim appears in it. A mostly-null result is publishable; a note that waits
-for a positive result is not this note.
+**Required data.** Already in the archive; nothing new is collected for this note.
 
-**Dependencies.** None external. December closes the expiry band on its own and is
-not waited for — the note reports the band as it is.
+**Kill / continue gate (G2).** Published when: the kill test verdict is recorded
+(D-103 — done); the discount referees have run and their spread is recorded (D-104 —
+done); this specification is frozen (D-107 — done); every number in the note is
+reproduced by a named script from `findings/` (the note cites them); `check_readme.py`
+and `ref_check.py` are green; no forecast-quality claim appears. A mostly-null result
+is publishable; a note that waits for a positive result is not this note.
+
+**Dependencies.** None external. December's weeklies straddling 1 January will let
+the same kill test re-run with a band of days; that is a re-run of v1, not a new
+version, and it is waited for rather than built for.
 
 ---
 
@@ -57,10 +73,12 @@ about forecasting, and it is not said until the data allows it.
 
 **Required data.** Resolved events paired with the prices that preceded them, with
 lead time. `scripts/inventory_validation.py` counts what is available and collapses
-snapshots of one contract into one event; today that is nine informative independent
-events (`findings/validation_inventory.json`), growing by roughly two a day since the
-collector fix of 2026-09-15. The validation specification (the second of the three
-six-month outputs, D-102) is written while the sample accumulates.
+snapshots of one contract into one event: 121 independent events on the public
+window at 2026-09-16, most of them fifteen-minute markets quoted minutes before
+settlement (`findings/validation_inventory.json`). Outcome capture is reliable for
+those series and absent for the hourly ladders until the collector asks for settled
+markets (D-106, B-023). The validation specification is open at
+`docs/VALIDATION_SPEC.md` (DRAFT v0) and is frozen before any holdout is opened.
 
 **Method.** Pre-specified before the holdout is opened. Evaluation design, scoring
 rule, and the definition of "independent event" are frozen in the specification, not
@@ -75,7 +93,8 @@ exploratory threshold and is not called more than exploratory before the prelimi
 one.
 
 **Dependencies.** Note 1's controls (the residual is only meaningful after them); the
-outcome pipeline being reliable (roadmap step 4).
+outcome pipeline being reliable — checked in roadmap step 4 (D-106): reliable for the
+fifteen-minute and small series, not for the hourly ladders.
 
 ---
 
@@ -106,7 +125,8 @@ reduce the maturity stress on the year-end wing.
 
 ## Note 4 — The cost–capital–basis–payoff frontier of expressing market views across instruments
 
-**Status:** ACTIVE — methodology only. No engine is built for it yet.
+**Status:** ACTIVE — methodology only. No engine is built for it yet. The first
+worked example is specified in `EXPOSURE_ENGINE.md` §5 (D-108) and not yet computed.
 
 **Question.** For a given directional or event view over a given horizon, what does it
 cost, in every dimension that matters, to express it in a perpetual, a dated future, a
