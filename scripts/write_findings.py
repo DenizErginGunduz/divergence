@@ -230,6 +230,7 @@ def measure_exhaustive_all(all_stamps):
     ladder, and the answer is the same shape on every snapshot.
     """
     pooled = {rule: [] for rule in measure_exhaustive.RULES}
+    set_aside = {'cumulative': 0, 'incomplete': 0}
     for d in all_stamps:
         try:
             g = snapshot(d)
@@ -242,6 +243,12 @@ def measure_exhaustive_all(all_stamps):
                     r = measure_exhaustive.ladder_sum(KA, D, series, currency, rule)
                 except (KeyError, TypeError, ValueError):
                     r = None
+                if r and r['ratio'] is None:
+                    # A cumulative or incomplete ladder has no sum to check
+                    # (D-105). Counted, so the page can say what was set aside.
+                    if rule == measure_exhaustive.RULES[0]:
+                        set_aside[r['ladder']] = set_aside.get(r['ladder'], 0) + 1
+                    continue
                 if r:
                     # The ratio, not the raw total: after D-073 an exhaustive
                     # ladder is worth D rather than 1, and D differs between
@@ -270,7 +277,12 @@ def measure_exhaustive_all(all_stamps):
                    'total/D, so 1.0000 is the target. Until D-073 the target '
                    'was written as 1 and the sum landed on 1 for any D, which '
                    'made the check blind to the convention bug. See D-067 for '
-                   'the boundary rule and D-073 for the discount.')
+                   'the boundary rule and D-073 for the discount. Only a '
+                   'ladder that is a partition is summed, one event per '
+                   'series; cumulative ladders (every rung P(S > K) at its own '
+                   'threshold) and incomplete ones (a hole in the archived '
+                   'ladder) are counted in ladders_set_aside instead (D-105).')
+    out['ladders_set_aside'] = set_aside
     return out
 
 
