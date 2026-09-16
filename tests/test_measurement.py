@@ -934,5 +934,67 @@ class DiscountReferees(unittest.TestCase):
         self.assertIsNone(discount_referee.years_to('25DEC26', '2027-01-05T0500Z'))
 
 
+class LadderShapeAndEvents(unittest.TestCase):
+    """D-105: a series is not a ladder, and not every ladder is a partition.
+
+    The exhaustiveness constraint applies to one event's markets when they
+    tile the outcome space. Summing two events, a cumulative ladder, or a
+    ladder with a hole in it produced ratios of 1.8, 40 and 0.05 on the
+    screen. These pin the three refusals and the event choice.
+    """
+
+    def test_the_fixture_ladder_is_a_partition(self):
+        M = kalshi_ladder([(0.5, 0.52)] * 3)['markets']['KXBTCY']
+        self.assertEqual(measure_band.ladder_shape(M), ('exhaustive', 0))
+
+    def test_a_missing_middle_rung_is_a_break_not_a_sum(self):
+        """68,200 'less' followed by a 'between' from 75,000 is what the
+        archive holds for an intraday event cut by the 200-market page."""
+        KA = kalshi_ladder([(0.5, 0.52)] * 3)
+        KA['markets']['KXBTCY'] = [m for m in KA['markets']['KXBTCY']
+                                   if m['strike_type'] != 'between']
+        shape, breaks = measure_band.ladder_shape(KA['markets']['KXBTCY'])
+        self.assertEqual(shape, 'incomplete')
+        self.assertEqual(breaks, 1)
+        r = measure_exhaustive.ladder_sum(KA, parity_chain(), 'KXBTCY', 'BTC', 'corrected')
+        self.assertEqual(r['ladder'], 'incomplete')
+        self.assertIsNone(r['ratio'])
+        self.assertIsNone(r['total'])
+
+    def test_an_all_greater_ladder_is_cumulative_and_never_summed(self):
+        KA = kalshi_ladder([(0.5, 0.52)] * 3)
+        for m in KA['markets']['KXBTCY']:
+            m['strike_type'] = 'greater'
+            m['floor_strike'] = m['floor_strike'] or 79999.99
+            m['cap_strike'] = None
+        self.assertEqual(measure_band.ladder_shape(KA['markets']['KXBTCY'])[0], 'cumulative')
+        r = measure_exhaustive.ladder_sum(KA, parity_chain(), 'KXBTCY', 'BTC', 'corrected')
+        self.assertEqual(r['ladder'], 'cumulative')
+        self.assertIsNone(r['ratio'])
+
+    def test_two_events_in_one_series_yield_the_earliest_closing_one(self):
+        """Three rungs closing 2027-01-01 and three more of a later event: the
+        ladder is the first three, and the caller is told there were two."""
+        KA = kalshi_ladder([(0.5, 0.52)] * 3)
+        first = KA['markets']['KXBTCY']
+        for m in first:
+            m['event_ticker'] = 'KXBTCY-27JAN01'
+        later = [dict(m, event_ticker='KXBTCY-27JAN08', ticker=m['ticker'] + '-L',
+                      close_time='2027-01-08T05:00:00Z') for m in first]
+        KA['markets']['KXBTCY'] = later + first
+        M, events = measure_band.event_ladder(KA, 'KXBTCY')
+        self.assertEqual(events, 2)
+        self.assertEqual([m['event_ticker'] for m in M], ['KXBTCY-27JAN01'] * 3)
+        h = measure_band.rungs(KA, parity_chain(), 'KXBTCY', 'BTC')
+        self.assertEqual(len(h['rows']), 3)
+        self.assertEqual(h['events_in_series'], 2)
+        self.assertEqual(h['ladder'], 'exhaustive')
+        self.assertAlmostEqual(h['total'], PARITY_D, places=6)
+        r = measure_exhaustive.ladder_sum(KA, parity_chain(), 'KXBTCY', 'BTC', 'corrected')
+        self.assertEqual(r['events'], 2)
+        self.assertEqual(r['buckets'], 3)
+        self.assertAlmostEqual(r['ratio'], 1.0, places=6)
+
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
