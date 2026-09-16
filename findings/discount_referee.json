@@ -1,0 +1,1801 @@
+{
+ "archive": {
+  "day_count": 17,
+  "snapshot_count": 68,
+  "first": "2026-08-30T1611Z",
+  "last": "2026-09-16T1314Z"
+ },
+ "produced_by": "scripts/discount_referee.py",
+ "decision": "D-093",
+ "external_rate": {
+  "name": "SOFR (overnight), used flat",
+  "value": 3.62,
+  "as_of": "2026-09-14",
+  "source": "https://fred.stlouisfed.org/series/SOFR (NY Fed data)",
+  "entered": "2026-09-16"
+ },
+ "headline": {
+  "chains_judged": 1426,
+  "median_abs_R1_minus_R2_bp (estimator consistency)": 0.2,
+  "median_R1_minus_R3_bp (financing basis)": 0.22,
+  "median_R1_minus_R4_bp (vs external rate)": 47.38
+ },
+ "per_expiry": {
+  "BTC 1SEP26": {
+   "snapshots": 7,
+   "median_rate_pct": {
+    "R1": 3.946420297516806,
+    "R2_marks": 3.9340590845527585,
+    "R2_mids": -40.50379920061913,
+    "R3": 2.8697424596442285,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": 0.3,
+    "R1_minus_R3": 6.81,
+    "R1_minus_R4": 32.64
+   }
+  },
+  "BTC 2SEP26": {
+   "snapshots": 10,
+   "median_rate_pct": {
+    "R1": 4.8648164819155735,
+    "R2_marks": 4.871506619065186,
+    "R2_mids": -1.2319822628532484,
+    "R3": 4.238004698491838,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": 0.43,
+    "R1_minus_R3": 0.6,
+    "R1_minus_R4": 124.48
+   }
+  },
+  "BTC 3SEP26": {
+   "snapshots": 13,
+   "median_rate_pct": {
+    "R1": 5.267805732335899,
+    "R2_marks": 5.253390129649122,
+    "R2_mids": 10.684217385783338,
+    "R3": 4.585037780129112,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": 0.06,
+    "R1_minus_R3": 12.63,
+    "R1_minus_R4": 164.78
+   }
+  },
+  "BTC 4SEP26": {
+   "snapshots": 16,
+   "median_rate_pct": {
+    "R1": 4.783062187798854,
+    "R2_marks": 4.784530287785814,
+    "R2_mids": 9.62667776408436,
+    "R3": 4.818113099090706,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": 0.02,
+    "R1_minus_R3": 2.93,
+    "R1_minus_R4": 116.31
+   }
+  },
+  "BTC 11SEP26": {
+   "snapshots": 32,
+   "median_rate_pct": {
+    "R1": 3.658483102302887,
+    "R2_marks": 3.6441399905965874,
+    "R2_mids": 2.8645241457054422,
+    "R3": 3.5292145276707143,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": 0.03,
+    "R1_minus_R3": -0.05,
+    "R1_minus_R4": 3.85
+   }
+  },
+  "BTC 18SEP26": {
+   "snapshots": 67,
+   "median_rate_pct": {
+    "R1": 3.6868057981179034,
+    "R2_marks": 3.667370154832174,
+    "R2_mids": 1.9525097748327491,
+    "R3": 3.680355810678784,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": 0.03,
+    "R1_minus_R3": 0.4,
+    "R1_minus_R4": 6.68
+   }
+  },
+  "BTC 25SEP26": {
+   "snapshots": 67,
+   "median_rate_pct": {
+    "R1": 3.6494119888741565,
+    "R2_marks": 3.649378330014387,
+    "R2_mids": 3.256743179115047,
+    "R3": 3.5504865842026514,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": 0.0,
+    "R1_minus_R3": -0.01,
+    "R1_minus_R4": 2.94
+   }
+  },
+  "BTC 30OCT26": {
+   "snapshots": 67,
+   "median_rate_pct": {
+    "R1": 4.328744376681073,
+    "R2_marks": 4.328186819992746,
+    "R2_mids": 4.356861194565712,
+    "R3": 4.33786365424398,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": 0.0,
+    "R1_minus_R3": 0.07,
+    "R1_minus_R4": 70.87
+   }
+  },
+  "BTC 27NOV26": {
+   "snapshots": 67,
+   "median_rate_pct": {
+    "R1": 4.556606902158258,
+    "R2_marks": 4.556850227986316,
+    "R2_mids": 4.603091455229371,
+    "R3": 4.551597973315247,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": 0.0,
+    "R1_minus_R3": 0.0,
+    "R1_minus_R4": 93.66
+   }
+  },
+  "BTC 25DEC26": {
+   "snapshots": 67,
+   "median_rate_pct": {
+    "R1": 4.762232473668258,
+    "R2_marks": 4.761748603474134,
+    "R2_mids": 4.4461827018002165,
+    "R3": 4.743852175818222,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": -0.0,
+    "R1_minus_R3": 0.02,
+    "R1_minus_R4": 114.22
+   }
+  },
+  "BTC 26MAR27": {
+   "snapshots": 67,
+   "median_rate_pct": {
+    "R1": 4.6835146539200005,
+    "R2_marks": 4.6869756043874276,
+    "R2_mids": 4.658126062898272,
+    "R3": 4.68621707426958,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": -0.0,
+    "R1_minus_R3": 0.02,
+    "R1_minus_R4": 106.35
+   }
+  },
+  "BTC 25JUN27": {
+   "snapshots": 67,
+   "median_rate_pct": {
+    "R1": 4.797931006375767,
+    "R2_marks": 4.797929019504353,
+    "R2_mids": 4.737802622111589,
+    "R3": 4.7979795891977455,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": 0.0,
+    "R1_minus_R3": 0.03,
+    "R1_minus_R4": 117.79
+   }
+  },
+  "ETH 25DEC26": {
+   "snapshots": 67,
+   "median_rate_pct": {
+    "R1": 3.4926272797420372,
+    "R2_marks": 3.4933663907140367,
+    "R2_mids": 3.420383835949401,
+    "R3": 3.481003752949945,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": -0.02,
+    "R1_minus_R3": 0.06,
+    "R1_minus_R4": -12.74
+   }
+  },
+  "ETH 26MAR27": {
+   "snapshots": 67,
+   "median_rate_pct": {
+    "R1": 3.684064019528251,
+    "R2_marks": 3.6846161076602546,
+    "R2_mids": 3.6835383841189326,
+    "R3": 3.684637710584098,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": 0.0,
+    "R1_minus_R3": 0.13,
+    "R1_minus_R4": 6.41
+   }
+  },
+  "ETH 25JUN27": {
+   "snapshots": 67,
+   "median_rate_pct": {
+    "R1": 3.907752641092148,
+    "R2_marks": 3.90771620046881,
+    "R2_mids": 3.880634602339252,
+    "R3": 3.9068492782637816,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": -0.0,
+    "R1_minus_R3": 0.06,
+    "R1_minus_R4": 28.78
+   }
+  },
+  "BTC 31AUG26": {
+   "snapshots": 2,
+   "median_rate_pct": {
+    "R1": 9.451599698461138,
+    "R2_marks": 9.497519427086724,
+    "R2_mids": 231.35158137692756,
+    "R3": 10.288876336827661,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": -2.59,
+    "R1_minus_R3": 511.01,
+    "R1_minus_R4": 583.16
+   }
+  },
+  "ETH 1SEP26": {
+   "snapshots": 6,
+   "median_rate_pct": {
+    "R1": 9.891745052359067,
+    "R2_marks": 10.18241447194907,
+    "R2_mids": 13.406959136809977,
+    "R3": 11.571824180049624,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": -29.07,
+    "R1_minus_R3": 41.87,
+    "R1_minus_R4": 627.17
+   }
+  },
+  "ETH 2SEP26": {
+   "snapshots": 11,
+   "median_rate_pct": {
+    "R1": 7.402109004184087,
+    "R2_marks": 7.751023935388148,
+    "R2_mids": -8.643112951941793,
+    "R3": 8.365018000867364,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": -16.29,
+    "R1_minus_R3": 104.61,
+    "R1_minus_R4": 378.21
+   }
+  },
+  "ETH 3SEP26": {
+   "snapshots": 14,
+   "median_rate_pct": {
+    "R1": 8.217328858295822,
+    "R2_marks": 8.187414038001455,
+    "R2_mids": 1.88031927803796,
+    "R3": 7.73732759676148,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": 18.3,
+    "R1_minus_R3": 87.86,
+    "R1_minus_R4": 459.73
+   }
+  },
+  "ETH 4SEP26": {
+   "snapshots": 16,
+   "median_rate_pct": {
+    "R1": 7.024169868567664,
+    "R2_marks": 6.905259655807545,
+    "R2_mids": 7.758317678742765,
+    "R3": 6.323733552488279,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": -2.16,
+    "R1_minus_R3": 16.02,
+    "R1_minus_R4": 340.42
+   }
+  },
+  "ETH 11SEP26": {
+   "snapshots": 36,
+   "median_rate_pct": {
+    "R1": 3.795380098249008,
+    "R2_marks": 3.8263813821978574,
+    "R2_mids": 3.4059164438115506,
+    "R3": 3.758063134686542,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": -1.45,
+    "R1_minus_R3": 2.82,
+    "R1_minus_R4": 17.54
+   }
+  },
+  "ETH 18SEP26": {
+   "snapshots": 66,
+   "median_rate_pct": {
+    "R1": 4.372550725577895,
+    "R2_marks": 4.370501844575069,
+    "R2_mids": 4.599939654107578,
+    "R3": 4.34590201588451,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": 1.08,
+    "R1_minus_R3": 4.62,
+    "R1_minus_R4": 75.26
+   }
+  },
+  "ETH 25SEP26": {
+   "snapshots": 66,
+   "median_rate_pct": {
+    "R1": 4.60484547216448,
+    "R2_marks": 4.721733458122281,
+    "R2_mids": 5.113454170224794,
+    "R3": 4.7473588090794205,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": -0.01,
+    "R1_minus_R3": 0.32,
+    "R1_minus_R4": 98.48
+   }
+  },
+  "ETH 30OCT26": {
+   "snapshots": 66,
+   "median_rate_pct": {
+    "R1": 3.3184339236580023,
+    "R2_marks": 3.3228849379340426,
+    "R2_mids": 3.6787199183722032,
+    "R3": 3.3169252227308954,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": -0.01,
+    "R1_minus_R3": 0.21,
+    "R1_minus_R4": -30.16
+   }
+  },
+  "ETH 27NOV26": {
+   "snapshots": 66,
+   "median_rate_pct": {
+    "R1": 3.4579674947402257,
+    "R2_marks": 3.4589307536482714,
+    "R2_mids": 3.597791791266327,
+    "R3": 3.4540535766016847,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": 0.09,
+    "R1_minus_R3": 0.42,
+    "R1_minus_R4": -16.2
+   }
+  },
+  "BTC 5SEP26": {
+   "snapshots": 8,
+   "median_rate_pct": {
+    "R1": 4.94451069744331,
+    "R2_marks": 4.952650476644862,
+    "R2_mids": 20.569992094696072,
+    "R3": 4.88221918001034,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": 0.22,
+    "R1_minus_R3": 6.04,
+    "R1_minus_R4": 132.45
+   }
+  },
+  "ETH 5SEP26": {
+   "snapshots": 10,
+   "median_rate_pct": {
+    "R1": 7.1622564319018585,
+    "R2_marks": 6.948715910807804,
+    "R2_mids": 18.620627262816857,
+    "R3": 7.035022761546404,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": 41.88,
+    "R1_minus_R3": 80.11,
+    "R1_minus_R4": 354.23
+   }
+  },
+  "BTC 6SEP26": {
+   "snapshots": 6,
+   "median_rate_pct": {
+    "R1": 4.178488379206904,
+    "R2_marks": 4.128084688241681,
+    "R2_mids": 13.705727023910987,
+    "R3": 3.892253791380397,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": 0.64,
+    "R1_minus_R3": 35.13,
+    "R1_minus_R4": 55.85
+   }
+  },
+  "ETH 6SEP26": {
+   "snapshots": 9,
+   "median_rate_pct": {
+    "R1": 5.4326490244402,
+    "R2_marks": 5.696505864330259,
+    "R2_mids": 13.835931750305363,
+    "R3": 4.986042436940908,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": -23.18,
+    "R1_minus_R3": 72.03,
+    "R1_minus_R4": 181.26
+   }
+  },
+  "BTC 7SEP26": {
+   "snapshots": 3,
+   "median_rate_pct": {
+    "R1": 3.6809404013587415,
+    "R2_marks": 3.6812762550555256,
+    "R2_mids": 5.853336167504709,
+    "R3": 3.6631203232396237,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": 0.61,
+    "R1_minus_R3": 1.78,
+    "R1_minus_R4": 6.09
+   }
+  },
+  "ETH 7SEP26": {
+   "snapshots": 7,
+   "median_rate_pct": {
+    "R1": 4.328398947905638,
+    "R2_marks": 3.8314568720436464,
+    "R2_mids": 17.939185983619154,
+    "R3": 3.6719616737695215,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": 32.23,
+    "R1_minus_R3": 37.3,
+    "R1_minus_R4": 70.84
+   }
+  },
+  "BTC 8SEP26": {
+   "snapshots": 1,
+   "median_rate_pct": {
+    "R1": 3.3948315549666974,
+    "R2_marks": 3.4893332063288116,
+    "R2_mids": 72.53990171388769,
+    "R3": 1.6722998221286554,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": -9.45,
+    "R1_minus_R3": 172.25,
+    "R1_minus_R4": -22.52
+   }
+  },
+  "ETH 8SEP26": {
+   "snapshots": 9,
+   "median_rate_pct": {
+    "R1": 2.813422105657767,
+    "R2_marks": 2.690917409140582,
+    "R2_mids": 8.198154240676486,
+    "R3": 1.5699511816514697,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": 5.9,
+    "R1_minus_R3": 5.49,
+    "R1_minus_R4": -80.66
+   }
+  },
+  "ETH 9SEP26": {
+   "snapshots": 8,
+   "median_rate_pct": {
+    "R1": 1.975568089252147,
+    "R2_marks": 2.4205885844299706,
+    "R2_mids": 3.7293271472810274,
+    "R3": 1.8797001519534229,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": 15.32,
+    "R1_minus_R3": 22.99,
+    "R1_minus_R4": -164.44
+   }
+  },
+  "ETH 10SEP26": {
+   "snapshots": 9,
+   "median_rate_pct": {
+    "R1": 3.159078004667844,
+    "R2_marks": 2.682891214232237,
+    "R2_mids": 6.044123327368143,
+    "R3": 2.5126155399694605,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": 25.56,
+    "R1_minus_R3": 63.33,
+    "R1_minus_R4": -46.09
+   }
+  },
+  "BTC 9SEP26": {
+   "snapshots": 3,
+   "median_rate_pct": {
+    "R1": 1.9142133191649613,
+    "R2_marks": 1.9002562480201644,
+    "R2_mids": 20.559776790775185,
+    "R3": 1.8995467969320425,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": 0.12,
+    "R1_minus_R3": 1.47,
+    "R1_minus_R4": -170.58
+   }
+  },
+  "BTC 10SEP26": {
+   "snapshots": 6,
+   "median_rate_pct": {
+    "R1": 5.6379633361895785,
+    "R2_marks": 5.641371746056852,
+    "R2_mids": -6.408881551769986,
+    "R3": 3.1274448243665827,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": -1.13,
+    "R1_minus_R3": 225.23,
+    "R1_minus_R4": 201.8
+   }
+  },
+  "BTC 12SEP26": {
+   "snapshots": 10,
+   "median_rate_pct": {
+    "R1": 4.2690091534151255,
+    "R2_marks": 4.265687461503703,
+    "R2_mids": 3.722254953909825,
+    "R3": 3.87415492797871,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": -0.07,
+    "R1_minus_R3": 65.44,
+    "R1_minus_R4": 64.9
+   }
+  },
+  "ETH 12SEP26": {
+   "snapshots": 10,
+   "median_rate_pct": {
+    "R1": 3.532197391293484,
+    "R2_marks": 3.6131730244063553,
+    "R2_mids": 5.250650829878793,
+    "R3": 2.9298107568225005,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": 4.68,
+    "R1_minus_R3": 109.32,
+    "R1_minus_R4": -8.78
+   }
+  },
+  "BTC 13SEP26": {
+   "snapshots": 7,
+   "median_rate_pct": {
+    "R1": 3.8946021198738543,
+    "R2_marks": 3.8966559236742953,
+    "R2_mids": -0.009225238778582473,
+    "R3": 3.0946314251453018,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": 0.2,
+    "R1_minus_R3": 21.21,
+    "R1_minus_R4": 27.46
+   }
+  },
+  "ETH 13SEP26": {
+   "snapshots": 7,
+   "median_rate_pct": {
+    "R1": 4.39368249911814,
+    "R2_marks": 3.857126622480677,
+    "R2_mids": 14.540094494524773,
+    "R3": 3.7701743929445657,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": 21.56,
+    "R1_minus_R3": 66.42,
+    "R1_minus_R4": 77.37
+   }
+  },
+  "BTC 14SEP26": {
+   "snapshots": 7,
+   "median_rate_pct": {
+    "R1": 3.3248945099332095,
+    "R2_marks": 3.321777806133981,
+    "R2_mids": 7.3672037218143585,
+    "R3": 2.4326947990185612,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": -0.09,
+    "R1_minus_R3": -7.66,
+    "R1_minus_R4": -29.51
+   }
+  },
+  "BTC 2OCT26": {
+   "snapshots": 31,
+   "median_rate_pct": {
+    "R1": 4.0740394792310495,
+    "R2_marks": 4.074747500333326,
+    "R2_mids": 3.619107617551385,
+    "R3": 4.111609331876649,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": -0.0,
+    "R1_minus_R3": 0.15,
+    "R1_minus_R4": 45.4
+   }
+  },
+  "ETH 14SEP26": {
+   "snapshots": 9,
+   "median_rate_pct": {
+    "R1": 5.1853653486333595,
+    "R2_marks": 4.04122369588477,
+    "R2_mids": 3.592237135467714,
+    "R3": 3.401141878741295,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": 4.83,
+    "R1_minus_R3": 70.06,
+    "R1_minus_R4": 156.54
+   }
+  },
+  "ETH 2OCT26": {
+   "snapshots": 31,
+   "median_rate_pct": {
+    "R1": 3.8589501522179184,
+    "R2_marks": 3.865975242860258,
+    "R2_mids": 3.6695365663473636,
+    "R3": 3.8498200195024066,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": 0.33,
+    "R1_minus_R3": 1.46,
+    "R1_minus_R4": 23.9
+   }
+  },
+  "BTC 15SEP26": {
+   "snapshots": 9,
+   "median_rate_pct": {
+    "R1": 3.5704141276987316,
+    "R2_marks": 3.5690295706573334,
+    "R2_mids": -9.973040106022053,
+    "R3": 2.9225357160638152,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": -0.36,
+    "R1_minus_R3": 33.7,
+    "R1_minus_R4": -4.96
+   }
+  },
+  "ETH 15SEP26": {
+   "snapshots": 13,
+   "median_rate_pct": {
+    "R1": 7.473862562024957,
+    "R2_marks": 6.290098173579412,
+    "R2_mids": 12.466134390356236,
+    "R3": 4.3720901203103475,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": 43.09,
+    "R1_minus_R3": 159.3,
+    "R1_minus_R4": 385.39
+   }
+  },
+  "BTC 16SEP26": {
+   "snapshots": 20,
+   "median_rate_pct": {
+    "R1": 4.438386820240949,
+    "R2_marks": 4.43725580021241,
+    "R2_mids": 6.459687301490229,
+    "R3": 3.6942631972783464,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": 0.52,
+    "R1_minus_R3": 17.91,
+    "R1_minus_R4": 81.84
+   }
+  },
+  "BTC 17SEP26": {
+   "snapshots": 24,
+   "median_rate_pct": {
+    "R1": 4.441864690993324,
+    "R2_marks": 4.455445318928482,
+    "R2_mids": 1.2159997568343226,
+    "R3": 4.516641352025967,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": 0.25,
+    "R1_minus_R3": 10.55,
+    "R1_minus_R4": 82.19
+   }
+  },
+  "ETH 16SEP26": {
+   "snapshots": 23,
+   "median_rate_pct": {
+    "R1": 5.522009189088019,
+    "R2_marks": 5.428000531986528,
+    "R2_mids": -4.204390684834144,
+    "R3": 5.316856407877868,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": -7.69,
+    "R1_minus_R3": -7.04,
+    "R1_minus_R4": 190.2
+   }
+  },
+  "ETH 17SEP26": {
+   "snapshots": 25,
+   "median_rate_pct": {
+    "R1": 5.175856248862063,
+    "R2_marks": 4.913399898340033,
+    "R2_mids": 15.874659325606798,
+    "R3": 5.153476501285015,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": 10.17,
+    "R1_minus_R3": 10.74,
+    "R1_minus_R4": 155.59
+   }
+  },
+  "BTC 19SEP26": {
+   "snapshots": 10,
+   "median_rate_pct": {
+    "R1": 6.6258913345865285,
+    "R2_marks": 6.627629389504513,
+    "R2_mids": 4.251069858499135,
+    "R3": 7.069780724529258,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": 0.01,
+    "R1_minus_R3": 1.3,
+    "R1_minus_R4": 300.59
+   }
+  },
+  "ETH 19SEP26": {
+   "snapshots": 10,
+   "median_rate_pct": {
+    "R1": 4.363259905192164,
+    "R2_marks": 4.295569013797891,
+    "R2_mids": 0.37036301321652265,
+    "R3": 4.49149286881469,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": 15.27,
+    "R1_minus_R3": -11.22,
+    "R1_minus_R4": 74.33
+   }
+  },
+  "BTC 20SEP26": {
+   "snapshots": 2,
+   "median_rate_pct": {
+    "R1": 6.946859738394408,
+    "R2_marks": 6.94137784677912,
+    "R2_mids": 8.789854951664811,
+    "R3": 6.67843981863011,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": 0.55,
+    "R1_minus_R3": 26.84,
+    "R1_minus_R4": 332.69
+   }
+  },
+  "ETH 20SEP26": {
+   "snapshots": 2,
+   "median_rate_pct": {
+    "R1": 3.7365975134446012,
+    "R2_marks": 3.6121589522428414,
+    "R2_mids": 9.417418208713714,
+    "R3": 3.9844696421020513,
+    "R4": 3.62
+   },
+   "median_diff_bp": {
+    "R1_minus_R2": 33.31,
+    "R1_minus_R3": 47.39,
+    "R1_minus_R4": 11.66
+   }
+  }
+ },
+ "newest": {
+  "stamp": "2026-09-16T1314Z",
+  "chains": [
+   {
+    "currency": "BTC",
+    "expiry": "17SEP26",
+    "T_years": 0.00214,
+    "index": 75735.29,
+    "R1": {
+     "D": 0.999845180933599,
+     "rate": 7.23223269695017,
+     "brackets": 26,
+     "label": "current estimator (median bracket residual)"
+    },
+    "R2": {
+     "D_marks": 0.9998449590827504,
+     "D_mids": 1.0008994064854655,
+     "rate_marks": 7.242597062232239,
+     "rate_mids": -41.99282678692888,
+     "points": [
+      27,
+      20
+     ],
+     "label": "parity slope — estimator-consistency check, NOT independent of R1"
+    },
+    "R3": {
+     "D": 0.9998455384167739,
+     "rate": 7.215531903792602,
+     "underlying_price": 75746.99,
+     "listed_or_synthetic": "UNKNOWN",
+     "label": "futures basis from underlying_price"
+    },
+    "R4": {
+     "D": 0.999922504333844,
+     "rate": 3.62,
+     "label": "external rate, dated constant",
+     "as_of": "2026-09-14",
+     "source": "https://fred.stlouisfed.org/series/SOFR (NY Fed data)"
+    },
+    "diff_bp": {
+     "R1_minus_R2_marks (estimator disagreement)": -1.04,
+     "R1_minus_R2_mids (estimator disagreement)": 4922.51,
+     "R1_minus_R3 (financing/collateral basis)": 1.67,
+     "R1_minus_R4 (distance from external rate)": 361.22
+    }
+   },
+   {
+    "currency": "BTC",
+    "expiry": "18SEP26",
+    "T_years": 0.00488,
+    "index": 75735.29,
+    "R1": {
+     "D": 0.9995755633011999,
+     "rate": 8.701641248628775,
+     "brackets": 28,
+     "label": "current estimator (median bracket residual)"
+    },
+    "R2": {
+     "D_marks": 0.9995756592701941,
+     "D_mids": 1.0003580703661226,
+     "rate_marks": 8.699673310878808,
+     "rate_mids": -7.338151987258233,
+     "points": [
+      28,
+      25
+     ],
+     "label": "parity slope — estimator-consistency check, NOT independent of R1"
+    },
+    "R3": {
+     "D": 0.9996023251768418,
+     "rate": 8.152870228344291,
+     "underlying_price": 75765.42,
+     "listed_or_synthetic": "UNKNOWN",
+     "label": "futures basis from underlying_price"
+    },
+    "R4": {
+     "D": 0.9998234067268336,
+     "rate": 3.62,
+     "label": "external rate, dated constant",
+     "as_of": "2026-09-14",
+     "source": "https://fred.stlouisfed.org/series/SOFR (NY Fed data)"
+    },
+    "diff_bp": {
+     "R1_minus_R2_marks (estimator disagreement)": 0.2,
+     "R1_minus_R2_mids (estimator disagreement)": 1603.98,
+     "R1_minus_R3 (financing/collateral basis)": 54.88,
+     "R1_minus_R4 (distance from external rate)": 508.16
+    }
+   },
+   {
+    "currency": "BTC",
+    "expiry": "19SEP26",
+    "T_years": 0.00762,
+    "index": 75735.29,
+    "R1": {
+     "D": 0.9995361809503995,
+     "rate": 6.091034928058915,
+     "brackets": 26,
+     "label": "current estimator (median bracket residual)"
+    },
+    "R2": {
+     "D_marks": 0.9995361011715229,
+     "D_mids": 1.0009434934534631,
+     "rate_marks": 6.0920828554360895,
+     "rate_mids": -12.381574249068219,
+     "points": [
+      27,
+      27
+     ],
+     "label": "parity slope — estimator-consistency check, NOT independent of R1"
+    },
+    "R3": {
+     "D": 0.9995652531410593,
+     "rate": 5.709165672232503,
+     "underlying_price": 75768.23,
+     "listed_or_synthetic": "UNKNOWN",
+     "label": "futures basis from underlying_price"
+    },
+    "R4": {
+     "D": 0.9997243189409198,
+     "rate": 3.62,
+     "label": "external rate, dated constant",
+     "as_of": "2026-09-14",
+     "source": "https://fred.stlouisfed.org/series/SOFR (NY Fed data)"
+    },
+    "diff_bp": {
+     "R1_minus_R2_marks (estimator disagreement)": -0.1,
+     "R1_minus_R2_mids (estimator disagreement)": 1847.26,
+     "R1_minus_R3 (financing/collateral basis)": 38.19,
+     "R1_minus_R4 (distance from external rate)": 247.1
+    }
+   },
+   {
+    "currency": "BTC",
+    "expiry": "20SEP26",
+    "T_years": 0.01035,
+    "index": 75735.29,
+    "R1": {
+     "D": 0.9992809530231005,
+     "rate": 6.946859738394408,
+     "brackets": 24,
+     "label": "current estimator (median bracket residual)"
+    },
+    "R2": {
+     "D_marks": 0.9992815202320803,
+     "D_mids": 0.9990902773451062,
+     "rate_marks": 6.94137784677912,
+     "rate_mids": 8.789854951664811,
+     "points": [
+      25,
+      25
+     ],
+     "label": "parity slope — estimator-consistency check, NOT independent of R1"
+    },
+    "R3": {
+     "D": 0.9993087266954207,
+     "rate": 6.67843981863011,
+     "underlying_price": 75787.68,
+     "listed_or_synthetic": "UNKNOWN",
+     "label": "futures basis from underlying_price"
+    },
+    "R4": {
+     "D": 0.9996252409751297,
+     "rate": 3.62,
+     "label": "external rate, dated constant",
+     "as_of": "2026-09-14",
+     "source": "https://fred.stlouisfed.org/series/SOFR (NY Fed data)"
+    },
+    "diff_bp": {
+     "R1_minus_R2_marks (estimator disagreement)": 0.55,
+     "R1_minus_R2_mids (estimator disagreement)": -184.3,
+     "R1_minus_R3 (financing/collateral basis)": 26.84,
+     "R1_minus_R4 (distance from external rate)": 332.69
+    }
+   },
+   {
+    "currency": "BTC",
+    "expiry": "25SEP26",
+    "T_years": 0.02404,
+    "index": 75735.29,
+    "R1": {
+     "D": 0.9986309170290296,
+     "rate": 5.6980567482440865,
+     "brackets": 65,
+     "label": "current estimator (median bracket residual)"
+    },
+    "R2": {
+     "D_marks": 0.9986296984678344,
+     "D_mids": 0.9999770623650154,
+     "rate_marks": 5.703131819458733,
+     "rate_mids": 0.09540105062182043,
+     "points": [
+      22,
+      22
+     ],
+     "label": "parity slope — estimator-consistency check, NOT independent of R1"
+    },
+    "R3": {
+     "D": 0.9986585707086063,
+     "rate": 5.582886197117268,
+     "underlying_price": 75837.02,
+     "listed_or_synthetic": "UNKNOWN",
+     "label": "futures basis from underlying_price"
+    },
+    "R4": {
+     "D": 0.9991299984139717,
+     "rate": 3.62,
+     "label": "external rate, dated constant",
+     "as_of": "2026-09-14",
+     "source": "https://fred.stlouisfed.org/series/SOFR (NY Fed data)"
+    },
+    "diff_bp": {
+     "R1_minus_R2_marks (estimator disagreement)": -0.51,
+     "R1_minus_R2_mids (estimator disagreement)": 560.27,
+     "R1_minus_R3 (financing/collateral basis)": 11.52,
+     "R1_minus_R4 (distance from external rate)": 207.81
+    }
+   },
+   {
+    "currency": "BTC",
+    "expiry": "2OCT26",
+    "T_years": 0.04321,
+    "index": 75735.29,
+    "R1": {
+     "D": 0.9977480707535002,
+     "rate": 5.2176376500077986,
+     "brackets": 17,
+     "label": "current estimator (median bracket residual)"
+    },
+    "R2": {
+     "D_marks": 0.997748146364837,
+     "D_mids": 0.9990120354497635,
+     "rate_marks": 5.217462263687156,
+     "rate_mids": 2.287629551885631,
+     "points": [
+      17,
+      17
+     ],
+     "label": "parity slope — estimator-consistency check, NOT independent of R1"
+    },
+    "R3": {
+     "D": 0.9977553718977779,
+     "rate": 5.200702144701553,
+     "underlying_price": 75905.67,
+     "listed_or_synthetic": "UNKNOWN",
+     "label": "futures basis from underlying_price"
+    },
+    "R4": {
+     "D": 0.9984370710011218,
+     "rate": 3.62,
+     "label": "external rate, dated constant",
+     "as_of": "2026-09-14",
+     "source": "https://fred.stlouisfed.org/series/SOFR (NY Fed data)"
+    },
+    "diff_bp": {
+     "R1_minus_R2_marks (estimator disagreement)": 0.02,
+     "R1_minus_R2_mids (estimator disagreement)": 293.0,
+     "R1_minus_R3 (financing/collateral basis)": 1.69,
+     "R1_minus_R4 (distance from external rate)": 159.76
+    }
+   },
+   {
+    "currency": "BTC",
+    "expiry": "30OCT26",
+    "T_years": 0.11987,
+    "index": 75735.29,
+    "R1": {
+     "D": 0.99388087537552,
+     "rate": 5.120550206375581,
+     "brackets": 52,
+     "label": "current estimator (median bracket residual)"
+    },
+    "R2": {
+     "D_marks": 0.9938775036663017,
+     "D_mids": 0.9938282516478631,
+     "rate_marks": 5.123380370980338,
+     "rate_mids": 5.164722906956137,
+     "points": [
+      26,
+      26
+     ],
+     "label": "parity slope — estimator-consistency check, NOT independent of R1"
+    },
+    "R3": {
+     "D": 0.9939077044054869,
+     "rate": 5.0980306436083564,
+     "underlying_price": 76199.52,
+     "listed_or_synthetic": "UNKNOWN",
+     "label": "futures basis from underlying_price"
+    },
+    "R4": {
+     "D": 0.9956701636829323,
+     "rate": 3.62,
+     "label": "external rate, dated constant",
+     "as_of": "2026-09-14",
+     "source": "https://fred.stlouisfed.org/series/SOFR (NY Fed data)"
+    },
+    "diff_bp": {
+     "R1_minus_R2_marks (estimator disagreement)": -0.28,
+     "R1_minus_R2_mids (estimator disagreement)": -4.42,
+     "R1_minus_R3 (financing/collateral basis)": 2.25,
+     "R1_minus_R4 (distance from external rate)": 150.06
+    }
+   },
+   {
+    "currency": "BTC",
+    "expiry": "27NOV26",
+    "T_years": 0.19653,
+    "index": 75735.29,
+    "R1": {
+     "D": 0.9903616079198027,
+     "rate": 4.9281168824876245,
+     "brackets": 44,
+     "label": "current estimator (median bracket residual)"
+    },
+    "R2": {
+     "D_marks": 0.9903544387007326,
+     "D_mids": 0.9919283962961538,
+     "rate_marks": 4.931800331250852,
+     "rate_mids": 4.123761000121119,
+     "points": [
+      25,
+      25
+     ],
+     "label": "parity slope — estimator-consistency check, NOT independent of R1"
+    },
+    "R3": {
+     "D": 0.9903893306440075,
+     "rate": 4.91387356890193,
+     "underlying_price": 76470.22,
+     "listed_or_synthetic": "UNKNOWN",
+     "label": "futures basis from underlying_price"
+    },
+    "R4": {
+     "D": 0.992910924125015,
+     "rate": 3.62,
+     "label": "external rate, dated constant",
+     "as_of": "2026-09-14",
+     "source": "https://fred.stlouisfed.org/series/SOFR (NY Fed data)"
+    },
+    "diff_bp": {
+     "R1_minus_R2_marks (estimator disagreement)": -0.37,
+     "R1_minus_R2_mids (estimator disagreement)": 80.44,
+     "R1_minus_R3 (financing/collateral basis)": 1.42,
+     "R1_minus_R4 (distance from external rate)": 130.81
+    }
+   },
+   {
+    "currency": "BTC",
+    "expiry": "25DEC26",
+    "T_years": 0.27319,
+    "index": 75735.29,
+    "R1": {
+     "D": 0.9864164809284087,
+     "rate": 5.006301649608084,
+     "brackets": 58,
+     "label": "current estimator (median bracket residual)"
+    },
+    "R2": {
+     "D_marks": 0.9864154069064255,
+     "D_mids": 0.9873766071271135,
+     "rate_marks": 5.006700207441321,
+     "rate_mids": 4.6501827782543925,
+     "points": [
+      16,
+      16
+     ],
+     "label": "parity slope — estimator-consistency check, NOT independent of R1"
+    },
+    "R3": {
+     "D": 0.9864395847630801,
+     "rate": 4.99772817384949,
+     "underlying_price": 76776.41,
+     "listed_or_synthetic": "UNKNOWN",
+     "label": "futures basis from underlying_price"
+    },
+    "R4": {
+     "D": 0.9901593310781772,
+     "rate": 3.62,
+     "label": "external rate, dated constant",
+     "as_of": "2026-09-14",
+     "source": "https://fred.stlouisfed.org/series/SOFR (NY Fed data)"
+    },
+    "diff_bp": {
+     "R1_minus_R2_marks (estimator disagreement)": -0.04,
+     "R1_minus_R2_mids (estimator disagreement)": 35.61,
+     "R1_minus_R3 (financing/collateral basis)": 0.86,
+     "R1_minus_R4 (distance from external rate)": 138.63
+    }
+   },
+   {
+    "currency": "BTC",
+    "expiry": "26MAR27",
+    "T_years": 0.52233,
+    "index": 75735.29,
+    "R1": {
+     "D": 0.9744962006941494,
+     "rate": 4.946017895742772,
+     "brackets": 50,
+     "label": "current estimator (median bracket residual)"
+    },
+    "R2": {
+     "D_marks": 0.9744957300373668,
+     "D_mids": 0.975565404967677,
+     "rate_marks": 4.946110360712143,
+     "rate_mids": 4.736077821103292,
+     "points": [
+      15,
+      15
+     ],
+     "label": "parity slope — estimator-consistency check, NOT independent of R1"
+    },
+    "R3": {
+     "D": 0.9745213848946482,
+     "rate": 4.941070286865836,
+     "underlying_price": 77715.37,
+     "listed_or_synthetic": "UNKNOWN",
+     "label": "futures basis from underlying_price"
+    },
+    "R4": {
+     "D": 0.9812692066873221,
+     "rate": 3.62,
+     "label": "external rate, dated constant",
+     "as_of": "2026-09-14",
+     "source": "https://fred.stlouisfed.org/series/SOFR (NY Fed data)"
+    },
+    "diff_bp": {
+     "R1_minus_R2_marks (estimator disagreement)": -0.01,
+     "R1_minus_R2_mids (estimator disagreement)": 20.99,
+     "R1_minus_R3 (financing/collateral basis)": 0.49,
+     "R1_minus_R4 (distance from external rate)": 132.6
+    }
+   },
+   {
+    "currency": "BTC",
+    "expiry": "25JUN27",
+    "T_years": 0.77148,
+    "index": 75735.29,
+    "R1": {
+     "D": 0.9625928851648503,
+     "rate": 4.941782767560128,
+     "brackets": 49,
+     "label": "current estimator (median bracket residual)"
+    },
+    "R2": {
+     "D_marks": 0.9625934489256353,
+     "D_mids": 0.9638993129779567,
+     "rate_marks": 4.941706852288272,
+     "rate_mids": 4.765980169734716,
+     "points": [
+      15,
+      15
+     ],
+     "label": "parity slope — estimator-consistency check, NOT independent of R1"
+    },
+    "R3": {
+     "D": 0.9626131067658216,
+     "rate": 4.939059781674431,
+     "underlying_price": 78676.77,
+     "listed_or_synthetic": "UNKNOWN",
+     "label": "futures basis from underlying_price"
+    },
+    "R4": {
+     "D": 0.9724589020882967,
+     "rate": 3.62,
+     "label": "external rate, dated constant",
+     "as_of": "2026-09-14",
+     "source": "https://fred.stlouisfed.org/series/SOFR (NY Fed data)"
+    },
+    "diff_bp": {
+     "R1_minus_R2_marks (estimator disagreement)": 0.01,
+     "R1_minus_R2_mids (estimator disagreement)": 17.58,
+     "R1_minus_R3 (financing/collateral basis)": 0.27,
+     "R1_minus_R4 (distance from external rate)": 132.18
+    }
+   },
+   {
+    "currency": "ETH",
+    "expiry": "17SEP26",
+    "T_years": 0.00214,
+    "index": 2399.11,
+    "R1": {
+     "D": 0.9999490480000002,
+     "rate": 2.3800529899765723,
+     "brackets": 31,
+     "label": "current estimator (median bracket residual)"
+    },
+    "R2": {
+     "D_marks": 0.9999658320028927,
+     "D_mids": 0.9991185354403257,
+     "rate_marks": 1.5960307976990127,
+     "rate_mids": 41.19178952920275,
+     "points": [
+      31,
+      31
+     ],
+     "label": "parity slope — estimator-consistency check, NOT independent of R1"
+    },
+    "R3": {
+     "D": 0.999962487495832,
+     "rate": 1.7522599257300486,
+     "underlying_price": 2399.2,
+     "listed_or_synthetic": "UNKNOWN",
+     "label": "futures basis from underlying_price"
+    },
+    "R4": {
+     "D": 0.999922504333844,
+     "rate": 3.62,
+     "label": "external rate, dated constant",
+     "as_of": "2026-09-14",
+     "source": "https://fred.stlouisfed.org/series/SOFR (NY Fed data)"
+    },
+    "diff_bp": {
+     "R1_minus_R2_marks (estimator disagreement)": 78.4,
+     "R1_minus_R2_mids (estimator disagreement)": -3881.17,
+     "R1_minus_R3 (financing/collateral basis)": 62.78,
+     "R1_minus_R4 (distance from external rate)": -123.99
+    }
+   },
+   {
+    "currency": "ETH",
+    "expiry": "18SEP26",
+    "T_years": 0.00488,
+    "index": 2399.11,
+    "R1": {
+     "D": 0.9998051014000008,
+     "rate": 3.9952789700359745,
+     "brackets": 30,
+     "label": "current estimator (median bracket residual)"
+    },
+    "R2": {
+     "D_marks": 0.9998132447791354,
+     "D_mids": 0.9994826954971103,
+     "rate_marks": 3.8283300544164836,
+     "rate_mids": 10.606074633894341,
+     "points": [
+      27,
+      27
+     ],
+     "label": "parity slope — estimator-consistency check, NOT independent of R1"
+    },
+    "R3": {
+     "D": 0.9997749671827142,
+     "rate": 4.613077935474397,
+     "underlying_price": 2399.65,
+     "listed_or_synthetic": "UNKNOWN",
+     "label": "futures basis from underlying_price"
+    },
+    "R4": {
+     "D": 0.9998234067268336,
+     "rate": 3.62,
+     "label": "external rate, dated constant",
+     "as_of": "2026-09-14",
+     "source": "https://fred.stlouisfed.org/series/SOFR (NY Fed data)"
+    },
+    "diff_bp": {
+     "R1_minus_R2_marks (estimator disagreement)": 16.69,
+     "R1_minus_R2_mids (estimator disagreement)": -661.08,
+     "R1_minus_R3 (financing/collateral basis)": -61.78,
+     "R1_minus_R4 (distance from external rate)": 37.53
+    }
+   },
+   {
+    "currency": "ETH",
+    "expiry": "19SEP26",
+    "T_years": 0.00762,
+    "index": 2399.11,
+    "R1": {
+     "D": 0.9997091370000003,
+     "rate": 3.8193848287772583,
+     "brackets": 30,
+     "label": "current estimator (median bracket residual)"
+    },
+    "R2": {
+     "D_marks": 0.9997207607694469,
+     "D_mids": 0.9998262595166613,
+     "rate_marks": 3.6667292877291446,
+     "rate_mids": 2.281290159421358,
+     "points": [
+      31,
+      31
+     ],
+     "label": "parity slope — estimator-consistency check, NOT independent of R1"
+    },
+    "R3": {
+     "D": 0.9997166418728306,
+     "rate": 3.7208227583778877,
+     "underlying_price": 2399.79,
+     "listed_or_synthetic": "UNKNOWN",
+     "label": "futures basis from underlying_price"
+    },
+    "R4": {
+     "D": 0.9997243189409198,
+     "rate": 3.62,
+     "label": "external rate, dated constant",
+     "as_of": "2026-09-14",
+     "source": "https://fred.stlouisfed.org/series/SOFR (NY Fed data)"
+    },
+    "diff_bp": {
+     "R1_minus_R2_marks (estimator disagreement)": 15.27,
+     "R1_minus_R2_mids (estimator disagreement)": 153.81,
+     "R1_minus_R3 (financing/collateral basis)": 9.86,
+     "R1_minus_R4 (distance from external rate)": 19.94
+    }
+   },
+   {
+    "currency": "ETH",
+    "expiry": "20SEP26",
+    "T_years": 0.01035,
+    "index": 2399.11,
+    "R1": {
+     "D": 0.9996131726000003,
+     "rate": 3.7365975134446012,
+     "brackets": 25,
+     "label": "current estimator (median bracket residual)"
+    },
+    "R2": {
+     "D_marks": 0.9996260525646103,
+     "D_mids": 0.9990253581613,
+     "rate_marks": 3.6121589522428414,
+     "rate_mids": 9.417418208713714,
+     "points": [
+      26,
+      26
+     ],
+     "label": "parity slope — estimator-consistency check, NOT independent of R1"
+    },
+    "R3": {
+     "D": 0.999587517186784,
+     "rate": 3.9844696421020513,
+     "underlying_price": 2400.1,
+     "listed_or_synthetic": "UNKNOWN",
+     "label": "futures basis from underlying_price"
+    },
+    "R4": {
+     "D": 0.9996252409751297,
+     "rate": 3.62,
+     "label": "external rate, dated constant",
+     "as_of": "2026-09-14",
+     "source": "https://fred.stlouisfed.org/series/SOFR (NY Fed data)"
+    },
+    "diff_bp": {
+     "R1_minus_R2_marks (estimator disagreement)": 12.44,
+     "R1_minus_R2_mids (estimator disagreement)": -568.08,
+     "R1_minus_R3 (financing/collateral basis)": -24.79,
+     "R1_minus_R4 (distance from external rate)": 11.66
+    }
+   },
+   {
+    "currency": "ETH",
+    "expiry": "25SEP26",
+    "T_years": 0.02404,
+    "index": 2399.11,
+    "R1": {
+     "D": 0.9988934395999991,
+     "rate": 4.60484547216448,
+     "brackets": 73,
+     "label": "current estimator (median bracket residual)"
+    },
+    "R2": {
+     "D_marks": 0.9988862845538433,
+     "D_mids": 0.9981660202385347,
+     "rate_marks": 4.634637109565609,
+     "rate_mids": 7.634711424451878,
+     "points": [
+      21,
+      21
+     ],
+     "label": "parity slope — estimator-consistency check, NOT independent of R1"
+    },
+    "R3": {
+     "D": 0.998859212690218,
+     "rate": 4.7473588090794205,
+     "underlying_price": 2401.85,
+     "listed_or_synthetic": "UNKNOWN",
+     "label": "futures basis from underlying_price"
+    },
+    "R4": {
+     "D": 0.9991299984139717,
+     "rate": 3.62,
+     "label": "external rate, dated constant",
+     "as_of": "2026-09-14",
+     "source": "https://fred.stlouisfed.org/series/SOFR (NY Fed data)"
+    },
+    "diff_bp": {
+     "R1_minus_R2_marks (estimator disagreement)": -2.98,
+     "R1_minus_R2_mids (estimator disagreement)": -302.99,
+     "R1_minus_R3 (financing/collateral basis)": -14.25,
+     "R1_minus_R4 (distance from external rate)": 98.48
+    }
+   },
+   {
+    "currency": "ETH",
+    "expiry": "2OCT26",
+    "T_years": 0.04321,
+    "index": 2399.11,
+    "R1": {
+     "D": 0.9985095819999998,
+     "rate": 3.451927316245197,
+     "brackets": 16,
+     "label": "current estimator (median bracket residual)"
+    },
+    "R2": {
+     "D_marks": 0.9985091206326924,
+     "D_mids": 0.997764473798077,
+     "rate_marks": 3.45299667737768,
+     "rate_mids": 5.179589835741755,
+     "points": [
+      13,
+      13
+     ],
+     "label": "parity slope — estimator-consistency check, NOT independent of R1"
+    },
+    "R3": {
+     "D": 0.9985183150411834,
+     "rate": 3.4316858911100265,
+     "underlying_price": 2402.67,
+     "listed_or_synthetic": "UNKNOWN",
+     "label": "futures basis from underlying_price"
+    },
+    "R4": {
+     "D": 0.9984370710011218,
+     "rate": 3.62,
+     "label": "external rate, dated constant",
+     "as_of": "2026-09-14",
+     "source": "https://fred.stlouisfed.org/series/SOFR (NY Fed data)"
+    },
+    "diff_bp": {
+     "R1_minus_R2_marks (estimator disagreement)": -0.11,
+     "R1_minus_R2_mids (estimator disagreement)": -172.77,
+     "R1_minus_R3 (financing/collateral basis)": 2.02,
+     "R1_minus_R4 (distance from external rate)": -16.81
+    }
+   },
+   {
+    "currency": "ETH",
+    "expiry": "30OCT26",
+    "T_years": 0.11987,
+    "index": 2399.11,
+    "R1": {
+     "D": 0.9961464586500005,
+     "rate": 3.221019359636231,
+     "brackets": 38,
+     "label": "current estimator (median bracket residual)"
+    },
+    "R2": {
+     "D_marks": 0.9961429305470588,
+     "D_mids": 0.9958952577205884,
+     "rate_marks": 3.2239740637791,
+     "rate_mids": 3.4314204518498936,
+     "points": [
+      17,
+      17
+     ],
+     "label": "parity slope — estimator-consistency check, NOT independent of R1"
+    },
+    "R3": {
+     "D": 0.9961137153462573,
+     "rate": 3.2484415169705594,
+     "underlying_price": 2408.47,
+     "listed_or_synthetic": "UNKNOWN",
+     "label": "futures basis from underlying_price"
+    },
+    "R4": {
+     "D": 0.9956701636829323,
+     "rate": 3.62,
+     "label": "external rate, dated constant",
+     "as_of": "2026-09-14",
+     "source": "https://fred.stlouisfed.org/series/SOFR (NY Fed data)"
+    },
+    "diff_bp": {
+     "R1_minus_R2_marks (estimator disagreement)": -0.3,
+     "R1_minus_R2_mids (estimator disagreement)": -21.04,
+     "R1_minus_R3 (financing/collateral basis)": -2.74,
+     "R1_minus_R4 (distance from external rate)": -39.9
+    }
+   },
+   {
+    "currency": "ETH",
+    "expiry": "27NOV26",
+    "T_years": 0.19653,
+    "index": 2399.11,
+    "R1": {
+     "D": 0.9931355756000004,
+     "rate": 3.504886869272948,
+     "brackets": 31,
+     "label": "current estimator (median bracket residual)"
+    },
+    "R2": {
+     "D_marks": 0.993139597637353,
+     "D_mids": 0.9949955914705882,
+     "rate_marks": 3.502826183906261,
+     "rate_mids": 2.552799629097589,
+     "points": [
+      16,
+      16
+     ],
+     "label": "parity slope — estimator-consistency check, NOT independent of R1"
+    },
+    "R3": {
+     "D": 0.993099537209514,
+     "rate": 3.5233514620252295,
+     "underlying_price": 2415.78,
+     "listed_or_synthetic": "UNKNOWN",
+     "label": "futures basis from underlying_price"
+    },
+    "R4": {
+     "D": 0.992910924125015,
+     "rate": 3.62,
+     "label": "external rate, dated constant",
+     "as_of": "2026-09-14",
+     "source": "https://fred.stlouisfed.org/series/SOFR (NY Fed data)"
+    },
+    "diff_bp": {
+     "R1_minus_R2_marks (estimator disagreement)": 0.21,
+     "R1_minus_R2_mids (estimator disagreement)": 95.21,
+     "R1_minus_R3 (financing/collateral basis)": -1.85,
+     "R1_minus_R4 (distance from external rate)": -11.51
+    }
+   },
+   {
+    "currency": "ETH",
+    "expiry": "25DEC26",
+    "T_years": 0.27319,
+    "index": 2399.11,
+    "R1": {
+     "D": 0.989872785999999,
+     "rate": 3.725947076911258,
+     "brackets": 43,
+     "label": "current estimator (median bracket residual)"
+    },
+    "R2": {
+     "D_marks": 0.9898656457916667,
+     "D_mids": 0.99027549375,
+     "rate_marks": 3.7285874866572515,
+     "rate_mids": 3.577058788204088,
+     "points": [
+      8,
+      8
+     ],
+     "label": "parity slope — estimator-consistency check, NOT independent of R1"
+    },
+    "R3": {
+     "D": 0.9898625231053606,
+     "rate": 3.7297422448541377,
+     "underlying_price": 2423.68,
+     "listed_or_synthetic": "UNKNOWN",
+     "label": "futures basis from underlying_price"
+    },
+    "R4": {
+     "D": 0.9901593310781772,
+     "rate": 3.62,
+     "label": "external rate, dated constant",
+     "as_of": "2026-09-14",
+     "source": "https://fred.stlouisfed.org/series/SOFR (NY Fed data)"
+    },
+    "diff_bp": {
+     "R1_minus_R2_marks (estimator disagreement)": -0.26,
+     "R1_minus_R2_mids (estimator disagreement)": 14.89,
+     "R1_minus_R3 (financing/collateral basis)": -0.38,
+     "R1_minus_R4 (distance from external rate)": 10.59
+    }
+   },
+   {
+    "currency": "ETH",
+    "expiry": "26MAR27",
+    "T_years": 0.52233,
+    "index": 2399.11,
+    "R1": {
+     "D": 0.9800364350000006,
+     "rate": 3.860669125888241,
+     "brackets": 40,
+     "label": "current estimator (median bracket residual)"
+    },
+    "R2": {
+     "D_marks": 0.980040719125,
+     "D_mids": 0.9797793875000002,
+     "rate_marks": 3.8598322290701748,
+     "rate_mids": 3.9108896310269516,
+     "points": [
+      8,
+      8
+     ],
+     "label": "parity slope — estimator-consistency check, NOT independent of R1"
+    },
+    "R3": {
+     "D": 0.9800245914028128,
+     "rate": 3.8629827722825243,
+     "underlying_price": 2448.01,
+     "listed_or_synthetic": "UNKNOWN",
+     "label": "futures basis from underlying_price"
+    },
+    "R4": {
+     "D": 0.9812692066873221,
+     "rate": 3.62,
+     "label": "external rate, dated constant",
+     "as_of": "2026-09-14",
+     "source": "https://fred.stlouisfed.org/series/SOFR (NY Fed data)"
+    },
+    "diff_bp": {
+     "R1_minus_R2_marks (estimator disagreement)": 0.08,
+     "R1_minus_R2_mids (estimator disagreement)": -5.02,
+     "R1_minus_R3 (financing/collateral basis)": -0.23,
+     "R1_minus_R4 (distance from external rate)": 24.07
+    }
+   },
+   {
+    "currency": "ETH",
+    "expiry": "25JUN27",
+    "T_years": 0.77148,
+    "index": 2399.11,
+    "R1": {
+     "D": 0.9694803510000006,
+     "rate": 4.017627865942499,
+     "brackets": 40,
+     "label": "current estimator (median bracket residual)"
+    },
+    "R2": {
+     "D_marks": 0.9694880624249999,
+     "D_mids": 0.9689976729166667,
+     "rate_marks": 4.016596836746952,
+     "rate_mids": 4.082178983460219,
+     "points": [
+      8,
+      8
+     ],
+     "label": "parity slope — estimator-consistency check, NOT independent of R1"
+    },
+    "R3": {
+     "D": 0.9694979774427279,
+     "rate": 4.015271195918779,
+     "underlying_price": 2474.59,
+     "listed_or_synthetic": "UNKNOWN",
+     "label": "futures basis from underlying_price"
+    },
+    "R4": {
+     "D": 0.9724589020882967,
+     "rate": 3.62,
+     "label": "external rate, dated constant",
+     "as_of": "2026-09-14",
+     "source": "https://fred.stlouisfed.org/series/SOFR (NY Fed data)"
+    },
+    "diff_bp": {
+     "R1_minus_R2_marks (estimator disagreement)": 0.1,
+     "R1_minus_R2_mids (estimator disagreement)": -6.46,
+     "R1_minus_R3 (financing/collateral basis)": 0.24,
+     "R1_minus_R4 (distance from external rate)": 39.76
+    }
+   }
+  ]
+ }
+}
