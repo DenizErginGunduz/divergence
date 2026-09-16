@@ -2962,3 +2962,103 @@ D-091's seven-step order. Steps 1–7 each have a record: D-103 (kill test), D-1
 (referees), D-097 with the rewritten draft (findings language), D-106 (outcome
 capture), D-107 (Note 1 frozen), D-108 (exposure example), D-109 (this). What
 remains open is listed in `DECISION_GATES.md` and `BACKLOG.md`, not here.
+
+## D-110 — The owner supplied the URLs; three of the four exist, and one of them states our premise in public
+**Date:** 2026-09-16 · **Supersedes the NOT FOUND status of:** entries 1 and 3 in `docs/COMPETITORS.md` · **Narrows:** D-098 · **Closes:** B-021
+
+D-098 narrowed the novelty claim to the discipline rather than the comparison, and
+said so as a hypothesis with the register as its evidence. Three of the four names in
+the review synthesis could not be found on 2026-09-16 and were recorded as NOT FOUND
+rather than assumed (B-021). The owner then supplied the URLs. They exist. Reading
+them costs us part of the hypothesis, and this record is where that is written down.
+
+### What the pages say, read 2026-09-16
+**The paper is real, and the synthesis had the title wrong.** Fabi, Schönleber, Ruffo
+and Marfè, **"Market Efficiency in Prediction Markets — A Comparison with
+Derivatives"** (SSRN 6565258), not "Cross-Market Pricing in Prediction Markets" as the
+synthesis called it. SSRN's own page was behind a bot check on the read date and was
+not read; the title, authors and abstract come from the SSRN listing surfaced in
+search and from a conference programme copy. It compares Polymarket BTC and ETH
+prices against option-implied risk-neutral distributions across **nearly 5,000
+contracts**, and reports that prices broadly track the benchmark while deviations
+**concentrate in tail and barrier contracts** and vary with sentiment, volatility and
+frictions.
+
+That last clause is the uncomfortable one. Our own three persistent rungs were all
+tails — BTC above $150k, ETH above $5k, ETH below $1k — and we reported that as an
+observation. A published paper reports the same concentration on a sample two orders
+of magnitude larger. Note 3 in `docs/RESEARCH_ROADMAP.md` ("do prediction markets
+exhibit a persistent long-shot premium?") is therefore not an open question we are
+first to ask; it is a question with prior work that we have not read in full.
+
+**PolyGap is real and is a live paid product.** `polygap.io`, read at 18:57 UTC.
+It prices every Polymarket crypto market against Deribit, refreshes every two
+minutes, sells a $30/month tier in USDC with a REST API, Telegram alerts and two
+bots that trade the user's own wallet. Its method is parametric and stated plainly on
+the page: implied volatility by strike and expiry, **N(d₂)** for "above $X" and **a
+barrier model** for "hit $X".
+
+**Block Scholes' July report derives the binary from a call spread.** Entry 4 already
+recorded the firm as parametric on the strength of its SVI surfaces. The report says
+something else as well, in the plainest possible words: *binary option prices, and
+therefore the prices of prediction markets on the same underlying, are uniquely
+determined by the prices of vanilla call options*, and it then walks the reader
+through building the binary out of a call spread. That is our Layer A premise,
+published by an institutional analytics firm on 2 July 2026, months before this
+record.
+
+**And the executable framing has prior work too.** Not surfaced by the owner but
+found while reading: Gebele, Mutzel and Matthes, **"Executable Arbitrage and Market
+Efficiency in Prediction Markets"** (arXiv 2608.00666, 1 August 2026), which separates
+payoff-space no-arbitrage from **protocol-executable** no-arbitrage and reconstructs
+**depth-aware executable portfolio values**. Different comparison — Polymarket's own
+negative-risk markets, not options — but the same instinct, named in the title, and
+executed with depth rather than top of book.
+
+**And the three-venue setup has been done as a thesis.** De Stefano, LUISS,
+`btc-prediction-market-efficiency`: Polymarket, Kalshi **and** Deribit, 33,107
+observations over March 2024 – June 2026, benchmark Φ(d₂) from DVOL. Parametric,
+spot-based rather than chain-based, no fees and no executable side — but the venue
+triple and the framing are ours.
+
+### What this costs the differentiation hypothesis
+D-098 listed seven things as the possible difference. After reading:
+
+| claim | status after 2026-09-16 |
+|---|---|
+| model-free spread digitals | **weakened.** Block Scholes states and derives it publicly. What is left is that we *only* do this, where they also sell a surface. |
+| quote-side executable envelopes | **weakened, not removed.** Gebele et al. do depth-aware executable reconstruction on a different comparison. No entry in the register does it on the options-versus-prediction-market comparison. |
+| both venues' fee schedules, per-order rounding | **stands.** No entry evidences fee-schedule modelling. |
+| expiry-gap and strike-grid sensitivity | **stands.** No entry evidences either. |
+| verbatim settlement audits | **stands.** No entry evidences reading resolution text. |
+| refusal where no two-sided quote exists | **stands.** |
+| recorded retractions | **stands**, and is the one nobody can copy cheaply. |
+
+Three of seven weakened; none of the seven is fraudulent; the honest summary is that
+**the comparison is not ours and the controls may be.** Any sentence in this
+repository that implies otherwise is to be changed on sight, including in Research
+Note 1, whose related-work paragraph must now cite these entries rather than describe
+an empty field.
+
+### What is not concluded
+That Divergence is redundant. PolyGap sells a signal built on N(d₂) and a barrier
+model and calls the options side "the sharp read" that "is usually the one that's
+right"; this project spent four weeks establishing that the same comparison, done at
+executable prices with both fee schedules, produces **nothing** on the family it
+declared. Those are different claims about the same data, and the second one is the
+one we can defend. That is a smaller position than "we built the comparison" and it
+is the true one.
+
+### Consequences
+- `docs/COMPETITORS.md` entries 1 and 3 are replaced with what the pages say;
+  entry 2 records that the synthesis's "FairOdds" resolves to two different sites,
+  one unrelated and one that did not respond; entries 4, 9 and 10 are added or
+  extended. B-021 is closed.
+- `fairodds.io` returned **504 Gateway Time-out** on two attempts at 19:0x UTC on
+  2026-09-16. The domain is confirmed by the owner; the product is UNKNOWN. It stays
+  in the register as unreachable rather than as absent, and is re-checked before Note
+  1 publishes (G2).
+- Note 1's related-work paragraph is a publication-gate item under G2, not a
+  cosmetic edit.
+- Reading the Fabi et al. paper in full is a prerequisite for Note 3, not for Note 1.
+  Logged as B-025.
