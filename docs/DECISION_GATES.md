@@ -11,8 +11,8 @@ existed and may not be edited after the evidence is in.
 
 | # | gate | status |
 |---|---|---|
-| G1 | ETH > $5k anomaly kill test | OPEN — pre-committed, script not yet run |
-| G2 | Note 1 publish | OPEN |
+| G1 | ETH > $5k anomaly kill test | CLOSED — verdict recorded in D-103: not a surviving discrepancy |
+| G2 | Note 1 publish | OPEN — G1 verdict and referee spread (D-104) in; analytical freeze and the rewritten note outstanding |
 | G3 | Note 2 sample / data | OPEN — waiting for data |
 | G4 | Payoff card (V0) build | OPEN |
 | G5 | Builders application | OPEN |
@@ -38,6 +38,11 @@ over the full mirror via the `measure` workflow.
 **On any outcome.** A decision record states the verdict with the numbers; Note 1,
 `README.md` and the interface use the verdict's exact words; the rung is not called a
 finding, alpha, mispricing, artefact or noise under any outcome.
+
+**Outcome (2026-09-16).** Run on the full mirror, 68 snapshots: the margin against the
+worst local executable estimate is positive in 0 of 62 judged snapshots → **not a
+surviving discrepancy** (D-103). The gate is closed and this section is not edited
+further.
 
 ## G2 — Note 1 publish (D-097)
 
