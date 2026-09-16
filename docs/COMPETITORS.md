@@ -8,8 +8,9 @@ rediscovers or re-invents these in six months.
 
 **Why this file exists.** "Prediction-market price versus Deribit option-implied
 probability" is not sufficient differentiation: at least one institutional analytics
-firm, one academic paper and one paid retail product do the same comparison (entries
-4, 5, 7). Where Divergence may differ is the discipline, not the comparison —
+firm, one academic paper and one paid retail product do the same comparison (entries 1, 3, 4, 5, 6, 7, 10).
+Entry 4 publishes the call-spread derivation this project treats as its own starting
+point, and entry 9 carries the executable framing further than we do (D-110). Where Divergence may differ is the discipline, not the comparison —
 model-free spread digitals, quote-side executable envelopes, both venues' fee
 schedules, maturity and grid sensitivity, verbatim settlement audits, refusal where
 no two-sided quote exists, and recorded retractions. That is a hypothesis about
@@ -22,48 +23,57 @@ question; **differentiation** lists only what is evidenced on the page read.
 
 ---
 
-## 1. "Fabi et al." / "Fair Odds" — NOT FOUND
+## 1. Fabi, Schönleber, Ruffo & Marfè — DIRECT (academic)
 
 | field | value |
 |---|---|
-| NAME | "Fabi et al." / "Fair Odds", as named in the review synthesis |
-| URL | UNKNOWN — no page found |
-| CATEGORY | NOT FOUND |
-| WHAT THEY DO | UNKNOWN. The synthesis describes research comparing Polymarket BTC/ETH contracts against Deribit option-implied benchmarks, with a live surface. |
-| SEARCHES RUN (2026-09-16) | "Fabi" with Polymarket / Deribit / option-implied / arXiv / SSRN, five variants; no paper, author page or product surfaced. The nearest academic match (entry 5) cites no author named Fabi and nothing titled "Fair Odds". |
-| NEAREST MATCHES | entry 5 (Portnaya, arXiv 2606.19517); entry 6 (Lee, Lee & Lee, SSRN 6748186); entry 7 (Bitcoin Edge) |
-| ACTION | The owner is asked for a URL. Until one exists, no claim about this work is made anywhere in the repository. |
+| NAME | "Market Efficiency in Prediction Markets — A Comparison with Derivatives" — Michele Fabi, Lorenzo Schönleber, Vittorio Ruffo, Roberto Marfè. The review synthesis called it "Cross-Market Pricing in Prediction Markets"; that title does not appear on the SSRN listing and is recorded here as the synthesis's error, not the paper's. |
+| URL | https://papers.ssrn.com/sol3/papers.cfm?abstract_id=6565258 |
+| CATEGORY | research paper |
+| HOW READ (2026-09-16) | **The SSRN page itself was not read.** It returned a Cloudflare bot check ("Performing security verification") on two attempts and the check was not circumvented. Title, authors, date and abstract come from the SSRN listing as surfaced in search, and from a conference-programme copy at aifinconf.org (file/2025/7-1.pdf), whose host refused the fetch. Every field below is therefore second-hand and marked accordingly. |
+| WHAT THEY DO | Compares Polymarket BTC and ETH prices against benchmarks derived from option-implied risk-neutral distributions. Reported sample: **nearly 5,000 contracts**. Finding: Polymarket prices broadly track the derivative-implied benchmark, and **deviations concentrate in tail and barrier contracts** and vary with sentiment, attention, volatility, demand and market frictions. Dates given in different places as 12 and 20 April 2026. |
+| METHOD | UNKNOWN in detail — second-hand. "Option-implied risk-neutral distributions extracted from the derivatives market" is the phrase used. Whether the digital is taken from a spread or from a fitted surface: UNKNOWN. Executable prices, fees, expiry matching: UNKNOWN. |
+| TARGET USER | Academic |
+| DATA | Polymarket; derivatives benchmark venue not confirmed second-hand |
+| STRENGTHS | Sample two orders of magnitude larger than ours; peer-review track; a cross-sectional explanation of the deviations rather than only measurement |
+| WEAKNESSES | UNKNOWN until the paper is read in full |
+| OVERLAP | **High.** This is our Layer A question on a much larger sample. |
+| DIFFERENTIATION | Claimed, not evidenced, until the paper is read: executable envelopes, both fee schedules, expiry-band and grid sensitivity, settlement-text audits, Kalshi. Do not assert any of these as differentiation from *this* paper before reading it. |
+| WHAT IT COSTS US | The tail concentration is the finding our own three rungs pointed at. Note 3 (long-shot premium) has prior work. Reading the paper in full is a prerequisite for Note 3 — logged as B-025 — and citing it is a G2 publication-gate item for Note 1. |
 | DATE LAST CHECKED | 2026-09-16 |
 
-## 2. FairOdds (fairodds.app) — exists, unrelated
+## 2. "FairOdds" — two different sites, neither confirmed as the one meant
 
 | field | value |
 |---|---|
 | NAME | FairOdds |
-| URL | https://fairodds.app/implied-probability |
-| CATEGORY | live product — sports-betting calculators |
-| WHAT THEY DO | Odds-format conversion (decimal / American / fractional ↔ implied probability), Kelly, EV, arbitrage and no-vig calculators |
-| METHOD | Arithmetic odds conversion. No options data, no option model, no maturity handling, no bid/ask, no fees. |
-| TARGET USER | Sports bettors |
-| DATA | User-entered odds only |
-| STRENGTHS | Simple, free |
-| WEAKNESSES | Does not mention Polymarket, Deribit, crypto, BTC or options |
-| OVERLAP | None |
-| DIFFERENTIATION | Not a competitor. The synthesis's description ("live Polymarket-vs-options reference-pricing product") does not match the page read; whether a different "FairOdds" exists is UNKNOWN. |
+| URL (a) | https://fairodds.io/ — **supplied by the owner 2026-09-16 as the intended site** |
+| STATUS (a) | **UNREACHABLE.** Two attempts at ~19:0x UTC on 2026-09-16 returned `504 Gateway Time-out` from nginx/1.28.3 (Ubuntu). Nothing about the product was read. Every field for this site is UNKNOWN. Re-check before Note 1 publishes (G2). |
+| URL (b) | https://fairodds.app/implied-probability — found by search, read 2026-09-16 |
+| WHAT (b) DOES | Sports-betting calculators: odds-format conversion (decimal / American / fractional to implied probability), Kelly, EV, arbitrage, no-vig |
+| METHOD (b) | Arithmetic odds conversion. No options data, no option model, no maturity handling, no bid/ask, no fees. |
+| OVERLAP (b) | None. Does not mention Polymarket, Deribit, crypto, BTC or options. |
+| READING | The synthesis described "FairOdds" as a live Polymarket-versus-options reference-pricing product. That does not match site (b), and site (a) did not respond. Whether the described product exists is **UNKNOWN**. No claim about it is made anywhere in the repository until a page is read. |
 | DATE LAST CHECKED | 2026-09-16 |
 
-## 3. PolyGap — NOT FOUND
+## 3. PolyGap — DIRECT (live, paid)
 
 | field | value |
 |---|---|
-| NAME | PolyGap, as named in the review synthesis |
-| URL | UNKNOWN — no page found |
-| CATEGORY | NOT FOUND |
-| WHAT THEY DO | UNKNOWN. The synthesis describes a crypto prediction-market vs Deribit comparison terminal. |
-| SEARCHES RUN (2026-09-16) | "PolyGap" with Polymarket / Deribit / crypto / prediction market terminal; polygap.io / .xyz / .app; two tool directories read (Awesome-Prediction-Market-Tools on GitHub; launchpoly.com, 142 tools) list nothing by this name and nothing described as a Polymarket-vs-options comparison. |
-| NEAREST MATCHES | entry 8 (djienne, open-source); `Romil10/gap369` on GitHub, described as a "prediction market comparison portal" — not read in depth, options use UNKNOWN |
-| ACTION | The owner is asked for a URL. No claim about this work is made until one exists. |
-| DATE LAST CHECKED | 2026-09-16 |
+| NAME | PolyGap — "Polymarket Edge: Mispricings, LP Rewards & Bot API" |
+| URL | https://polygap.io/ |
+| CATEGORY | live product — free tier with locked fields, paid tier, REST API, packaged bots |
+| WHAT THEY DO | "Prices every Polymarket crypto market against Deribit's options curve" and ranks funded Polymarket liquidity-reward pools. Terminal refreshes every 2 minutes; on the page as read the board showed **0** crypto markets clearing its **3-point gap threshold**, and 40 reward pools. Columns: MARKET / ASSET / **CROWD** / **FAIR** / CROWD to FAIR / GAP / **SIGNAL**. |
+| METHOD | **Parametric, stated on the page:** "We pull Deribit's live options surface — implied volatility by strike and expiry — and convert it into the fair probability of each Polymarket question: **N(d2)** for 'above $X', **a barrier model** for 'hit $X'." No bid/ask side, no fee schedule, no expiry-gap treatment and no settlement-text audit are evidenced. The Polymarket side is described as "the crowd price". |
+| TARGET USER | Retail Polymarket traders and bot operators |
+| DATA | Deribit options surface; Polymarket CLOB; Polymarket LP reward pools |
+| PRICING | Free tier shows which markets are in play; fair value, gap and reward-per-$ are locked. Pro **$30/month in USDC** (Polygon) or USDT (BEP20): fair value, gap, signal, reward rankings, Telegram alerts, JSON API (120 req/min), and "Autopilot" and "Autotrader" bots that run through the user's own wallet with dry-run, size caps and daily limits by default. |
+| STRENGTHS | Live, shipped, priced and monetised; an API and two bots; a second product line (LP reward optimiser) with nothing to do with options; two-minute refresh |
+| WEAKNESSES | Model-dependent on both contract types; a mid-style "crowd" price against a model "fair", so the gap is not an executable quantity; no fee treatment evidenced; the barrier model is exactly the path-dependent case this project refuses to model |
+| OVERLAP | **Very high on the question, low on the method.** Same two venues, same asset class, same comparison. |
+| DIFFERENTIATION | Divergence: model-free spread digitals rather than N(d2); executable bid/ask envelopes on both legs; both venues' published fee schedules; expiry-band and strike-grid sensitivity; verbatim settlement audits; refusal where no two-sided quote exists; Kalshi. PolyGap: shipped, paid, an API, bots, LP rewards, an audience — **none of which Divergence has**. |
+| THE LANGUAGE DIFFERENCE, RECORDED BECAUSE IT IS THE POINT | The page says Deribit's curve is "the closest thing crypto has to a true price" and that "the options market is usually the one that's right", and sells a column headed SIGNAL. This project's terminology rules forbid all three moves: "true probability" is a banned phrase, and a gap is not automatically an opportunity. That is not a criticism of a product doing something else for somebody else; it is the clearest available illustration of what the discipline claim in this register actually means. |
+| DATE LAST CHECKED | 2026-09-16, terminal timestamped 18:57 UTC on the page |
 
 ## 4. Block Scholes — DIRECT / ADJACENT
 
@@ -73,7 +83,7 @@ question; **differentiation** lists only what is evidenced on the page read.
 | URL | https://www.blockscholes.com/use-cases/digital-options-prediction-markets · https://www.blockscholes.com/research/the-renaissance-of-onchain-options · https://www.blockscholes.com/research |
 | CATEGORY | analytics firm — institutional crypto derivatives data and research |
 | WHAT THEY DO | Sells implied-volatility and volatility-surface data (API, WebSocket feeds, self-serve plans) and publishes research. A dedicated use-case page pitches using the surface data to find prediction-market mispricings; a 2 July 2026 report co-authored with Castle Labs compares Polymarket BTC/ETH strike odds against probabilities from the Block Scholes composite surface, strike by strike at matched strike and expiry. |
-| METHOD | Parametric: SVI-calibrated surfaces ("SVI-calibrated surfaces provide the complete smile across all strikes"); binary probabilities read from the calibrated surface. Composite surface synthesised from multiple venues. Mid vs bid/ask: UNKNOWN. Fees: "transaction costs" mentioned qualitatively; no fee-schedule modelling evidenced. Maturity handling between listed expiries and prediction-market resolution: UNKNOWN (page says "identical strikes and expiration times"). |
+| METHOD — CORRECTED 2026-09-16 (D-110) | **Both parametric and model-free.** The July report derives the binary from a **call spread** and states in plain words that *"binary option prices (and therefore the prices of prediction markets on the same underlying asset) are uniquely determined by the prices of vanilla call options"*, then walks the reader through removing the linear ramp. That is this project's Layer A premise, published 2 July 2026. The surface work alongside it is parametric: SVI-calibrated surfaces ("SVI-calibrated surfaces provide the complete smile across all strikes"); binary probabilities read from the calibrated surface. Composite surface synthesised from multiple venues. Mid vs bid/ask: UNKNOWN. Fees: "transaction costs" mentioned qualitatively; no fee-schedule modelling evidenced. Maturity handling between listed expiries and prediction-market resolution: UNKNOWN (page says "identical strikes and expiration times"). |
 | TARGET USER | Hedge funds, systematic traders, institutions |
 | DATA | Deribit (named as the surface source in the July report) plus a multi-venue composite; Polymarket. Kalshi: not mentioned on the pages read. |
 | STRENGTHS | Institutional-grade surfaces; multi-venue composite; real-time feeds; brand; a published empirical observation that the gap is not uniform across strikes |
@@ -146,7 +156,39 @@ question; **differentiation** lists only what is evidenced on the page read.
 | DIFFERENTIATION | No public live surface; a strategy tool rather than a measurement. |
 | DATE LAST CHECKED | 2026-09-16 |
 
-## 9. Commentary and adjacent items (read, not competitors)
+## 9. Gebele, Mutzel & Matthes, arXiv 2608.00666 — ADJACENT (academic)
+
+| field | value |
+|---|---|
+| NAME | "Executable Arbitrage and Market Efficiency in Prediction Markets" — Jonas Gebele, Timm Mutzel, Florian Matthes; submitted 1 August 2026, cs.CE |
+| URL | https://arxiv.org/abs/2608.00666 |
+| CATEGORY | research paper |
+| WHAT THEY DO | Separates **payoff-space** no-arbitrage (implied by terminal payoffs) from **protocol-executable** no-arbitrage (what the protocol lets a trader do before settlement), using Polymarket's negative-risk markets, where the NegRisk Adapter operationalises only the NO-to-YES direction. Reconstructs **depth-aware executable portfolio values**, combines them with actor-level transaction histories and on-chain conversion traces, and estimates **$1.12 m** of arbitrage profit ($1.086 m converter-enabled, $32 k settlement-based). Positive violations concentrate on the unsupported YES side. Implements a prototype bidirectional adapter. |
+| METHOD | Depth-aware executable reconstruction; on-chain trace matching; no option model — the comparison is internal to Polymarket, not against derivatives |
+| OVERLAP | **Low on the question, high on the instinct.** They do not compare against options at all. But "a bound violation is not an opportunity unless it is executable" is their thesis and ours, and they carry it further: depth-aware, not top of book. |
+| DIFFERENTIATION | Divergence compares two venues with different settlement sources; they compare linked contracts inside one protocol. Ours is a cross-market pricing question, theirs a protocol-design question. |
+| WHAT IT COSTS US | The word "executable" in our differentiation claim is not ours alone, and their execution standard is stricter than ours. D-095's distinction between quoted-executable and size-executable is the right one, and this paper is the reason to keep it visible: they measured the second, we have measured the first. |
+| DATE LAST CHECKED | 2026-09-16 (abstract page read in full; PDF not read) |
+
+
+## 10. De Stefano — btc-prediction-market-efficiency — DIRECT (academic, open source)
+
+| field | value |
+|---|---|
+| NAME | "Cross-Market Mispricing in Bitcoin Prediction Markets: Evidence from Polymarket, Kalshi, and Deribit" — Giannandrea De Stefano, MSc Economics and Finance, LUISS Guido Carli |
+| URL | https://github.com/giannandreadestefano/btc-prediction-market-efficiency |
+| CATEGORY | open-source code and MSc thesis; MIT licence; 33 commits; 0 stars, 0 forks on the date checked |
+| WHAT THEY DO | Asks whether Polymarket and Kalshi BTC prediction-market prices differ systematically from a Deribit-implied benchmark. **33,107 observations, 6,566 unique contracts, March 2024 to June 2026**: 19,649 Polymarket terminal, 10,323 Polymarket path-dependent, 3,135 Kalshi (first timestamped trade within 30 minutes of open). Six sequential notebooks from collection to regressions. |
+| METHOD | **Parametric and spot-based, not chain-based.** Benchmark is Black-Scholes `P(S_T > K) = Phi(d2)` with matched BTC spot, strike, time to maturity and a **DVOL**-derived volatility input — Deribit's volatility *index*, not its option chain. Signed and absolute pricing-difference measures, bootstrap inference, OLS with robust and clustered errors, monthly and horizon robustness. Explicitly calls the benchmark "a risk-neutral-style probability proxy, rather than a physical probability forecast". |
+| DATA | Polymarket, Kalshi `KXBTC`, BTC spot, Deribit DVOL. Full datasets deliberately **not redistributed**; one illustrative sample CSV is published, and the author states the repository is not a one-click reproduction package. |
+| STRENGTHS | The same three venues as this project; a two-year sample against our seventeen days; separates terminal from path-dependent contracts; proper inference; states its own limits, including the data-rights one, in the README |
+| WEAKNESSES | A single volatility number per observation (DVOL) rather than a strike-by-strike chain, so no smile and no per-strike digital; no bid/ask side; no fee schedules; no settlement-text audit; ETH not covered |
+| OVERLAP | **High.** The closest published match to this project's venue triple. |
+| DIFFERENTIATION | Chain-based model-free digitals against a DVOL Phi(d2) proxy; executable envelopes; both fee schedules; expiry-band and grid sensitivity; verbatim settlement rules; ETH. The sample-size comparison runs the other way and is to be stated that way. |
+| DATE LAST CHECKED | 2026-09-16 |
+
+
+## 11. Commentary and adjacent items (read, not competitors)
 
 - Vertox, "How to Price Polymarket Up-Down Markets" (2025-11-16) — Deribit IV → SVI → Monte Carlo for touch-style markets; educational, paywalled, no tool. https://www.vertoxquant.com/p/how-to-price-touch-style-options
 - dev.to, "Probability Arbitrage … Deribit Options" (2026-03-03) — Black–Scholes `d2` with Deribit IV vs Polymarket up/down; sells a bot; companion repo not read. https://dev.to/xniiinx/probability-arbitrage-how-to-beat-polymarket-using-deribit-options-ln1
