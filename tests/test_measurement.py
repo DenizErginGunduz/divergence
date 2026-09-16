@@ -27,6 +27,7 @@ import fees
 import measure_band
 import measure_exhaustive
 import measure_touch
+import kill_test_eth5k
 import prune_archive
 from stability import Stability
 
@@ -755,6 +756,115 @@ class CollectorFieldDrops(unittest.TestCase):
             self.assertNotIn(field, self.ns['HOLDER_DROP'])
         for field in ('price', 'size', 'timestamp', 'conditionId'):
             self.assertNotIn(field, self.ns['TRADE_DROP'])
+
+
+class KillTestEth5k(unittest.TestCase):
+    """D-092: the ETH above $5,000 kill test, with its verdict rules written
+    before the number. Synthetic call chain in USD, shaped like the one
+    measure_band.chain() returns for one expiry and one side."""
+
+    IDX = 2400.0
+
+    def chain(self, one_sided=None):
+        # strike -> (mark, bid, ask), USD. Monotone falling in strike.
+        spec = {4500: (48, 46, 50), 4800: (38, 36, 40), 5000: (32, 31, 33),
+                5200: (28, 27, 29), 5500: (23, 22, 24), 6000: (17, 16, 18)}
+        o = {}
+        for k, (m, b, a) in spec.items():
+            o[float(k)] = {'mark': float(m), 'bid': float(b), 'ask': float(a)}
+        if one_sided is not None:
+            o[float(one_sided)]['bid'] = None
+        return o
+
+    def test_the_tight_bracket_steps_over_the_listed_strike(self):
+        """Production's bracket() takes strictly below and above K, so a
+        listed 5,000 is never used by the tight estimator; only the one-sided
+        quotients touch it. D-092 records this because it is the reason the
+        kill test can say something the band never could."""
+        br = kill_test_eth5k.brackets(self.chain(), 5000.0)
+        self.assertEqual(br['tight'], (4800.0, 5200.0))
+        self.assertEqual(br['skip1'], (4500.0, 5500.0))
+        self.assertIsNone(br['skip2'])           # no third strike below
+        self.assertEqual(br['onesided_lower'], (4800.0, 5000.0))
+        self.assertEqual(br['onesided_upper'], (5000.0, 5200.0))
+
+    def test_no_onesided_quotients_without_a_listed_strike(self):
+        o = self.chain()
+        del o[5000.0]
+        br = kill_test_eth5k.brackets(o, 5000.0)
+        self.assertIsNone(br['onesided_lower'])
+        self.assertIsNone(br['onesided_upper'])
+        self.assertEqual(br['tight'], (4800.0, 5200.0))
+
+    def test_the_estimator_crosses_the_spread_and_charges_the_crossed_price(self):
+        """Long the lower leg at its ASK, short the upper leg at its BID: that
+        is the executable high, and the Deribit fee is charged on those two
+        prices, per unit of digital. Same rule as measure_band.digital."""
+        o = self.chain()
+        e = kill_test_eth5k.estimate(o, (4800.0, 5200.0), self.IDX)
+        w = 400.0
+        self.assertAlmostEqual(e['dsp'], (38 - 28) / w)
+        self.assertAlmostEqual(e['high'], (40 - 27) / w)
+        self.assertAlmostEqual(e['low'], (36 - 29) / w)
+        fee = (min(0.0003 * self.IDX, 0.125 * 40) + min(0.0003 * self.IDX, 0.125 * 27)) / w
+        self.assertAlmostEqual(e['fee'], fee)
+        self.assertAlmostEqual(e['cost'], e['high'] + fee)
+        self.assertLessEqual(e['low'], e['dsp'])
+        self.assertLessEqual(e['dsp'], e['high'])
+
+    def test_a_one_sided_leg_is_a_refusal_not_a_zero(self):
+        o = self.chain(one_sided=5200)
+        e = kill_test_eth5k.estimate(o, (4800.0, 5200.0), self.IDX)
+        self.assertIsNotNone(e['dsp'])
+        self.assertIsNone(e['high'])
+        self.assertIsNone(e['cost'])
+        self.assertIn('refused', e)
+
+    def test_the_verdict_rules_are_the_ones_d092_wrote_down(self):
+        """Three synthetic archives, one per branch. The thresholds are read
+        from the module so that editing them there changes these numbers and
+        not the branch they land in — the pre-commitment is the constants."""
+        K = kill_test_eth5k
+
+        def rows(margins, depth):
+            return [{'margin_vs_worst_local_executable': m,
+                     'value_at_depth_usd': m * depth} for m in margins]
+
+        # 8 of 10 positive: persistence fails.
+        v = K.verdict(rows([0.02] * 8 + [-0.01] * 2, 100))
+        self.assertEqual(v['verdict'], K.VERDICT_NOT_SURVIVING)
+        # All positive, smallest below one cent: noise.
+        v = K.verdict(rows([0.02] * 9 + [0.005], 100))
+        self.assertEqual(v['verdict'], K.VERDICT_NOISE)
+        # All positive and material, but resting depth makes it worth < 1 USD.
+        v = K.verdict(rows([0.02] * 10, 10))
+        self.assertEqual(v['verdict'], K.VERDICT_NOISE)
+        # All positive, material, and worth something: anomaly, nothing more.
+        v = K.verdict(rows([0.02] * 10, 100))
+        self.assertEqual(v['verdict'], K.VERDICT_ANOMALY)
+        # Exactly 90% positive is not "fewer than 90%".
+        v = K.verdict(rows([0.02] * 9 + [-0.01], 100))
+        self.assertNotEqual(v['verdict'], K.VERDICT_NOT_SURVIVING)
+        # No executable estimate anywhere: UNKNOWN, not a verdict.
+        self.assertEqual(K.verdict([{'margin_vs_worst_local_executable': None}])['verdict'],
+                         'UNKNOWN')
+
+    def test_persistence_is_the_stability_threshold(self):
+        """D-092 ties the 90% to stability.py's always_above so the two cannot
+        drift apart silently, the way D-072's "always" once meant ">90%" on one
+        surface and "every one of N" on another."""
+        import inspect
+        default = inspect.signature(Stability.summary).parameters['always_above'].default
+        self.assertEqual(kill_test_eth5k.PERSISTENCE, default)
+
+    def test_the_interpolant_is_linear_in_time_and_labelled(self):
+        """-165 h early, +2019 h late: the weight on the late chain is
+        165/2184, and a rung-observation with either end missing has no
+        interpolant rather than a guessed one."""
+        val, wgt = kill_test_eth5k.interpolant(0.010, -165.0, 0.020, 2019.0)
+        self.assertAlmostEqual(wgt, 165.0 / 2184.0)
+        self.assertAlmostEqual(val, 0.010 + wgt * 0.010)
+        self.assertEqual(kill_test_eth5k.interpolant(None, -165.0, 0.02, 2019.0), (None, None))
 
 
 if __name__ == '__main__':
