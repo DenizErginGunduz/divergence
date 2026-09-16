@@ -2716,3 +2716,123 @@ it an executable one, and that is the whole difference.
   advanced the archive to 68 snapshots and 17 days.
 - December's weeklies straddling 1 January will let the same test run with a band of
   days rather than weeks. Nothing is built for that; it is waited for (D-101).
+
+## D-104 — The discount referees agree with the current estimator to a basis point; the external rate does not, and is not meant to
+**Date:** 2026-09-16 · **Produced by:** `scripts/discount_referee.py` on the full mirror (68 snapshots / 17 days, 2026-08-30T1611Z … 2026-09-16T1314Z; automated commit `28e2373`) · **Record:** `findings/discount_referee.json` · **Applies the rules of:** D-093 · **Satisfies:** the referee condition of G2 in `docs/DECISION_GATES.md`
+
+### What was measured
+1,426 chain-snapshots (every expiry with a two-sided chain, both currencies, every
+snapshot), each with the four estimates of D-093 converted to an annual rate:
+
+| | median over all chains | on the 18 chains seen in 30+ snapshots |
+|---|---|---|
+| \|R1 − R2\| (estimator consistency, marks) | 0.2 bp | ≤ 1 bp on every one |
+| R1 − R3 (option chain vs its `underlying_price`) | 0.22 bp | max \|median\| 4.6 bp; ≤ 0.5 bp on every chain dated a month or more out |
+| R1 − R4 (vs SOFR 3.62% flat) | +47 bp | −30 bp (ETH 30OCT26) to +118 bp (BTC 25JUN27) |
+
+The four chains the year-end work rests on: BTC 25DEC26 R1 4.76% / R3 4.74% /
+26MAR27 4.68% / 4.69%; ETH 25DEC26 3.49% / 3.48%, 26MAR27 3.68% / 3.69%. In discount
+terms on the newest snapshot, ETH 25DEC26 is D = 0.98987 (R1), 0.98986 (R3), 0.99016
+(R4); ETH 26MAR27 is 0.98004, 0.98002, 0.98127.
+
+### Reading, in the order D-093 fixed
+- **R2 agrees, and that is not evidence.** It is the same identity re-estimated; the
+  0.2 bp says the median-of-brackets and the least-squares slope see the same chain.
+  On mids instead of marks the slope is unusable on short chains (a −42% "rate" on a
+  two-day BTC chain), because a one-sided quote removes a point and the remaining
+  spread dwarfs the time value; on the quarterly chains mids and marks agree within
+  a few bp. R2 stays labelled an estimator-consistency check.
+- **R3 agrees to within a basis point on every dated chain, and this is the referee
+  that matters.** `underlying_price` is Deribit's own forward for the expiry — a
+  listed future or a synthetic, which of the two is still **UNKNOWN** per expiry
+  (B-018) — and it is produced by a different part of the venue than the option
+  marks. The two coincide on the financing rate to ~1 bp for every chain a month or
+  more out. The current estimator stands.
+- **R4 differs by about a percentage point on BTC and by a fraction of one on ETH,
+  in both directions, and no referee is declared right.** The gap is the basis
+  D-093 said to expect — coin-collateralised financing on the venue against an
+  unsecured overnight dollar rate — and it is a fact about the venue, not an error
+  in the estimator. It is also not the number to use here: the digital's put side is
+  `D − [P(b) − P(a)]/w`, so a D taken from outside the chain would make the put side
+  and the call side of the same strike disagree by exactly that basis. Only a D read
+  from the chain keeps the two sides on one footing. R4 is kept as the distance
+  from a money-market rate and nothing else.
+- **Short chains are noise, and are expected to be.** On the 37 chains seen in
+  fewer than 30 snapshots — dailies and near-weeklies — \|R1 − R3\| reaches 511 bp
+  and the rates themselves range from 2% to 10%. At T of a few days, 1 − D is
+  smaller than a tick, which D-073 said: a 500 bp error in the rate at T = 0.005 y
+  is 0.00025 in D. The intraday tenor's D is therefore effectively 1 whatever the
+  referees say, and the year-end tenor's D is the one the referees confirm.
+
+### What this changes
+- Nothing in the numbers. The kill test of D-103 is on a call-side rung (ETH 5,000
+  sits above the forward on both chains), whose discounted state price is a call
+  spread over its width and contains no D at all. Put-side rungs move by
+  (D_R4 − D_R1) ≈ 0.0003 on the December chain if R4 were used, and it is not.
+- G2's referee condition is met: D has a referee that agrees, an external rate that
+  disagrees for a stated reason, and a per-expiry UNKNOWN that a futures stream
+  would settle. G2 itself stays open on the analytical freeze and the note.
+- The external rate stays a dated constant (SOFR 3.62%, as of 2026-09-14, entered
+  2026-09-16). It is refreshed by hand when it is refreshed, and its date travels
+  with every number it touches.
+
+## D-105 — The exhaustiveness check was summing things that are not partitions; one event per series, and only ladders that tile
+**Date:** 2026-09-16 · **Produced by:** `scripts/measure_band.py` (`event_ladder()`, `ladder_shape()`), `scripts/measure_exhaustive.py`, `scripts/write_findings.py` · **Type:** pipeline defect, found and fixed; wrong numbers reached the screen · **Tests:** `LadderShapeAndEvents` in `tests/test_measurement.py`
+
+### What was on the screen
+From the automated findings of 2026-09-16, `exhaustiveness_constraint` read
+`corrected` mean 2.479, max 76.1, departure **+147.9%**, and the intraday band block
+read `mean_density` 1.1624 against a mean D of 0.9999. Both were wrong, and both
+sat where `web/index.html` reads them. Rule 6: a wrong number on screen is the
+worst kind, and this record exists so the reason is not lost.
+
+### Why
+On 2026-09-15 (commit `31a2eab`) the intraday series joined `SERIES`, including
+the cumulative ladders KXBTCD / KXETHD. `rungs()` in `measure_band.py` knew they
+were cumulative and refused to sum them. `measure_exhaustive.ladder_sum()` did not
+know: it summed every active market of every series in `SERIES`, so ten ladders of
+overlapping P(S > K) rungs contributed sums of 5 to 76.
+
+Underneath that was a second defect that the first one hid. A series is not a
+ladder. The collector's open pass returns one page of 200 open markets per series,
+and for the intraday series that page spans **two events** — in the
+2026-09-15T2104Z snapshot, 120 rungs of KXBTC closing at 22:00 and 80 of the event
+closing 21:00 the next day. Both scripts took all 200 as one ladder under the first
+market's close: `ladder_sum()` summed both events (ratio 1.78), and `rungs()` judged
+the second event's rungs against an expiry and a gap chosen for the first.
+
+And underneath that, a third: the 120 rungs of the first event are not the whole
+event. The archived ladder runs `less` to 68,200, then `between` from 75,000 up to
+86,800 and `greater` above it — the middle is missing, cut by the same 200-market
+page. Its sum is 0.78 of D, not because the digitals are wrong but because the
+archive holds a ladder with a hole in it. Summing that is not a check of anything.
+
+### The fix
+`event_ladder(KA, series)` returns the active markets of the earliest-closing event
+and the number of events present; both scripts use it, and `rungs()` reports
+`events_in_series`. `ladder_shape(M)` names the ladder `cumulative` (all `greater`),
+`exhaustive` (one open end each side and every ceiling equal to the next floor under
+the boundary rule of D-067), or `incomplete` with the number of breaks. Only an
+exhaustive ladder is summed; the other two are counted in
+`ladders_set_aside` and printed by name. On the public 14-day window the constraint
+now reads `corrected` mean 0.9977, min 0.9945, max 1.0000, departure −0.2% over 97
+ladders, with 10 cumulative and 7 incomplete set aside; the intraday block's
+`mean_density` reads 0.9961. The year-end numbers did not move — one event per
+series, complete ladders, under 200 markets — and neither did the kill test or the
+referees, which never read a ladder sum.
+
+### What is not fixed, and is written down instead
+- Whether the open pass truncates a single intraday event is now visible
+  (`incomplete`, with breaks) but not cured: curing it means the collector asking
+  for more than one page of open markets, which changes what the archive holds and
+  is the owner's call. Logged as B-022. Until then an intraday exhaustive ladder is
+  summed only in the snapshots where the archive holds all of it (7 of 48 in the
+  public window are incomplete; the rest were cumulative or complete).
+- `ladder_sum()` still chooses its expiry by date, not by instant, unlike `rungs()`.
+  For a partition test the expiry does not matter — a partition sums to D on any
+  chain — so it is left as it is and noted.
+- The intraday band block's `percent` changes by dropping the second event's rungs
+  (17.3 on the mirror before the fix; 15.6 on the public 14-day window after it —
+  two different bases, and the mirror's value follows at the next `measure` run);
+  that block is not on the README and is not part of any claim. Its
+  `expiry_gap_hours_median` now describes the event actually judged.
