@@ -122,6 +122,13 @@ jobs:
       - name: Sensitivity — strike grid and expiry band
         run: python scripts/measure_sensitivity.py
 
+      # The pre-committed kill test for the one rung that survives the
+      # maturity stress test (D-092). Its verdict rules were written before
+      # the script; the script only applies them. Writes
+      # findings/kill_test_eth5k.json.
+      - name: Kill test — ETH above $5,000 against the local grid
+        run: python scripts/kill_test_eth5k.py
+
       # The third settlement difference (D-075), measured rather than left
       # UNKNOWN: Kalshi settles on BRTI, Deribit on its own index, and both
       # halves are already archived.
