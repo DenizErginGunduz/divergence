@@ -2049,9 +2049,21 @@ Applied to the real 2026-09-15T0505Z file: 3,696,191 plain bytes → 1,010,677
 (**−72.7%**), 648,806 gzipped → 267,123 (**−58.8%**). Field-byte prediction was
 −73.5%; the gap is the JSON structure outside the holder rows, which does not move.
 
-The pipeline itself is verified by the next scheduled holders fetch, 05:05 UTC.
-The stage runs once a day and today's had already run when the change landed, so
-unlike D-087 this one is not yet confirmed end-to-end. Stated rather than implied.
+The pipeline was verified by the next scheduled fetch, `2026-09-16T0504Z`, which
+is the first holders file written under archive version 5:
+
+    gzip        651,398 -> 275,704 bytes   (-57.7%, predicted -58.8%)
+    per row     351 -> 97 bytes
+    fields      proxyWallet, amount, outcomeIndex — and nothing else
+    leaked      0 of 10,299 rows carried any dropped field
+
+The counter worked on its first run too: `holders_unexpected: 1`, and reading the
+file back finds exactly one condition whose payload is not a list. The hole that
+was invisible is now a number in `_meta`.
+
+(This paragraph replaces the one written a few hours earlier, which said the
+change was not yet confirmed end-to-end. It said so rather than implying it was
+fine; this is the confirmation it was waiting for.)
 
 ### The first thing the inspection found that is not about storage
 **77 of the 150 token groups are at the `limit=100` cap.** The collector asks for
