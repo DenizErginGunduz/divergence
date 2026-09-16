@@ -134,12 +134,19 @@ close the gap arrive in December without any work; and a measurement that has
 avoided a model since D-025 does not adopt one to rescue a 0.4-cent margin. If a
 surface is ever built, it is for a different question and under a new decision.
 
-## B-021 — Three competitors named in the review could not be found (2026-09-16)
-`docs/COMPETITORS.md` entries 1–3: "Fabi et al. / Fair Odds" and "PolyGap"
-returned no page under those names; "FairOdds" exists and is a sports odds
-converter. Either the names are wrong, or the work is private or unindexed. The
-owner is asked for URLs; until then no document cites them. Logged so the search
-is not repeated from scratch.
+## B-021 — Three competitors named in the review could not be found — CLOSED 2026-09-16 (D-110)
+**Closed the same day it was opened.** The owner supplied the URLs and the pages were
+read. Two of the three exist and are now entries 1 and 3 in `docs/COMPETITORS.md`;
+the third, fairodds.io, is a confirmed domain that returned 504 on two attempts and
+stays in the register as unreachable rather than absent, to be re-checked before
+Note 1 publishes.
+
+Kept rather than deleted because the sequence is the lesson: three names were
+recorded as NOT FOUND with the searches listed, no claim was made about them, and the
+gap was closed by asking rather than by guessing. Had they been written up from the
+synthesis's description, entry 1's title would have been wrong, entry 3's method
+would have been described as ours rather than N(d2), and entry 2 would have merged
+two unrelated sites.
 
 ## B-022 — The open pass truncates intraday events; a full ladder needs more than one page (2026-09-16)
 The collector's open-market pass asks Kalshi for one page of 200 open markets per
@@ -214,6 +221,23 @@ decision record; if none does, that is recorded too, and the project accepts
 that its result is not quotable.
 
 ---
+
+## B-025 — Read the Fabi et al. paper in full (2026-09-16)
+Entry 1 in `docs/COMPETITORS.md` is second-hand: SSRN's page was behind a bot check
+on the read date and the conference copy's host refused the fetch, so the method,
+the benchmark construction and the treatment of execution and fees are all UNKNOWN.
+
+Two things depend on reading it. **Note 3** asks whether prediction markets show a
+persistent long-shot premium; this paper reports that deviations concentrate in tail
+and barrier contracts across nearly 5,000 contracts, which is the same claim on a
+sample two orders of magnitude larger, so Note 3 cannot be specified without it.
+**Note 1** needs it cited in a related-work paragraph rather than describing an empty
+field — a G2 publication-gate item.
+
+Not started. The obvious routes are the SSRN page from a normal browser session, the
+authors' own pages (Schönleber lists research publicly), or the conference programme
+PDF from a host that will serve it. Whichever is used, the register entry is rewritten
+from the paper itself and the second-hand fields are replaced, not annotated.
 
 ---
 
