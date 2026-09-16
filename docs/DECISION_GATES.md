@@ -12,9 +12,9 @@ existed and may not be edited after the evidence is in.
 | # | gate | status |
 |---|---|---|
 | G1 | ETH > $5k anomaly kill test | CLOSED — verdict recorded in D-103: not a surviving discrepancy |
-| G2 | Note 1 publish | OPEN — G1 verdict and referee spread (D-104) in; analytical freeze and the rewritten note outstanding |
-| G3 | Note 2 sample / data | OPEN — waiting for data |
-| G4 | Payoff card (V0) build | OPEN |
+| G2 | Note 1 publish | OPEN — G1 verdict (D-103), referee spread (D-104), analytical freeze (D-107) and the rewritten note are in; remaining: the mechanical checks at publication |
+| G3 | Note 2 sample / data | OPEN — waiting for data; outcome capture reliable for the fifteen-minute and small series, absent for the hourly ladders until B-023 (D-106) |
+| G4 | Payoff card (V0) build | OPEN — requirements defined (D-109); discovery and data-rights answers outstanding |
 | G5 | Builders application | OPEN |
 | G6 | Event hedge studio (V1) promotion | OPEN |
 | G7 | Cross-asset expansion | OPEN |
@@ -70,9 +70,10 @@ grows it.
 
 ## G4 — Payoff card (V0) build (D-099)
 
-**Pass when all of:** the five V0 requirements in `PRODUCT_ROADMAP.md` have answers
-that are not `UNKNOWN` (exact user, market family, repeated job, routing requirement,
-data-rights-safe external information); G2's freeze is in place so the card's
+**Pass when all of:** the V0 requirements in `PRODUCT_ROADMAP.md` (D-109) have
+answers that are not `UNKNOWN` — the discovery questions Q1–Q5 (user, repeated job,
+market family, the `UNKNOWN`-carry question, routing) and the data-rights questions
+R1–R2; G2's freeze is in place so the card's
 reference number has a published method; at least one identified user has the
 repeated job; the data-rights position for what the card displays is written in
 `DATA_SOURCES.md`.
