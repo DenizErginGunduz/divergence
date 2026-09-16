@@ -28,6 +28,7 @@ import measure_band
 import measure_exhaustive
 import measure_touch
 import kill_test_eth5k
+import discount_referee
 import prune_archive
 from stability import Stability
 
@@ -865,6 +866,72 @@ class KillTestEth5k(unittest.TestCase):
         self.assertAlmostEqual(wgt, 165.0 / 2184.0)
         self.assertAlmostEqual(val, 0.010 + wgt * 0.010)
         self.assertEqual(kill_test_eth5k.interpolant(None, -165.0, 0.02, 2019.0), (None, None))
+
+
+class DiscountReferees(unittest.TestCase):
+    """D-093: four estimates of D side by side. R2 is pinned as the same
+    identity as R1 (it must agree exactly on an arbitrage-free chain), R3 is
+    pinned to the futures basis arithmetic, and the external rate is pinned
+    to being a dated, sourced constant rather than a bare number."""
+
+    def test_the_parity_slope_recovers_d_on_marks_and_on_mids(self):
+        """On the parity chain C - P = D*(F - K) exactly, so the least-squares
+        slope is -D whether marks or mids are used (the mids ARE the marks:
+        bid = 0.98 mark, ask = 1.02 mark). Agreement with R1 to machine
+        precision is the point: this referee is not independent evidence."""
+        ch, idx = measure_band.chain(parity_chain(), 'BTC')
+        r2 = discount_referee.parity_slope(ch, EXPIRY, idx)
+        self.assertAlmostEqual(r2['D_marks'], PARITY_D, places=9)
+        self.assertAlmostEqual(r2['D_mids'], PARITY_D, places=9)
+        r1 = measure_band.discount(ch, EXPIRY)
+        self.assertAlmostEqual(r1['D'], r2['D_marks'], places=9)
+
+    def test_a_one_sided_leg_leaves_the_mid_regression_not_the_mark_one(self):
+        raw = parity_chain()
+        for row in raw['BTC']['book_summary']['result']:
+            if row['instrument_name'].endswith('-100000-C'):
+                row['bid_price'] = None
+        ch, idx = measure_band.chain(raw, 'BTC')
+        r2 = discount_referee.parity_slope(ch, EXPIRY, idx)
+        self.assertEqual(r2['points_marks'], r2['points_mids'] + 1)
+        self.assertAlmostEqual(r2['D_marks'], PARITY_D, places=9)
+
+    def test_the_futures_referee_is_index_over_underlying(self):
+        """underlying_price = index / D on every row of the expiry, so R3
+        returns D. The listed-or-synthetic question is UNKNOWN by construction
+        and the script must say so rather than guess."""
+        raw = parity_chain()
+        for row in raw['BTC']['book_summary']['result']:
+            row['underlying_price'] = INDEX / PARITY_D
+        und = discount_referee.underlying_by_expiry(raw, 'BTC')
+        self.assertIn(EXPIRY, und)
+        self.assertAlmostEqual(INDEX / und[EXPIRY]['underlying_price'], PARITY_D, places=9)
+
+    def test_rates_and_discounts_round_trip_and_refuse_nonsense(self):
+        T = 0.5
+        r = discount_referee.implied_rate(PARITY_D, T)
+        self.assertAlmostEqual(discount_referee.discount_from_rate(r, T), PARITY_D, places=12)
+        self.assertIsNone(discount_referee.implied_rate(PARITY_D, 0.0))
+        self.assertIsNone(discount_referee.implied_rate(0.0, T))
+        self.assertIsNone(discount_referee.implied_rate(None, T))
+
+    def test_the_external_rate_is_dated_and_sourced(self):
+        """Rule 1. The one number in the measurement path that is not read
+        from the archive must carry where it came from and when, and must be
+        either a number or None (UNKNOWN) — never a placeholder string."""
+        e = discount_referee.EXTERNAL_RATE
+        for field in ('name', 'value', 'as_of', 'source', 'entered'):
+            self.assertIn(field, e)
+        self.assertTrue(e['value'] is None or isinstance(e['value'], float))
+        self.assertTrue(e['source'].startswith('http'))
+        self.assertRegex(e['as_of'], r'^\d{4}-\d{2}-\d{2}$')
+
+    def test_time_to_expiry_is_measured_from_the_snapshot(self):
+        """25DEC26 08:00 UTC from a 2026-09-16 13:02 snapshot is a bit under
+        100 days; a stamp after the expiry yields None, not a negative year."""
+        T = discount_referee.years_to('25DEC26', '2026-09-16T1302Z')
+        self.assertAlmostEqual(T * 365.25, 99.79, places=1)
+        self.assertIsNone(discount_referee.years_to('25DEC26', '2027-01-05T0500Z'))
 
 
 if __name__ == '__main__':
