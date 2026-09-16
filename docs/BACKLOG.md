@@ -87,6 +87,25 @@ live branch code inside `strip()` has to come back with them.
 
 ---
 
+## B-017 — verify_index.yml: an experiment with no record (2026-09-16)
+Found by Denetim 3 (D-090). `.github/workflows/verify_index.yml` asks one
+question — can a GitHub Actions runner pull an index option chain from Yahoo via
+yfinance, given that Colab failed 5 of 5 — and it is named in no document, no
+decision record and no backlog item. Its own header comment is the only account
+of why it exists.
+
+It is `workflow_dispatch` only and touches nothing else, so it is harmless where
+it sits. What is missing is the answer: whether it has ever been run, and what it
+returned. That answer decides whether the index arm (`^SPX`, `^NDX`) can be built
+on Actions at all, or needs a keyed source or a collector on the user machine —
+which is the gate on the whole index / commodity / equity direction, and on B-001
+and B-002 with it.
+
+Not deleted, because the question is live. Logged so the next person does not have
+to reconstruct the intent from a comment.
+
+---
+
 # REMOVED IN THE CORRECTNESS SPRINT — recoverable on purpose
 
 Everything below was WORKING and was taken out between 2026-09-14 and
