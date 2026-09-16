@@ -7,12 +7,15 @@ Prediction markets (Kalshi, Polymarket) quote a probability directly. Listed opt
 (Deribit) imply a discounted state price through the difference between neighbouring
 strikes. Same question, two answers, no model required to compare them.
 
-The short version of what that comparison found: the differences are real,
-reproducible across 55 consecutive observations, and worth about **five dollars**.
+The short version of what that comparison found: differences at quoted prices are
+real and persistent, and none of them survives the full set of controls — both
+venues' fees, executable prices on both expiries that bracket the settlement, and
+the local strike grid (D-103).
 
-**Start here: [Research Note 1 — Four dollars and sixty-nine cents](drafts/RESEARCH_NOTE_1.md).**
-It is the whole argument in one read: what was measured, what survived, what did
-not, and the mistakes found along the way.
+**Start here: [Research Note 1](drafts/RESEARCH_NOTE_1.md).** It is the whole
+argument in one read: what was measured, what survived, what did not, and the
+mistakes found along the way. Its framing is being rewritten to D-097; where the
+draft and this page disagree, the findings file and the decision log win.
 
 Not a betting app, not a trading bot, not a signal service.
 
@@ -36,15 +39,16 @@ honest move is to measure the gap rather than assume it away.
 risk premium and measurement error all live inside the gap. Most of what looks like
 mispricing is one of those. This project has now charged both venues' published
 fees, priced the trade at quotes that actually stand, and counted the contracts
-resting behind them — and what is left is measured in cents on tens of contracts.
+resting behind them — and what is left does not survive the chain that expires
+after the contract settles (D-103).
 
 ---
 
 ## What has actually been measured
 
 Three venues, collected three times daily since 2026-08-30. The public `raw/` window
-is a rolling 14 days; the results below were computed over 61 snapshots and 16 days
-from the private mirror, last snapshot 2026-09-15T1317Z. Those are two different
+is a rolling 14 days; the results below were computed over 68 snapshots and 17 days
+from the private mirror, last snapshot 2026-09-16T1314Z. Those are two different
 things on purpose, and D-089 says why.
 
 Every number in this section is produced by a script in this repository, and
@@ -53,26 +57,32 @@ Every number in this section is produced by a script in this repository, and
 
 | setup | result | strength |
 |---|---|---|
-| Kalshi year-end buckets | 3 of 44 rungs show an edge at quoted prices after both venues' fees, in over 90% of their observations — the weakest in 54 of 55. Worth **$4.69** in total at the resting size. | model-free |
-| The same, against BOTH bracketing expiries | only **1 of the 3** clears the option value at either end. The other two cannot be separated from a seven-day expiry gap. | model-free |
-| Polymarket dailies | 10.3% of quotable rungs show an edge under the same test. Was **24.2%** until the same repairs reached this script; more than half of it was method (D-085). | model-free, noisy |
-| Long-horizon touch bound | 0.4% arithmetic violations; 93% above the 2x bound | model-dependent, weak |
+| Kalshi year-end buckets | 3 of 44 rungs show an edge at quoted prices after both venues' fees, in over 90% of their observations — the weakest in 61 of 62. A quoted-executable discrepancy, not a size-executable one (D-095); no dollar figure is quoted as a trade. | model-free |
+| The same, against BOTH bracketing expiries (mark prices) | only **1 of the 3** clears the option value at either end. The other two cannot be separated from a seven-day expiry gap. | model-free |
+| The survivor, against executable prices and the local strike grid | **not a surviving discrepancy**: the pre-committed kill test (D-092) finds the margin positive in 0 of 62 snapshots (D-103). 0 of 44 rungs in the declared family survive the full test (D-096). | model-free |
+| Polymarket dailies | 9.9% of quotable rungs show an edge under the same test. Was **24.2%** until the same repairs reached this script; more than half of it was method (D-085). | model-free, noisy |
+| Long-horizon touch bound | 0.3% arithmetic violations; 93.3% above the 2x bound | model-dependent, weak |
 
 The three Kalshi rungs are all tails: BTC above $150k, ETH above $5k, ETH **below**
-$1k. Nothing in the body of any distribution shows an edge. After the expiry band is
-admitted, only ETH above $5k is left, and it survives by about 0.4 cents — a margin
-comparable to an uncertainty that has not been measured on the chain that decides it.
+$1k. Nothing in the body of any distribution shows an edge. On mark prices, after the
+expiry band is admitted, only ETH above $5k was left, by about 0.4 cents. Priced at
+the quotes one would actually hit on the chain that expires after the contract
+settles, with Deribit's fee on those quotes and Kalshi's on the bid, that margin is
+negative in every snapshot (D-103).
 
 **Read that as a negative result, because it is one.** The project went looking for
-cross-market divergences, found three that persist across every snapshot for two
-weeks, and then established that two of them are an artefact of comparing contracts
-that settle a week apart, and that all three together are worth less than a cup of
-coffee. What remains is a fact about market structure — a reproducible price
-difference nobody arbitrages because it is not worth the trouble — not a trade.
+cross-market divergences, found three that persist at quoted prices across every
+snapshot for two and a half weeks, and then established that two cannot be
+separated from the seven-day expiry gap and the third does not survive executable
+prices on the later chain. What remains is a fact about market structure — price
+differences that persist at the top of the book and that the executable side of the
+same book removes — not a trade. December's Deribit weeklies straddling 1 January
+will let the same test run with a band of days; nothing is built to hurry that.
 
-The touch result is worth reading carefully. A 0.4% violation rate is a pipeline
-validation, not a finding — if the digital calculation were wrong, impossible values
-would show up here in the hundreds. The 93% figure does not show mispricing; it
+The touch result is worth reading carefully. A violation rate under half a percent
+is a pipeline validation, not a finding — if the digital calculation were wrong,
+impossible values would show up here in the hundreds. The share above the 2x bound
+does not show mispricing; it
 shows that the driftless reflection bound is the wrong tool for long-dated deep OTM
 strikes. An earlier version of that script compared against a lognormal terminal and
 reported 8.7% "arithmetic violations", which were the model's error, not the market's.
@@ -182,6 +192,7 @@ Known gaps, tracked openly:
 - 149 of 460 flow markets hit the fetch limit in the run of 2026-09-16T0504Z with no
   gap flagged. Probably fine, not verified.
 - Assets beyond BTC and ETH are collected but not measured (D-100).
-- The one year-end rung that clears the maturity stress test, ETH above $5,000, is an
-  anomaly requiring confirmation until the pre-committed kill test of D-092 has run.
-  It is not called a finding, an artefact or noise before that.
+- ETH above $5,000, the one year-end rung that cleared the mark-price maturity stress
+  test, is **not a surviving discrepancy** under the pre-committed kill test of D-092
+  (D-103). It is not called a finding, an artefact or noise; those are the verdict's
+  words and they are used as written.
