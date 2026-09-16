@@ -224,22 +224,38 @@ const STRIP=[
  {id:'tail', b:'Tail premium', src:'chain',
   t:()=>'What prediction markets charge for the least likely outcome, versus what the option chain implies.'},
 
- /* The headline is always_exceeds / distinct_rungs. "Always" is the classifier's
-    word for MORE THAN 90% of a rung's observations, not 100% — see
-    scripts/stability.py. The text says so, and reports the other two buckets,
-    because "the rest never clears" would be false whenever sometimes_exceeds
-    is above zero. */
- {id:'costs', b:'Survive costs', src:'findings', d:'D-049',
-  read:F=>{ const s=F.measurements.friction_band_kalshi.stability;
-    return {n:s.always_exceeds+'/'+s.distinct_rungs,
-      t:`Kalshi year-end rungs whose gap beats fees, spread and measurement error `
-        +`in over 90% of their observations. ${s.sometimes_exceeds} clear it `
-        +`sometimes, ${s.never_exceeds} never. About `
-        +`${Math.round(s.observations_per_rung)} observations per rung.`}; }},
+ /* TWO CLAIMS, NOT ONE (D-095). The number is the QUOTED-price claim; the
+    sentence under it is the EXECUTABLE one, in the kill test's own words,
+    carried into findings by write_findings.py. G1 in docs/DECISION_GATES.md
+    requires the interface to use those words, and the card must never show the
+    first claim without the second.
 
+    The stability block moved under .year_end when the band was split by tenor.
+    Reading it from the old place returned undefined and this card rendered
+    "measurement unavailable". Read the tenor explicitly. */
+ {id:'costs', b:'Clear costs at quoted prices', src:'findings', d:'D-092 · D-095 · D-103',
+  read:F=>{ const s=F.measurements.friction_band_kalshi.year_end.stability;
+    const k=F.measurements.kill_test_eth5k;
+    let x=`Kalshi year-end rungs whose gap beats both venues' fees at the quoted `
+      +`sides, in over 90% of their observations. ${s.sometimes_exceeds} clear it `
+      +`sometimes, ${s.never_exceeds} never. About `
+      +`${Math.round(s.observations_per_rung)} observations per rung. `;
+    if(k && k.verdict){ const v=k.verdict;
+      x+=`One of the ${s.always_exceeds} also cleared both bracketing expiries at `
+        +`mark prices; priced at the quotes one would actually hit it is `
+        +`“${v.verdict}” — positive in ${v.snapshots_positive} of `
+        +`${v.snapshots_judged} snapshots (${k.decision}).`; }
+    else { x+=`The executable kill test did not run against this archive.`; }
+    return {n:s.always_exceeds+'/'+s.distinct_rungs, t:x}; }},
+
+ /* model_free sits one level deeper on the band block since it was split by
+    tenor, so a flat scan counted 1 where the answer is 3. Walk one level. */
  {id:'rep', b:'Model-free setups', src:'findings', d:'D-045 \u00b7 D-049',
   read:F=>{ const m=F.measurements;
-    const free=Object.keys(m).filter(k=>m[k] && m[k].model_free===true);
+    const free=[];
+    Object.keys(m).forEach(k=>{ const v=m[k]; if(!v||typeof v!=='object') return;
+      if(v.model_free===true){ free.push(k); return; }
+      Object.keys(v).forEach(z=>{ if(v[z] && v[z].model_free===true) free.push(k+'.'+z); }); });
     return {n:String(free.length),
       t:`Independent comparisons that assume no model at all. A third setup `
         +`exists but its bound is too loose to test anything (D-046).`}; }},
