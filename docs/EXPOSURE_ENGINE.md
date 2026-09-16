@@ -1,7 +1,8 @@
 # EXPOSURE_ENGINE.md — basis-aware exposure design
 
-**Status:** methodology, version 0 (2026-09-16). No code exists for it yet; this
-document is the specification that code would be written against.
+**Status:** methodology, version 0.1 (2026-09-16; §5 added by D-108). No code
+exists for it yet; this document is the specification that code would be written
+against.
 **Decided in:** D-091 (Layer B), D-100 (WTI as a research case), D-101 (what is not
 built yet) · **Research note:** Note 4 in `RESEARCH_ROADMAP.md` · **Product:** V1 and
 V2 in `PRODUCT_ROADMAP.md`
@@ -160,7 +161,68 @@ computed only where the archive supports it.
 
 ---
 
-## 5. What this is not
+## 5. The first worked example — specified, not computed
+
+Note 4's kill / continue gate (`RESEARCH_ROADMAP.md`) and G6 in `DECISION_GATES.md`
+both ask for one worked example computed end-to-end from archived data before any
+engine is built. This section fixes what that example is, so that when it is computed
+the choices were made before the numbers.
+
+**The view.** "BTC finishes above K on 1 January 2027", for one K taken from the
+Kalshi year-end ladder so that a binary with that exact threshold exists. The
+horizon is the contract's close. Capital, maximum loss and liquidation tolerance
+are inputs and are varied in the scenario table rather than fixed here.
+
+**The instruments compared.**
+
+| instrument | venue | payoff class | what the archive supplies today | `UNKNOWN` |
+|---|---|---|---|---|
+| binary YES at K | Kalshi year-end | binary, pays 1 | bid, ask, sizes, taker fee (`fees.py`), settlement rule text | maker economics; collateral opportunity cost (a rate) |
+| call spread K / K+w | Deribit 25DEC26 and 26MAR27 | capped, pays up to `w` | marks, bids, asks, per-leg fee, `D`, the digital and its executable envelope | slippage beyond best level; margin for the short leg |
+| touch YES at K | Polymarket year-end | binary on a path event | bid, ask, taker fee, resolution source text | comparability to the terminal view: **different payoff class**, shown as such and not compared as equal |
+| long perpetual, size chosen to match the spread's delta | (none collected) | linear, liquidation-dependent | — | everything: price, funding, liquidation rule (B-019) |
+
+**The layers, applied.**
+- **B.** Reference for all four is a BTC dollar price; the three collected venues
+  settle on three sources (BRTI, the Deribit index, Polymarket's stated source) and
+  the mapping row for each is its quoted rule text (rule 3). The perpetual's row
+  is `UNKNOWN`.
+- **C.** Entry basis per instrument: the binary and the touch have none in price
+  terms (they are priced in probability units) but carry a **settlement basis**,
+  which is the BRTI-vs-index difference already measured (`findings/settlement_basis.json`);
+  the spread's basis is the chain's own forward against the index (referee 3 of
+  D-093); the perpetual's is `UNKNOWN`.
+- **D.** Carry: the spread's is its premium's time decay between now and expiry,
+  read off the two chains rather than modelled; the binary's is the collateral
+  locked until 1 January at a rate marked `UNKNOWN` (no rate is assumed); the
+  perpetual's funding is `UNKNOWN`.
+- **E.** Execution at the sides one would hit, both fee schedules, best-level depth;
+  this is `measure_band.rungs()`'s envelope reused, not re-derived.
+- **F.** Payoff at settlement for the binary (0 or 1), the spread (0, linear, then
+  `w`), the touch (0 or 1 on the path, which the terminal price does not determine —
+  the row is present and flagged), the perpetual (`UNKNOWN`).
+- **G.** Scenarios: `S_T` = K − 10%, K − 1%, K, K + 1%, K + 10%, and a tail at K + 50%;
+  for each, the executable P&L per unit of capital for each instrument, with the
+  maturity gap of the option chains shown as two columns (25DEC26 and 26MAR27) rather
+  than interpolated (D-094).
+- **H.** Constraints applied in the table: no liquidation (removes the perpetual by
+  construction), maximum loss = capital (the binary and the long spread satisfy it),
+  capped payoff acceptable (yes for this view).
+- **I.** Output is the table itself, every `UNKNOWN` printed as the word.
+
+**What the example is allowed to conclude.** Only which rows are computable from
+the archive and what each costs and pays under each named scenario. Not that one is
+"better": that is the constraint filter's job on a stated user input, and not a
+statement this repository makes.
+
+**What it needs before it runs.** Nothing new from the collector for the three
+collected rows; B-019 for the perpetual column to become anything but `UNKNOWN`. The
+rate for the binary's collateral cost is a dated, sourced constant if one is entered
+(the pattern of `discount_referee.EXTERNAL_RATE`), or `UNKNOWN`.
+
+---
+
+## 6. What this is not
 
 Not a router, not an execution system, not a recommendation engine. Not a claim that
 any instrument is mispriced — that is Layer A's question and it has its own controls.
