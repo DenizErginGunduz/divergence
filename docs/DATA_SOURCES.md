@@ -232,6 +232,14 @@ reproduce the published findings — about 42 snapshots — rather than an indef
 feed. Built and running as of 2026-09-14; the first prune removed 2026-08-30,
 eight day folders and 15.5 MB.
 
+**Fourteen and not ninety — decided 2026-09-16, D-089.** Extending the window was
+open until then. It was closed once it was clear that `measure.yml` has no schedule:
+every published number comes from a manual run, and a manual run reads the private
+mirror rather than this window, so a wider window would add nothing to any finding
+and only publish more. The cost of the decision is named in D-089 — a reader
+checking the findings from the public repository sees 14 days where the findings
+were computed over the whole mirror.
+
 **The ordering is the safety mechanism.** Pruning runs only after the private
 mirror has been updated successfully. The mirror step exits 0 even when it is
 skipped for a missing token, so "the previous step passed" proves nothing; the
