@@ -13,9 +13,10 @@ venues' fees, executable prices on both expiries that bracket the settlement, an
 the local strike grid (D-103).
 
 **Start here: [Research Note 1](drafts/RESEARCH_NOTE_1.md).** It is the whole
-argument in one read: what was measured, what survived, what did not, and the
-mistakes found along the way. Its framing is being rewritten to D-097; where the
-draft and this page disagree, the findings file and the decision log win.
+argument in one read: what was measured, what survived each control, what did
+not, and the mistakes found along the way. It is written to D-097 and its numbers
+are the findings file's; where any page and the findings disagree, the findings
+file and the decision log win.
 
 Not a betting app, not a trading bot, not a signal service.
 
