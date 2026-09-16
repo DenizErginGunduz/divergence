@@ -1,9 +1,9 @@
 {
  "archive": {
-  "day_count": 16,
-  "snapshot_count": 61,
+  "day_count": 17,
+  "snapshot_count": 68,
   "first": "2026-08-30T1611Z",
-  "last": "2026-09-15T1317Z"
+  "last": "2026-09-16T1314Z"
  },
  "archive_source": "private mirror",
  "produced_by": "scripts/write_findings.py",
@@ -11,18 +11,18 @@
   "friction_band_kalshi": {
    "year_end": {
     "model_free": true,
-    "exceeding": 165,
-    "measured": 2420,
-    "quotable": 2418,
+    "exceeding": 186,
+    "measured": 2728,
+    "quotable": 2726,
     "percent": 6.8,
     "percent_of_all_rungs": 6.8,
-    "mean_envelope": 0.0615,
-    "edge_value_max": 125.52,
-    "edge_value_median": 0.86,
-    "edge_value_total": 1384.96,
+    "mean_envelope": 0.0608,
+    "edge_value_max": 569.51,
+    "edge_value_median": 1.21,
+    "edge_value_total": 4897.76,
     "off_grid_quotes": 0,
-    "mean_density": 0.9859,
-    "mean_discount_factor": 0.988121,
+    "mean_density": 0.9858,
+    "mean_discount_factor": 0.988125,
     "discount_fallbacks": 0,
     "expiry_gap_hours_median": 165.0,
     "ladders": [
@@ -37,52 +37,53 @@
     ],
     "stability": {
      "distinct_rungs": 44,
-     "total_observations": 2420,
-     "observations_per_rung": 55.0,
+     "total_observations": 2728,
+     "observations_per_rung": 62.0,
      "always_exceeds": 3,
      "sometimes_exceeds": 1,
      "never_exceeds": 40,
      "always_exceeding_list": [
       {
        "rung": "BTC year-end:KXBTCY-27JAN0100-T149999.99",
-       "observations": 55,
-       "exceeding": 55
+       "observations": 62,
+       "exceeding": 62
       },
       {
        "rung": "ETH year-end:KXETHY-27JAN0100-T1000.00",
-       "observations": 55,
-       "exceeding": 54
+       "observations": 62,
+       "exceeding": 61
       },
       {
        "rung": "ETH year-end:KXETHY-27JAN0100-T4999.99",
-       "observations": 55,
-       "exceeding": 55
+       "observations": 62,
+       "exceeding": 62
       }
      ]
     }
    },
    "intraday": {
     "model_free": true,
-    "exceeding": 65,
-    "measured": 625,
-    "quotable": 516,
-    "percent": 12.6,
-    "percent_of_all_rungs": 10.4,
-    "mean_envelope": 0.1277,
-    "edge_value_max": 330.74,
-    "edge_value_median": 18.53,
-    "edge_value_total": 2817.89,
+    "exceeding": 222,
+    "measured": 3083,
+    "quotable": 1283,
+    "percent": 17.3,
+    "percent_of_all_rungs": 7.2,
+    "mean_envelope": 0.1486,
+    "edge_value_max": 3662.99,
+    "edge_value_median": 45.68,
+    "edge_value_total": 42098.23,
     "off_grid_quotes": 0,
-    "mean_density": 0.9904,
-    "mean_discount_factor": 0.999906,
-    "discount_fallbacks": 0,
-    "expiry_gap_hours_median": -18.0,
+    "mean_density": 1.1624,
+    "mean_discount_factor": 0.999909,
+    "discount_fallbacks": 4,
+    "expiry_gap_hours_median": -2.0,
     "ladders": [
      "cumulative",
      "exhaustive"
     ],
     "expiry_side": [
-     "after"
+     "after",
+     "before"
     ],
     "series": [
      "BTC intraday",
@@ -91,12 +92,12 @@
      "ETH intraday cum"
     ],
     "stability": {
-     "distinct_rungs": 625,
-     "total_observations": 625,
-     "observations_per_rung": 1.0,
-     "always_exceeds": 65,
-     "sometimes_exceeds": 0,
-     "never_exceeds": 560,
+     "distinct_rungs": 2871,
+     "total_observations": 3083,
+     "observations_per_rung": 1.1,
+     "always_exceeds": 196,
+     "sometimes_exceeds": 15,
+     "never_exceeds": 2660,
      "always_exceeding_list": [
       {
        "rung": "BTC intraday cum:KXBTCD-26SEP1510-T72999.99",
@@ -204,27 +205,27 @@
   },
   "polymarket_terminal": {
    "model_free": true,
-   "measured": 7420,
-   "quotable": 4561,
-   "exceeding": 470,
-   "percent": 10.3,
-   "gap_12h_exceeding": 253,
-   "gap_12h_quotable": 3038,
-   "gap_12h_percent": 8.3,
-   "mean_envelope": 0.0462,
-   "mean_venue_fee": 0.00646,
+   "measured": 8296,
+   "quotable": 5117,
+   "exceeding": 509,
+   "percent": 9.9,
+   "gap_12h_exceeding": 268,
+   "gap_12h_quotable": 3392,
+   "gap_12h_percent": 7.9,
+   "mean_envelope": 0.0467,
+   "mean_venue_fee": 0.0065,
    "skipped": {
-    "outside the strike range": 1464,
-    "no two-sided option quote": 1395
+    "outside the strike range": 1676,
+    "no two-sided option quote": 1503
    },
-   "touch_ladders_excluded": 1035,
+   "touch_ladders_excluded": 1161,
    "stability": {
-    "distinct_rungs": 390,
-    "total_observations": 4561,
-    "observations_per_rung": 11.7,
+    "distinct_rungs": 405,
+    "total_observations": 5117,
+    "observations_per_rung": 12.6,
     "always_exceeds": 3,
-    "sometimes_exceeds": 173,
-    "never_exceeds": 214,
+    "sometimes_exceeds": 185,
+    "never_exceeds": 217,
     "always_exceeding_list": [
      {
       "rung": "ETH:2026-09-05:1900",
@@ -246,73 +247,73 @@
   },
   "long_horizon_touch": {
    "model_free": false,
-   "measured": 1397,
+   "measured": 1572,
    "arithmetic_violations": 5,
-   "ratio_over_two": 1299,
-   "violation_percent": 0.4,
-   "ratio_over_two_percent": 93.0,
+   "ratio_over_two": 1466,
+   "violation_percent": 0.3,
+   "ratio_over_two_percent": 93.3,
    "stability": {
-    "distinct_rungs": 55,
-    "total_observations": 1397,
-    "observations_per_rung": 25.4,
-    "always_exceeds": 36,
+    "distinct_rungs": 56,
+    "total_observations": 1572,
+    "observations_per_rung": 28.1,
+    "always_exceeds": 37,
     "sometimes_exceeds": 18,
     "never_exceeds": 1,
     "always_exceeding_list": [
      {
       "rung": "BTC:2027-01-01:200000",
-      "observations": 60,
-      "exceeding": 60
+      "observations": 67,
+      "exceeding": 67
      },
      {
       "rung": "BTC:2027-01-01:190000",
-      "observations": 60,
-      "exceeding": 60
+      "observations": 67,
+      "exceeding": 67
      },
      {
       "rung": "BTC:2027-01-01:180000",
-      "observations": 60,
-      "exceeding": 60
+      "observations": 67,
+      "exceeding": 67
      },
      {
       "rung": "BTC:2027-01-01:170000",
-      "observations": 60,
-      "exceeding": 60
+      "observations": 67,
+      "exceeding": 67
      },
      {
       "rung": "BTC:2027-01-01:160000",
-      "observations": 60,
-      "exceeding": 60
+      "observations": 67,
+      "exceeding": 67
      },
      {
       "rung": "BTC:2027-01-01:150000",
-      "observations": 60,
-      "exceeding": 60
+      "observations": 67,
+      "exceeding": 67
      },
      {
       "rung": "BTC:2027-01-01:140000",
-      "observations": 60,
-      "exceeding": 60
+      "observations": 67,
+      "exceeding": 67
      },
      {
       "rung": "BTC:2027-01-01:130000",
-      "observations": 60,
-      "exceeding": 60
+      "observations": 67,
+      "exceeding": 67
      },
      {
       "rung": "BTC:2027-01-01:120000",
-      "observations": 60,
-      "exceeding": 60
+      "observations": 67,
+      "exceeding": 67
      },
      {
       "rung": "BTC:2027-01-01:110000",
-      "observations": 60,
-      "exceeding": 60
+      "observations": 67,
+      "exceeding": 67
      },
      {
       "rung": "BTC:2027-01-01:100000",
-      "observations": 60,
-      "exceeding": 59
+      "observations": 67,
+      "exceeding": 66
      },
      {
       "rung": "BTC:2026-09-01:85000",
@@ -365,25 +366,25 @@
   },
   "exhaustiveness_constraint": {
    "corrected": {
-    "measured": 110,
-    "mean_ratio_to_discount": 0.9977,
+    "measured": 136,
+    "mean_ratio_to_discount": 2.479,
     "min_ratio_to_discount": 0.9945,
-    "max_ratio_to_discount": 1.0,
-    "departure_percent": -0.2
+    "max_ratio_to_discount": 76.1047,
+    "departure_percent": 147.9
    },
    "naive_a": {
-    "measured": 110,
-    "mean_ratio_to_discount": 0.9977,
+    "measured": 136,
+    "mean_ratio_to_discount": 2.479,
     "min_ratio_to_discount": 0.9945,
-    "max_ratio_to_discount": 1.0,
-    "departure_percent": -0.2
+    "max_ratio_to_discount": 76.1047,
+    "departure_percent": 147.9
    },
    "naive_b": {
-    "measured": 110,
-    "mean_ratio_to_discount": 1.1292,
-    "min_ratio_to_discount": 1.0843,
-    "max_ratio_to_discount": 1.1914,
-    "departure_percent": 12.9
+    "measured": 136,
+    "mean_ratio_to_discount": 2.6272,
+    "min_ratio_to_discount": 1.0714,
+    "max_ratio_to_discount": 76.604,
+    "departure_percent": 162.7
    },
    "note": "An exhaustive bucket set is worth the discount factor D today, because buying every bucket buys a dollar at expiry with certainty. That is arithmetic, not a preference, so a departure from D says the computation is wrong without saying which bucket is wrong. The figures below are total/D, so 1.0000 is the target. Until D-073 the target was written as 1 and the sum landed on 1 for any D, which made the check blind to the convention bug. See D-067 for the boundary rule and D-073 for the discount."
   }

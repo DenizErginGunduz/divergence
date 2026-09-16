@@ -1,28 +1,28 @@
 {
  "archive": {
-  "day_count": 16,
-  "snapshot_count": 61,
+  "day_count": 17,
+  "snapshot_count": 68,
   "first": "2026-08-30T1611Z",
-  "last": "2026-09-15T1317Z"
+  "last": "2026-09-16T1314Z"
  },
  "produced_by": "scripts/measure_basis.py",
- "pairs": 63,
+ "pairs": 75,
  "by_currency": {
   "BTC": {
-   "n": 31,
-   "median_bp": -1.08,
-   "spread_bp": 4.49,
-   "se_bp": 0.81,
+   "n": 37,
+   "median_bp": -0.88,
+   "spread_bp": 5.3,
+   "se_bp": 0.87,
    "min_bp": -20.03,
-   "max_bp": 17.99
+   "max_bp": 20.26
   },
   "ETH": {
-   "n": 32,
-   "median_bp": -0.04,
-   "spread_bp": 4.9,
-   "se_bp": 0.87,
+   "n": 38,
+   "median_bp": 1.17,
+   "spread_bp": 4.56,
+   "se_bp": 0.74,
    "min_bp": -14.59,
-   "max_bp": 26.5
+   "max_bp": 29.12
   }
  },
  "by_bin": {
@@ -35,20 +35,20 @@
    "max_bp": 4.25
   },
   "within_180s": {
-   "n": 47,
-   "median_bp": -0.48,
-   "spread_bp": 3.81,
-   "se_bp": 0.56,
+   "n": 53,
+   "median_bp": -0.2,
+   "spread_bp": 4.3,
+   "se_bp": 0.59,
    "min_bp": -14.27,
-   "max_bp": 9.63
+   "max_bp": 21.1
   },
   "within_450s": {
-   "n": 63,
-   "median_bp": -0.62,
-   "spread_bp": 4.92,
-   "se_bp": 0.62,
+   "n": 75,
+   "median_bp": -0.2,
+   "spread_bp": 5.31,
+   "se_bp": 0.61,
    "min_bp": -20.03,
-   "max_bp": 26.5
+   "max_bp": 29.12
   }
  }
 }
