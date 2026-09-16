@@ -24,15 +24,21 @@ because the honest output of a sensitivity test is a band, not a better point.
    with maturity.
 
    Here both bracketing expiries are computed: the one before the close and the
-   one after. For a tail whose probability is monotone in maturity the true
-   value for the settlement date lies between them. That turns "we used the
-   early one" into a bound, and the bound is what decides whether the three
-   surviving rungs (D-078) survive the expiry gap at all.
+   one after, and a rung has to clear the option value at each. This is a
+   CONSERVATIVE MATURITY STRESS TEST, not a bound (D-094). The earlier wording
+   here said the settlement-date value "lies between" the two chains; that is a
+   monotonicity argument about a tail probability, and D*Q(S_T > K) is not
+   monotone in maturity in general -- D falls with T, the two chains carry
+   different D, forwards and liquidity, and the term structure can move a tail
+   either way. Failing the test means not surviving; passing it means passing a
+   stress test. It is still what decides whether the three surviving rungs
+   (D-078) survive the expiry gap at all.
 
 WHAT THIS SCRIPT DOES NOT DO
-It does not choose. It does not interpolate between expiries, which would need
-a model of how the probability grows with maturity, and a model is the thing
-this measurement has avoided from the start (D-025). It prints both ends.
+It does not choose, and it does not fit a surface. The linear-in-time
+interpolant that D-094 asks for is computed by scripts/kill_test_eth5k.py for
+the one rung it matters for, and reported there as a sensitivity with a stated
+formula, never as the settlement-date value. This script prints both ends.
 
 Usage:
     python scripts/measure_sensitivity.py
@@ -309,8 +315,10 @@ def main():
     def judge(r):
         """Two cases, and they are not the same statement.
 
-        STRADDLES — one chain each side of the close. The settlement-date value
-        lies between them, so a bid above both cannot be explained by the gap.
+        STRADDLES — one chain each side of the close. A bid above both has
+        passed the maturity stress test (D-094): it is not a bound, so "above
+        BOTH" means the gap alone does not remove the rung, not that the
+        settlement-date value is known to sit between the two.
 
         ONE-SIDED — both chains expire after the close, which is every intraday
         ladder (D-082). A later expiry OVERSTATES an upside tail, so the
@@ -397,17 +405,18 @@ def main():
     print('so for an upside tail it understates and flatters the comparison;')
     print('positive means it expires later and overstates, which does not.')
     print()
-    print('Year-end ladders straddle: -165h and +2000h, so the settlement-date')
-    print('value sits between the two and "inside the band" means the rung')
-    print('cannot be separated from the gap at all.')
+    print('Year-end ladders straddle: -165h and +2000h. Clearing both is a')
+    print('maturity STRESS TEST, not a bound (D-094): "inside the band" means the')
+    print('rung cannot be separated from the gap; "above BOTH" means the gap')
+    print('alone does not remove it, and nothing stronger.')
     print()
     print('Intraday ladders never straddle. Deribit delists a daily option the')
     print('moment it settles, so both neighbours are AFTER the close and both')
     print('overstate. The nearest is the binding bound: "above the bound" is')
     print('real evidence, "under the bound" is no evidence either way.')
     print()
-    print('No interpolation is done anywhere. That would need a model of how a')
-    print('tail probability grows with maturity, and this measurement has none.')
+    print('No surface is fitted anywhere. The one linear-in-time interpolant the')
+    print('project reports lives in kill_test_eth5k.py, labelled a sensitivity.')
     return 0
 
 
