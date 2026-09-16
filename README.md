@@ -42,16 +42,21 @@ resting behind them — and what is left is measured in cents on tens of contrac
 
 ## What has actually been measured
 
-Archive: 14 days, 46 snapshots, three venues, collected three times daily since
-2026-08-30. Every number below is regenerated from that archive by a script in this
-repository — nothing is typed in by hand.
+Three venues, collected three times daily since 2026-08-30. The public `raw/` window
+is a rolling 14 days; the results below were computed over 61 snapshots and 16 days
+from the private mirror, last snapshot 2026-09-15T1317Z. Those are two different
+things on purpose, and D-089 says why.
+
+Every number in this section is produced by a script in this repository, and
+`scripts/check_readme.py` fails the build when the sentences below stop matching
+`findings/latest.json`.
 
 | setup | result | strength |
 |---|---|---|
-| Kalshi year-end buckets | 3 of 44 rungs show an edge at quoted prices after both venues' fees, in 45 of 45 observations each. Worth **$4.69** in total at the resting size. | model-free |
+| Kalshi year-end buckets | 3 of 44 rungs show an edge at quoted prices after both venues' fees, in over 90% of their observations — the weakest in 54 of 55. Worth **$4.69** in total at the resting size. | model-free |
 | The same, against BOTH bracketing expiries | only **1 of the 3** clears the option value at either end. The other two cannot be separated from a seven-day expiry gap. | model-free |
 | Polymarket dailies | 10.3% of quotable rungs show an edge under the same test. Was **24.2%** until the same repairs reached this script; more than half of it was method (D-085). | model-free, noisy |
-| Long-horizon touch bound | 0.2% arithmetic violations; 94.9% above the 2x bound | model-dependent, weak |
+| Long-horizon touch bound | 0.4% arithmetic violations; 93% above the 2x bound | model-dependent, weak |
 
 The three Kalshi rungs are all tails: BTC above $150k, ETH above $5k, ETH **below**
 $1k. Nothing in the body of any distribution shows an edge. After the expiry band is
@@ -65,9 +70,9 @@ that settle a week apart, and that all three together are worth less than a cup 
 coffee. What remains is a fact about market structure — a reproducible price
 difference nobody arbitrages because it is not worth the trouble — not a trade.
 
-The touch result is worth reading carefully. A 0.2% violation rate is a pipeline
+The touch result is worth reading carefully. A 0.4% violation rate is a pipeline
 validation, not a finding — if the digital calculation were wrong, impossible values
-would show up here in the hundreds. The 94.9% figure does not show mispricing; it
+would show up here in the hundreds. The 93% figure does not show mispricing; it
 shows that the driftless reflection bound is the wrong tool for long-dated deep OTM
 strikes. An earlier version of that script compared against a lognormal terminal and
 reported 8.7% "arithmetic violations", which were the model's error, not the market's.
@@ -116,8 +121,12 @@ docs/                  methodology, data sources, product and design decisions
    whether two contracts are comparable.
 4. **Uncertainty is surfaced, not resolved.** A row we cannot measure stays visible
    and says why.
-5. **Every number on screen traces to a script.** Enforced in CI: `ref_check.py` fails
-   the build if a decision number is cited but never recorded.
+5. **Every number on screen traces to a script.** The interface holds no numbers of
+   its own; it reads `findings/latest.json`. Two checks keep the written pages from
+   drifting away from it: `ref_check.py` fails the build on a decision number that was
+   never recorded, and `check_readme.py` fails it when the results table above stops
+   matching the findings file. Prose elsewhere in `docs/` is not checked — that gap is
+   what Denetim 3 was for (D-090).
 6. **Retractions are recorded like results.** Decisions that turned out wrong stay in
    the log with the reason.
 
@@ -158,8 +167,8 @@ For the data, go to the venues.
 
 ## Status
 
-Working: collector (25 of 25 recent runs clean), archive, three model-free
-measurements, reference checker, terminal UI.
+Working: collector, archive, the eleven measurement steps `measure.yml` runs in
+order, two documentation checkers, terminal UI.
 
 Known gaps, tracked openly:
 
@@ -168,6 +177,6 @@ Known gaps, tracked openly:
 - `raw/` is a rolling 14-day window. It bounds the working tree, not git history:
   `.git` still grows about 4 MB a day and a full clone reaches every snapshot ever
   committed. The full archive lives in a private mirror (docs/DATA_SOURCES.md).
-- 148 of 446 flow markets hit the fetch limit in the latest run with no gap flagged.
-  Probably fine, not verified.
+- 149 of 460 flow markets hit the fetch limit in the run of 2026-09-16T0504Z with no
+  gap flagged. Probably fine, not verified.
 - Assets beyond BTC and ETH are collected but not measured.
