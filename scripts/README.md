@@ -53,6 +53,8 @@ local checkout, run the workflow from the Actions tab.
 | `measure_touch.py` | Is the touch price inside the theoretical bound above terminal? | Polymarket + Deribit |
 | `measure_sensitivity.py` | Two approximations under every digital: the strike grid it is differenced across, and the expiry that is not the settlement date. Reported as a band, never as a correction. (D-079) | Kalshi + Deribit |
 | `measure_basis.py` | The third settlement difference, measured rather than left UNKNOWN: Kalshi settles on BRTI, Deribit on its own index. (D-075) | Kalshi + Deribit |
+| `kill_test_eth5k.py` | *(pending, D-092)* The pre-committed local-grid kill test for the one rung that survives the maturity stress test. | Kalshi + Deribit |
+| `discount_referee.py` | *(pending, D-093)* Four estimates of the discount factor side by side, as implied rates; one is an estimator-consistency check, two are independent, one is an external dated constant. | Deribit |
 | `inventory_validation.py` | How many observations could ever be scored against an outcome, and how many of those are independent events. Counting before scoring. | `raw/` |
 | `write_findings.py` | Calls every measurement, writes `findings/latest.json`. | — |
 | `ref_check.py` | Does every decision number cited anywhere actually exist? | repo text |
