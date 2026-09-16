@@ -21,6 +21,8 @@ python scripts/measure_exhaustive.py    # does a bucket ladder sum to D?
 python scripts/measure_polymarket.py    # Polymarket daily terminal ladders
 python scripts/measure_touch.py         # long-horizon touch bound
 python scripts/measure_sensitivity.py   # strike grid and expiry band, as a range
+python scripts/kill_test_eth5k.py       # the pre-committed ETH above $5,000 kill test (D-092)
+python scripts/discount_referee.py      # four estimates of D as implied rates (D-093)
 python scripts/measure_basis.py         # BRTI against the Deribit index
 python scripts/inventory_validation.py  # how much could ever be scored, and how much is independent
 python scripts/write_findings.py        # run them all, write findings/latest.json
@@ -53,8 +55,8 @@ local checkout, run the workflow from the Actions tab.
 | `measure_touch.py` | Is the touch price inside the theoretical bound above terminal? | Polymarket + Deribit |
 | `measure_sensitivity.py` | Two approximations under every digital: the strike grid it is differenced across, and the expiry that is not the settlement date. Reported as a band, never as a correction. (D-079) | Kalshi + Deribit |
 | `measure_basis.py` | The third settlement difference, measured rather than left UNKNOWN: Kalshi settles on BRTI, Deribit on its own index. (D-075) | Kalshi + Deribit |
-| `kill_test_eth5k.py` | *(pending, D-092)* The pre-committed local-grid kill test for the one rung that survives the maturity stress test. | Kalshi + Deribit |
-| `discount_referee.py` | *(pending, D-093)* Four estimates of the discount factor side by side, as implied rates; one is an estimator-consistency check, two are independent, one is an external dated constant. | Deribit |
+| `kill_test_eth5k.py` | The pre-committed local-grid kill test for the one rung that survives the maturity stress test. | Kalshi + Deribit |
+| `discount_referee.py` | Four estimates of the discount factor side by side, as implied rates; one is an estimator-consistency check, two are independent, one is an external dated constant. | Deribit |
 | `inventory_validation.py` | How many observations could ever be scored against an outcome, and how many of those are independent events. Counting before scoring. | `raw/` |
 | `write_findings.py` | Calls every measurement, writes `findings/latest.json`. | — |
 | `ref_check.py` | Does every decision number cited anywhere actually exist? | repo text |
@@ -62,11 +64,11 @@ local checkout, run the workflow from the Actions tab.
 | `prune_archive.py` | Bounds `raw/` to a rolling 14-day window. Runs in CI only after the private mirror is confirmed. | `raw/` |
 
 `stability.py` exists because a ratio over repeated observations is
-misleading. The same 44 Kalshi rungs are measured 45 times each; reporting
+misleading. The same 44 Kalshi rungs are measured in every snapshot; reporting
 "134 of 1978" implies 1978 independent samples. What matters is whether a rung
-behaves consistently, and that is what this module reports. Today it reports
-3 rungs that clear the test in essentially every observation, 0 that sometimes
-do, and 41 that never do (D-077).
+behaves consistently, and that is what this module reports: how many rungs clear
+the test in over 90% of their observations, how many sometimes, how many never
+(D-072, D-077). The current split is in `findings/latest.json`, not here.
 
 ---
 
@@ -83,10 +85,11 @@ them will read wrong:
 - **The band is a trade, not a statistic.** `1.96*SE` is gone (D-076). A rung
   counts when one of two trades — priced at quotes that exist, after Deribit's
   fees and Kalshi's taker fee — leaves something. No mid is used in the verdict.
-- **An edge has a size.** `measure_band` reads the contracts resting at the
-  quote being hit and reports what the edge is worth in dollars. Live, the three
-  surviving rungs are worth $4.69 between them (D-078). That is the number, not
-  the cents-per-contract.
+- **An edge has a size, and a size is not a trade.** `measure_band` reads the
+  contracts resting at the quote being hit and reports what the quoted edge is
+  worth in dollars (D-078). That is a quoted-executable discrepancy, not a
+  size-executable opportunity (D-095); the one rung that cleared the maturity
+  stress test did not survive executable prices on the later chain (D-103).
 
 ---
 
