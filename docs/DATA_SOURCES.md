@@ -227,10 +227,14 @@ That is the specific practice the Kalshi clause names.
 ### The rolling window
 
 `raw/` is a rolling window of 14 days (`ARCHIVE_DAYS` in
-`scripts/prune_archive.py`). What remains is a research sample large enough to
-reproduce the published findings — about 42 snapshots — rather than an indefinite
-feed. Built and running as of 2026-09-14; the first prune removed 2026-08-30,
-eight day folders and 15.5 MB.
+`scripts/prune_archive.py`). What remains is a research sample — fourteen days at
+three runs a day — rather than an indefinite feed. Built and running as of
+2026-09-14; the first prune removed 2026-08-30, eight day folders and 15.5 MB.
+
+The exact count is deliberately not written here. It was, once — "about 42
+snapshots" — and by the time Denetim 3 read the line it was 47 (D-090). A number
+that changes three times a day does not belong in a sentence nobody recomputes;
+`state/latest.json` carries it, and the interface reads it from there.
 
 **Fourteen and not ninety — decided 2026-09-16, D-089.** Extending the window was
 open until then. It was closed once it was clear that `measure.yml` has no schedule:
