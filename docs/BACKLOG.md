@@ -151,6 +151,17 @@ a ladder `incomplete` and does not sum it; curing it means paging the open pass
 holds and widens the sync window by a call or two. Collector change: the owner
 decides. Not started.
 
+## B-023 — A settled-markets pass for the truncated Kalshi series (2026-09-16)
+The hourly ladders (KXBTC, KXETH, KXBTCD, KXETHD) never show a resolved row in the
+archive: the main pass's 1,000 rows are all future `initialized` markets and the
+open pass adds live quotes only (D-106, `docs/VALIDATION_SPEC.md` §4). Note 2
+cannot score that tenor until the collector asks for settled markets explicitly —
+one more page per truncated series with a `status` value and, if the API takes
+them, close-time bounds; which parameters return the last day's settled hourly
+markets is `UNKNOWN` until the documentation is read and the call is tried. It
+changes what the archive holds and adds calls to the sync window. Collector change:
+the owner decides. Not started.
+
 ---
 
 # REMOVED IN THE CORRECTNESS SPRINT — recoverable on purpose
