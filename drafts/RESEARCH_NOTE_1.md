@@ -36,6 +36,55 @@ common case is where they appear to disagree because something in the
 comparison is wrong. This note is about telling the two apart, control by
 control, and about what is left at the end.
 
+## What else exists
+
+This comparison is not new, and the register that says so is part of the work
+(`docs/COMPETITORS.md`, D-098 and D-110). Four entries in it bear directly on what
+follows.
+
+**The construction is published.** Block Scholes, in a report dated 2 July 2026,
+states that binary option prices — and therefore the prices of prediction markets
+on the same underlying — are uniquely determined by the prices of vanilla calls,
+and walks the reader through building the binary out of a call spread. That is
+the starting point of this note, in print, by an institutional analytics firm,
+before this note existed. Nothing here claims the derivation.
+
+**The empirical question has a larger answer already.** Fabi, Schönleber, Ruffo
+and Marfè compare Polymarket BTC and ETH prices against option-implied
+risk-neutral distributions across nearly 5,000 contracts, and report that prices
+broadly track the benchmark while deviations concentrate in tail and barrier
+contracts. Their sample is two orders of magnitude larger than the 68 snapshots
+here. That description is second-hand — the paper was behind a bot check on
+2026-09-16 and has not been read in full — which is recorded rather than glossed,
+and reading it is a prerequisite for the note that would follow this one.
+
+**A paid product already ships the comparison.** PolyGap prices every Polymarket
+crypto market against Deribit’s options curve, refreshes every two minutes, and
+sells the fair value, the gap and an execution signal for thirty dollars a month.
+Its method is stated on its own page: implied volatility by strike and expiry,
+N(d2) for a threshold and a barrier model for a touch. The difference from this
+note is not the question and not the data. It is that this note prices the option
+leg at the side one would have to hit, charges both venues’ published fees, tests
+both bracketing expiries, and refuses a rung where either book is one-sided.
+
+**And the executable framing has a stricter version.** Gebele, Mutzel and Matthes
+separate payoff-space no-arbitrage from protocol-executable no-arbitrage inside
+Polymarket’s own linked markets, and reconstruct depth-aware executable portfolio
+values. They measure at depth; this note measures at the top of the book, which
+is the weaker of the two standards and is labelled as such throughout (D-095).
+
+A fourth entry, De Stefano’s thesis, uses the same three venues as this project
+over two years rather than seventeen days, with a DVOL-based benchmark instead of
+a strike-by-strike chain.
+
+What is left, stated narrowly: the controls. A model-free digital from the spread
+rather than a fitted surface; the executable side rather than the mark; both fee
+schedules as published; the maturity band as a stress test; the strike grid as a
+measured sensitivity; the settlement text quoted rather than assumed; and a
+refusal where the data does not support an answer. Whether that set of controls
+changes the conclusion is what this note asks, and the answer is that it removes
+everything the quoted prices appeared to show.
+
 ## Three things that have to be right first
 
 **The option side is not a probability.** The difference quotient between two
