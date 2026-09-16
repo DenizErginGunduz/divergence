@@ -162,6 +162,59 @@ markets is `UNKNOWN` until the documentation is read and the call is tried. It
 changes what the archive holds and adds calls to the sync window. Collector change:
 the owner decides. Not started.
 
+## B-024 — The headline the null result has not got yet (2026-09-16)
+
+**Category:** the same one as B-011 to B-016 below — removed on correct
+methodological grounds, valuable on grounds the methodology does not measure.
+Filed here rather than in that section because it was not removed in the
+correctness sprint; it was retired by D-103, in the external-review round.
+
+**What went.** "Worth **$4.69** in total at the resting size." One line, one
+number, and the most quotable thing this project ever produced. It carried the
+whole result in five words: three rungs, four dollars, not a trade. It named the
+research note. D-103 retired it, correctly — the rung it rested on does not
+survive executable prices, and the honest replacement is "0 of 44 rungs in the
+declared family survive the full test".
+
+**Why that is a loss and not only a gain.** The replacement is true and it is
+better research. It is also a sentence that nobody repeats. A stranger who reads
+"0 of 44" learns that we found nothing; a stranger who read "$4.69" learned that
+we found something, measured it, and refused to call it a trade — which is the
+more interesting and the more accurate thing about this project. The number was
+never the finding. The *discipline* was, and the number was the only vehicle the
+discipline ever had.
+
+D-103 says $4.69 "is retired with this record rather than replaced by a bigger
+one", and that is right: the early chain now shows a quoted edge an order of
+magnitude larger and it means less, not more. But retiring a headline is not the
+same as having a new one, and nothing in the external-review round asked for a
+replacement. This item exists so that gap is a recorded question and not an
+oversight.
+
+**The question, stated so it can be answered:** is there a sentence that is
+(a) literally true of the current findings, (b) understandable in five seconds by
+somebody who will not read the note, and (c) not an overclaim in either
+direction — neither "we found an edge" nor the flat "we found nothing" that
+throws away what was actually established?
+
+Candidates exist and none is endorsed here. "Three price differences survived
+every cost test and none survived the prices you could actually trade at."
+"Everything that looked like an edge was the top of the book." "The gap was
+real, the trade was not." Each needs checking against `findings/latest.json`
+and against D-095 before anyone uses it.
+
+**Why not now.** Note 1 is frozen at v1 (D-107) and G2 is open. A headline
+written while the note is being published would be written to fit the note
+rather than the evidence.
+
+**Promotion condition.** Reviewed together with B-011 to B-016, in one sitting,
+against the finished Note 1 — not before. If a candidate passes (a), (b) and (c)
+it goes to `README.md`, the note, and the interface at the same time, with a
+decision record; if none does, that is recorded too, and the project accepts
+that its result is not quotable.
+
+---
+
 ---
 
 # REMOVED IN THE CORRECTNESS SPRINT — recoverable on purpose
