@@ -2253,3 +2253,390 @@ Prose in `docs/` carries numbers that nothing verifies — the 6 days 21 hours i
 `METHODOLOGY.md`, the coverage figures in `ARCHIVE_SCHEMA.md`, everything in this log.
 Eight claims in one file are now machine-checked. The rest rests on audits like this
 one, which is why they are numbered and repeated rather than treated as finished.
+
+## D-091 — The external review is closed; the project becomes three layers, and the repository becomes its memory
+**Date:** 2026-09-16 · **Source:** `drafts/REVIEW_PACKAGE.md` reviewed independently by three AI systems and synthesised by the owner · **Produces:** `docs/STRATEGY.md`, `docs/RESEARCH_ROADMAP.md`, `docs/PRODUCT_ROADMAP.md`, `docs/COMPETITORS.md`, `docs/EXPOSURE_ENGINE.md`, `docs/DECISION_GATES.md`, `docs/IDEA_BACKLOG.md`
+
+The review loop that the package in `drafts/` was written for has run and ended. This
+record and the eleven after it (D-092 … D-102) carry its conclusions into the log so
+that nothing decided in it exists only in a chat transcript. The review is not reopened
+by any of them; a broad strategic review is reopened only by a concrete factual or
+mathematical contradiction, and none was found (the two technical corrections that
+were found are recorded where they belong, in D-093 and D-094).
+
+### The three layers
+The project is from now on treated as three related but distinct layers.
+
+**Layer A — Divergence research.** Cross-market research on prediction-market prices
+against listed-derivative-implied state prices. Research-first, and unchanged in what
+it is not: not a startup by itself, not an alpha engine, not a signal service, not an
+arbitrage product, not a "true probability" engine. The same-state work is completed as
+Research Note 1 (D-097) rather than expanded indefinitely as the commercial thesis.
+
+**Layer B — exposure-design research.** A new branch. Its question: how should a market
+view be expressed across instruments when capital, basis, carry, payoff shape,
+liquidity and settlement differ? It is deliberately broader than the "cost of
+expressing a view" idea in the review package (§7.1), and it is not "which instrument
+is cheapest" — futures, perpetuals, vanilla options, spreads and binaries have different
+payoff functions, so the research object is a cost × capital × payoff × basis × risk ×
+execution frontier, not a single cost number. Defined in `docs/EXPOSURE_ENGINE.md`.
+
+**Layer C — product spin-off.** Emerges in stages, each gated on evidence: a
+same-event payoff card (V0), an event hedge studio (V1), a basis-aware exposure engine
+(V2). No stage is built before the gate in front of it is passed (D-099).
+
+### The methodology after the sprint
+The measurement framework after D-073 … D-090 is considered fundamentally defensible.
+What remains open is listed, not reopened: strike-grid discretisation, maturity
+handling, size executability, quote quality, statistical dependence, validation sample
+size, and data-rights constraints. The foundational repairs are not revisited unless
+new evidence contradicts them.
+
+### The governing principle
+The repository is the project's long-term memory. Ideas, competitors, rejected paths,
+open questions, methodological mistakes, negative results, product hypotheses and
+promotion criteria are written down, dated, and kept. Rejected or delayed ideas keep
+their reasoning rather than being deleted. A decision that supersedes an earlier one
+says so and names it; the earlier one stays. The project may become smaller, more
+negative, more research-oriented or more commercial; it may not become less honest.
+
+### What this record does not do
+It does not change a single measured number, script, or workflow. The documents it
+produces link to the canonical files rather than restating them; where an existing
+document already covers a topic (`docs/BACKLOG.md`, `docs/PRODUCT.md`,
+`docs/METHODOLOGY.md`) it stays canonical and the new documents point at it.
+
+## D-092 — ETH above $5,000 gets a pre-committed kill test, and its verdict rules are written before the number
+**Date:** 2026-09-16 · **Produced by:** `scripts/kill_test_eth5k.py` (to be added; this record precedes it on purpose) · **Result:** recorded in a later decision, not here
+
+### The status of the rung today
+"ETH above $5k" is the one year-end rung that clears the option value at both
+bracketing expiries (D-079), by about 0.4 cents, against a median grid sensitivity of
+11.5% on the chain that decides it (`findings/sensitivity.json`). Until the test below
+has run, its classification is **an interesting anomaly requiring confirmation**. It is
+not to be called a finding, alpha, a mispricing, an artefact, or noise. Both directions
+of overclaim are refused: the review package said "we would rather you attack it than we
+defend it", and this is the attack, specified before its outcome is known.
+
+### What the test computes
+For every snapshot in the archive, and for **both** Deribit expiries that bracket the
+Kalshi close (today 25DEC26 and 26MAR27), at K = 5,000:
+
+1. the tight bracket the production code uses — note that `bracket()` in
+   `scripts/measure_band.py` takes the strikes strictly below and above K, so a
+   listed 5,000 strike is never itself used; the tight bracket is 4,800–5,200 on
+   25DEC26 and 4,800–5,500 on 26MAR27;
+2. the skip-1 and skip-2 brackets, as `scripts/measure_sensitivity.py` defines them;
+3. because a 5,000 strike is listed on both expiries, the two one-sided quotients:
+   lower strike → 5,000 and 5,000 → upper strike;
+4. for each estimator: the mark discounted state price, the executable low and
+   high (ask on the leg bought, bid on the leg sold — the same rule as `digital()`),
+   the bracket width, and the Deribit fee computed on the **crossed** price of each
+   leg rather than its mark;
+5. the Kalshi side as `yes_bid − fees.rate(yes_bid, series)`, with `min_contracts`
+   reported alongside because the per-order round-up makes the fee size-dependent;
+6. a linear interpolant of the discounted state price to the settlement instant,
+   `dsp(T*) = dsp(T1) + (T* − T1)/(T2 − T1) · [dsp(T2) − dsp(T1)]`, reported as a
+   **sensitivity** and never as the settlement-date value (D-094).
+
+Reported margins, all as `kalshi_net − (executable_high + option_fee)`:
+`margin_vs_tight_late`, `margin_vs_skip1_late`, `margin_vs_skip2_late`,
+`margin_vs_onesided_lower_late`, `margin_vs_onesided_upper_late`, the same five for
+the early expiry, and `margin_vs_worst_local_executable`, which takes the largest
+`executable_high + fee` across all estimators on both expiries. A one-sided quote on
+any leg makes that estimator `None`, a refusal rather than a zero.
+
+### The pre-committed verdict
+Decided before the script exists and before any number has been seen:
+
+- If any robust local-grid estimator removes the positive margin — that is, if
+  `margin_vs_worst_local_executable` is positive in fewer than 90% of snapshots, the
+  same `always_above` threshold `scripts/stability.py` uses — the rung is **not a
+  surviving discrepancy**.
+- If every estimator stays positive but the smallest margin is economically tiny —
+  defined now as a minimum margin below **0.01** (one cent, the unit Kalshi rounds each
+  order's fee up to) **or** margin × resting depth below **1 USD** — the rung is
+  **indistinguishable from grid and quote noise**.
+- If it survives materially, it is **a genuine anomaly requiring more observations**,
+  and nothing stronger.
+
+### What is deliberately not done
+No volatility surface, no SVI, no interpolation in strike, is introduced to answer this
+question. The test uses only prices on the chain, differenced. If the answer depends on
+a model the answer is the model's.
+
+## D-093 — The discount factor gets referees, and one of them is not as independent as it looks
+**Date:** 2026-09-16 · **Produced by:** `scripts/discount_referee.py` (to be added) · **Applies to:** `discount()` in `scripts/measure_band.py`
+
+`D` is read off the chain (D-073) and is the one number every other number divides
+through. It is mathematically identified and needs no forward, so there is no
+circularity with `forward()`. It should still not be the only estimate of itself. Four
+referees are recorded side by side, each converted to an implied annual rate
+`r = −ln(D)/T` so they can be read in one unit.
+
+1. **The current estimator.** The median over shared brackets of the put-side minus
+   call-side residual, `1 − D`.
+2. **The parity slope across the chain.** `C(K) − P(K) = D·F − D·K`, so a least-squares
+   slope of `C − P` against `K` over the strikes near the forward is `−D`. **This is
+   not an independent referee.** The current estimator is the finite-difference form
+   of the same identity: per bracket, `[C(a) − C(b)]/w + [P(b) − P(a)]/w` is exactly
+   `−Δ(C − P)/ΔK`. Referee 2 re-estimates the same quantity with a different estimator
+   (least squares instead of a median of brackets; mids as well as marks). It is
+   recorded as an **estimator-consistency check** and is labelled that way in the
+   output. The review synthesis called it independent; that is the one technical
+   correction this record makes to it.
+3. **The futures basis.** The archive holds no futures stream — the Deribit payload
+   is options only — but every option row carries Deribit's `underlying_price` for its
+   expiry, which is the listed future's price where one is listed and a synthetic
+   otherwise. `D_fut = index_price / median(underlying_price)` is therefore computable
+   from the existing archive, back to its first day. Whether a given expiry's
+   underlying is a listed future or a synthetic is not stated in the payload and is
+   recorded as **UNKNOWN** per expiry. Adding a futures stream to the collector would
+   settle it and is logged in `docs/BACKLOG.md` rather than done here, because it
+   changes the archive format.
+4. **An external USD rate.** A sanity check, not the "correct" rate: crypto option
+   pricing may embed collateral basis, cross-currency basis, funding and
+   venue-specific financing, and the objective is consistency, not forcing Deribit
+   into SOFR. `measure.yml` has no network access, so the external rate is a dated
+   constant with its source URL written next to it, entered by hand — the only number
+   in the measurement path that does not come from the archive, and it is marked as
+   such. Until a value is entered it prints `UNKNOWN` and is skipped.
+
+The differences are reported in basis points in three separate columns, because they
+mean three different things: 1 − 2 is estimator disagreement; 1 − 3 is the
+financing/collateral basis between the option chain and its future; 1 − 4 is the
+distance from an external money-market rate. No referee is declared right.
+
+## D-094 — The two-expiry test is a stress test, not a bound; an interpolant is reported as a sensitivity
+**Date:** 2026-09-16 · **Supersedes in part:** the wording of D-079 and D-082 and the docstrings of `scripts/measure_sensitivity.py`, which describe the settlement-date value as lying "between" the two bracketing chains
+
+D-079 introduced the requirement that a rung survive both Deribit expiries that
+bracket the Kalshi close, and the sensitivity script's `judge()` reads a bid above both
+as "cannot be explained by the gap". The argument behind that is monotonicity: a tail
+probability grows with maturity, so the settlement-date value lies between the early
+and the late chain.
+
+That is not a theorem about a discounted state price. `D·Q(S_T > K)` is not monotone in
+`T` in general — the discount factor falls with maturity, the risk-neutral drift and
+the term structure of volatility can move the tail either way, and the two chains
+carry different `D`, different forwards and different liquidity. Requiring survival at
+both ends is a **conservative maturity stress test**: a rung that fails it has not
+survived, and a rung that passes it has passed a stress test, not cleared a bound.
+
+The wording is changed accordingly in `docs/METHODOLOGY.md`, in the docstrings and
+the reading notes of `scripts/measure_sensitivity.py`, and in Research Note 1. The
+arithmetic is not changed — the test remains as computed.
+
+In addition, three numbers are shown together for each year-end rung: the early-expiry
+DSP, the late-expiry DSP, and a linear-in-time interpolant to the settlement instant.
+The interpolant is a **sensitivity** with a stated formula, not a "true target value",
+and it is not a model of the term structure. On the current chains the band is
+−165 hours and +2,019 hours, so the interpolant sits within 8% of the way from the
+early chain to the late one; it will say little until nearer expiries exist. No
+volatility surface is built to close the year-end gap; as Deribit lists weeklies that
+straddle 1 January, real expiry convergence is preferred over model complexity.
+
+## D-095 — "Quoted-executable discrepancy" and "size-executable opportunity" are two different claims, and only the first has been made
+**Date:** 2026-09-16 · **Applies to:** every surface that describes an edge — `docs/METHODOLOGY.md`, `README.md`, `web/index.html`, `drafts/RESEARCH_NOTE_1.md`
+
+The executable envelope (D-076) prices every leg at a quote that exists and pays both
+venues' published fees (D-077). What it establishes is a **quoted-executable
+discrepancy**: at top-of-book quotes, one of the two trades leaves something after
+fees.
+
+It does not establish a **size-executable opportunity**. That would require depth
+beyond the best level, the option contract multiplier and minimum size, sizing the
+option spread against the prediction contract, legging risk across two venues,
+partial fills, quote staleness inside the sync window, fees at the executed rather than
+the quoted price, and slippage. The `depth` and `value` fields in
+`scripts/measure_band.py` describe the best level only and say so.
+
+From here on the two phrases are used and not interchanged. A top-of-book discrepancy
+is not described as a trade, an opportunity, or an edge that can be taken, without the
+second standard being met — and no measurement in the repository meets it yet.
+
+## D-096 — The year-end family is frozen at 44 rungs; no multiple-testing correction is applied; future data is a forward holdout
+**Date:** 2026-09-16 · **Applies to:** the Kalshi year-end ladders (`KXBTCY`, `KXETHY`) as measured in `findings/latest.json`
+
+### Why not Benjamini–Hochberg
+The quoted-edge framework does not produce a p-value per rung. There is no null
+distribution behind "bid minus executable high minus fees is positive", the rungs of
+one ladder are read from one chain in one instant and are not independent, and the
+snapshots of one rung are a time series of the same contract. Dressing the count in
+false-discovery-rate arithmetic would manufacture the independence it lacks. It is not
+done.
+
+### What is done instead
+1. The current year-end universe is frozen: **44 distinct rungs** across both assets,
+   as the findings file records.
+2. The family size is stated with every family-level result.
+3. The test is pre-declared: the executable envelope with both venues' fees, survival
+   at both bracketing expiries, and — for the one rung it applies to — the local-grid
+   kill test of D-092.
+4. Rungs discovered later are not added to this claim set. They begin a new family.
+5. Results are reported at family level, in the form "n of 44 current year-end rungs
+   survived the declared test".
+
+Data collected after this date is a **forward holdout** for these 44 rungs. For new
+hypotheses the sequence is now a stated methodological principle: **discovery →
+hypothesis freeze → forward, untouched test.** A hypothesis formed on data that is then
+scored on the same data is a description, not a result.
+
+## D-097 — Research Note 1 is reframed around what survives the controls, and a mostly-null result is the result
+**Date:** 2026-09-16 · **Supersedes:** the framing of `drafts/RESEARCH_NOTE_1.md` as written on 2026-09-15 ("Four dollars and sixty-nine cents") · **Depends on:** D-092, D-093, D-094, D-095, D-096
+
+The same-state question is not the flagship commercial thesis (D-091) and it is not
+expanded indefinitely. It is finished, as a defensible research note.
+
+The question the note answers: **how much apparent prediction-market / options
+divergence survives execution, maturity, settlement and strike-grid controls?** The
+contribution is not "we also computed options-implied state prices" — several
+products already do that (D-098). The contribution is that many apparently large
+cross-market discrepancies shrink or disappear when the controls are applied
+correctly, and the note shows each control doing its work: the Polymarket figure that
+went from 24.2% to 10.3% under the same repairs (D-085); the two of three year-end
+rungs that the maturity stress test removed (D-079); the one that remains, and what the
+kill test of D-092 says about it.
+
+The note contains: the inverse-option state-price derivation; the discount convention
+(D-073) and its referees (D-093); executable envelopes (D-076); fee treatment (D-077);
+maturity sensitivity as a stress test (D-094); settlement semantics
+(`scripts/audit_semantics.py`, D-075); grid sensitivity; family-level persistence over
+the frozen 44 (D-096); explicit retractions; and the final status of "ETH above $5k"
+after D-092 has run. It does not contain a forecast-quality claim — the validation
+sample is nine informative independent events, and no scoring is run on it. A
+mostly-null result is acceptable and is expected.
+
+## D-098 — Competitors exist, and the novelty claim is narrowed to the discipline, not the comparison
+**Date:** 2026-09-16 · **Produces:** `docs/COMPETITORS.md`
+
+"Prediction-market price versus Deribit option-implied probability" is not sufficient
+differentiation. The review named at least four prior or parallel efforts on the same
+comparison — Fabi et al. / Fair Odds, FairOdds, PolyGap and Block Scholes — and a
+permanent register is created so they are not rediscovered in six months. Each entry
+carries name, URL, category, what they do, method, target user, data, strengths,
+weaknesses, overlap, differentiation and the date last checked; any field that could
+not be verified from the source is written `UNKNOWN` rather than guessed (rule 1).
+
+Where the project may differ — and this is a hypothesis about differentiation, not an
+established one — is in the discipline rather than the comparison: model-light
+reconstruction, explicit quote-side execution bounds, refusal where no two-sided quote
+exists, settlement semantics read verbatim, maturity and grid controls, adversarial
+methodology, and transparent retractions. Novelty is not overstated in any document;
+the register is the check on that.
+
+## D-099 — The product is staged V0 → V1 → V2 behind evidence gates, and the research is not the Builders submission
+**Date:** 2026-09-16 · **Produces:** `docs/PRODUCT_ROADMAP.md`, gates in `docs/DECISION_GATES.md`
+
+No full cross-venue router is built. The product emerges in three stages, each of
+which needs evidence before the next:
+
+- **V0 — same-event payoff card.** BTC/ETH Polymarket price markets only. A
+  Polymarket-native, ticket-adjacent utility showing the Polymarket bid/ask and fee,
+  the state-price / call-spread reference, the execution envelope, the clock mismatch,
+  the settlement source, a simple scenario payoff, and basis/carry fields where
+  available. If product testing reaches routing, only the Polymarket leg is routed
+  through the Builders framework. The words BUY, SELL, EDGE, ALPHA and ARBITRAGE do not
+  appear unless literally justified, and D-095 says when they are not.
+- **V1 — event hedge studio.** Adds the user's view, target, horizon, capital and
+  maximum loss; perpetual/future comparison with funding and basis; options and
+  spreads; scenario analysis. Output: a small set of feasible exposure structures.
+- **V2 — basis-aware exposure engine.** Only after demonstrated usage of V1.
+  Potential expansion from crypto to equity indices and selected commodities, with
+  basis normalisation, carry, multi-venue exposure and a deeper scenario/risk engine.
+
+The current research is the credibility and methodology layer, not the product
+submitted to the Polymarket Builders programme; the preferred V0 is the payoff/hedge
+card, positioned as the first module of the event hedge studio. Success there is
+measured by users, repeated sessions, attributed routed trades and volume, and
+conversion from comparison to execution — not by methodological sophistication,
+stars, screenshots or grant acceptance. The product is not built to satisfy a grant;
+it continues without one only if users value it.
+
+The "best fit" that V1 shows means best under the user's explicit, stated constraints.
+It does not mean financial advice, highest expected return, true value, or the
+objectively best trade, and the interface says so where it shows it.
+
+## D-100 — BTC and ETH remain the only measured assets; indices are gated; WTI is a research case; ETF proxies are rejected
+**Date:** 2026-09-16 · **Relates to:** B-001, B-002, B-017 in `docs/BACKLOG.md`
+
+Research production stays on BTC and ETH. Nothing is broadened for presentation value.
+
+**Equity indices (S&P 500, Nasdaq-100)** are the next feasibility target and only
+that. They are not measured until a real option-chain data path exists, the licensing
+implications are understood, and settlement comparability is verified. Yahoo-quality
+data is not assumed sufficient; B-017 records that the one workflow that tests the
+free route has no recorded result.
+
+**WTI / oil** is valuable as a **research case** for exposure design (D-091, Layer B)
+because it exhibits a futures / crypto-synthetic basis, carry and funding, a benchmark
+mismatch, and event-market thresholds. The motivating example — an economic benchmark
+near 105 while a crypto-venue synthetic trades near 99, so that a short opened on the
+venue starts 5–6% away from the price the view is about — is recorded in
+`docs/EXPOSURE_ENGINE.md` as an **illustration supplied by the owner, not a number
+measured by this repository**, which collects no oil venue. No product-grade WTI
+coverage is claimed until proper listed-derivatives data exists.
+
+**Other assets.** Single stocks: low priority. Gold and silver: later, only with
+correct listed-derivative data. Rates and FX: not near-term. **ETF proxies are
+rejected** where tracking error, roll, fees, dividends, early exercise or basis add
+more noise than information — which closes B-002 as rejected-with-reasoning rather
+than deleting it.
+
+## D-101 — Validation thresholds are heuristics, waiting is a strategy, and the do / wait / do-not lists are written down
+**Date:** 2026-09-16 · **Applies to:** `docs/RESEARCH_ROADMAP.md`, `docs/DECISION_GATES.md`
+
+### Validation sample
+Nine informative independent events is too few for any forecast-quality claim, and it
+stays that way until it is not. Planning thresholds, stated as heuristics and not as
+statistical laws: **exploratory** around 30–50 independent events; **preliminary**
+around 100–200; **stronger publication** around 300 or more, or a sufficiently narrow
+uncertainty under a pre-specified evaluation design. More important than the count:
+independence of events, useful lead time, horizon diversity, an untouched holdout, and
+regime diversity. Many snapshots of one contract are never counted as many events —
+`scripts/inventory_validation.py` already collapses them and that stays the rule.
+
+### Waiting
+Two of the project's weakest parts improve by themselves: the 165-hour expiry band
+closes when Deribit lists the weeklies straddling 1 January (expected to appear from
+late November), and the validation sample grows by roughly two informative independent
+events a day since the collector defect fixed on 2026-09-15. No work is done to close
+the band; waiting is free.
+
+### The lists
+**Do now:** the ETH > $5k kill test (D-092); the discount referees (D-093); the
+Note 1 claim freeze (D-096, D-097); this documentation.
+**Do while data accumulates:** the outcome pipeline and a validation schema; the
+exposure-design methodology; a minimal futures / perpetual funding ingest (a collector
+change, so it is planned and asked about before it is built); cross-asset data and
+licensing feasibility; limited user discovery.
+**Wait:** full calibration conclusions; broad cross-asset research; any large product
+build.
+**Do not:** generic dashboard expansion; alerts; a broad API product; an ML prediction
+engine; an "AI probability" layer; cosmetic interface expansion as a goal; SVI or any
+volatility surface adopted because it sounds quantitative; replacing methodological
+uncertainty with model complexity.
+
+## D-102 — Project 3 is customer discovery only, and the portfolio is written down
+**Date:** 2026-09-16 · **Produces:** the Project 3 section of `docs/STRATEGY.md`, entries in `docs/IDEA_BACKLOG.md`
+
+A commercial-first track (Project 3) is not coded now. What is kept is a
+customer-discovery backlog. The most promising problem family identified in the review
+is a post-alert crypto compliance / investigation workflow — alert → evidence
+gathering → transaction reconstruction → case notes → decision or escalation →
+closure evidence — with a small VASP, crypto platform, fintech compliance team or
+prediction-market operator as the potential buyer. Other discovery candidates:
+settlement and integrity tooling for prediction-market operators; cross-venue
+execution-quality analysis; collateral and settlement optimisation; stablecoin reserve
+and compliance workflow; Builder attribution and economics tooling. No revenue
+projection enters any decision without real buyer evidence, and no Project 3 code is
+written before customer discovery has been done.
+
+The portfolio as a whole: Project 1, on-chain and prediction-market research (wallet
+behaviour, integrity, measurement, datasets); Project 2A, Divergence research; Project
+2B, exposure-design research; the Project 2 product spin-off (payoff card → event
+hedge studio → basis-aware exposure engine); Project 3, customer discovery only. If
+only three outputs may exist in six months they are: Research Note 1; the
+resolved-event dataset with its validation specification; and the Polymarket-native
+payoff / hedge card MVP only if discovery supports it, otherwise an exposure-design
+research note in its place.
