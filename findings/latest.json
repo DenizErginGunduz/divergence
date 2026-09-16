@@ -63,27 +63,27 @@
    },
    "intraday": {
     "model_free": true,
-    "exceeding": 222,
-    "measured": 3083,
-    "quotable": 1283,
-    "percent": 17.3,
-    "percent_of_all_rungs": 7.2,
-    "mean_envelope": 0.1486,
+    "exceeding": 185,
+    "measured": 2680,
+    "quotable": 1187,
+    "percent": 15.6,
+    "percent_of_all_rungs": 6.9,
+    "mean_envelope": 0.1427,
     "edge_value_max": 3662.99,
-    "edge_value_median": 45.68,
-    "edge_value_total": 42098.23,
+    "edge_value_median": 35.72,
+    "edge_value_total": 34157.57,
     "off_grid_quotes": 0,
-    "mean_density": 1.1624,
+    "mean_density": 0.9961,
     "mean_discount_factor": 0.999909,
     "discount_fallbacks": 4,
-    "expiry_gap_hours_median": -2.0,
+    "expiry_gap_hours_median": -10.0,
     "ladders": [
      "cumulative",
-     "exhaustive"
+     "exhaustive",
+     "incomplete"
     ],
     "expiry_side": [
-     "after",
-     "before"
+     "after"
     ],
     "series": [
      "BTC intraday",
@@ -92,12 +92,12 @@
      "ETH intraday cum"
     ],
     "stability": {
-     "distinct_rungs": 2871,
-     "total_observations": 3083,
-     "observations_per_rung": 1.1,
-     "always_exceeds": 196,
-     "sometimes_exceeds": 15,
-     "never_exceeds": 2660,
+     "distinct_rungs": 2680,
+     "total_observations": 2680,
+     "observations_per_rung": 1.0,
+     "always_exceeds": 185,
+     "sometimes_exceeds": 0,
+     "never_exceeds": 2495,
      "always_exceeding_list": [
       {
        "rung": "BTC intraday cum:KXBTCD-26SEP1510-T72999.99",
@@ -366,27 +366,31 @@
   },
   "exhaustiveness_constraint": {
    "corrected": {
-    "measured": 136,
-    "mean_ratio_to_discount": 2.479,
+    "measured": 125,
+    "mean_ratio_to_discount": 0.9977,
     "min_ratio_to_discount": 0.9945,
-    "max_ratio_to_discount": 76.1047,
-    "departure_percent": 147.9
+    "max_ratio_to_discount": 1.0,
+    "departure_percent": -0.2
    },
    "naive_a": {
-    "measured": 136,
-    "mean_ratio_to_discount": 2.479,
+    "measured": 125,
+    "mean_ratio_to_discount": 0.9977,
     "min_ratio_to_discount": 0.9945,
-    "max_ratio_to_discount": 76.1047,
-    "departure_percent": 147.9
+    "max_ratio_to_discount": 1.0,
+    "departure_percent": -0.2
    },
    "naive_b": {
-    "measured": 136,
-    "mean_ratio_to_discount": 2.6272,
-    "min_ratio_to_discount": 1.0714,
-    "max_ratio_to_discount": 76.604,
-    "departure_percent": 162.7
+    "measured": 125,
+    "mean_ratio_to_discount": 1.1322,
+    "min_ratio_to_discount": 1.0843,
+    "max_ratio_to_discount": 1.5007,
+    "departure_percent": 13.2
    },
-   "note": "An exhaustive bucket set is worth the discount factor D today, because buying every bucket buys a dollar at expiry with certainty. That is arithmetic, not a preference, so a departure from D says the computation is wrong without saying which bucket is wrong. The figures below are total/D, so 1.0000 is the target. Until D-073 the target was written as 1 and the sum landed on 1 for any D, which made the check blind to the convention bug. See D-067 for the boundary rule and D-073 for the discount."
+   "note": "An exhaustive bucket set is worth the discount factor D today, because buying every bucket buys a dollar at expiry with certainty. That is arithmetic, not a preference, so a departure from D says the computation is wrong without saying which bucket is wrong. The figures below are total/D, so 1.0000 is the target. Until D-073 the target was written as 1 and the sum landed on 1 for any D, which made the check blind to the convention bug. See D-067 for the boundary rule and D-073 for the discount. Only a ladder that is a partition is summed, one event per series; cumulative ladders (every rung P(S > K) at its own threshold) and incomplete ones (a hole in the archived ladder) are counted in ladders_set_aside instead (D-105).",
+   "ladders_set_aside": {
+    "cumulative": 10,
+    "incomplete": 7
+   }
   }
  }
 }
