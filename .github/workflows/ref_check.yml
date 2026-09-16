@@ -1,7 +1,11 @@
 name: ref-check
 
-# Checks decision references: every D-XXX number mentioned in the docs or the
-# interface must have a counterpart in DECISIONS.md.
+# Two checks on the written pages.
+#
+# 1. Decision references: every D-XXX number mentioned in the docs or the
+#    interface must have a counterpart in DECISIONS.md.
+# 2. README numbers: the result sentences in README.md must still match
+#    findings/latest.json (D-090).
 #
 # Why it exists: the finding cards in the interface printed "D-049" and
 # "D-045 . D-046 . D-066" while those decisions had never been written. The
@@ -50,3 +54,13 @@ jobs:
       # A dangling reference exits 1 -> the run goes red.
       - name: Check decision references
         run: python scripts/ref_check.py --list
+
+      # Same idea, different failure: the README had copied measured numbers
+      # into prose and the prose went stale while every generated surface stayed
+      # correct (D-090). This rebuilds those sentences from findings/latest.json
+      # and demands them verbatim. Self-test first, for the same reason as above.
+      - name: README checker self-test
+        run: python scripts/check_readme.py --self-test
+
+      - name: Does the README still match the findings
+        run: python scripts/check_readme.py
