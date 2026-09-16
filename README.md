@@ -107,6 +107,8 @@ scripts/               measurements; scripts/legacy/ does not run, by design
 findings/latest.json   measurement output, written by CI
 web/index.html         the terminal, reads the archive live
 docs/                  methodology, data sources, product and design decisions
+docs/STRATEGY.md       what the project is now (three layers), read with RESEARCH_ROADMAP,
+                       PRODUCT_ROADMAP, DECISION_GATES, COMPETITORS, IDEA_BACKLOG (D-091)
 ```
 
 ---
@@ -179,4 +181,7 @@ Known gaps, tracked openly:
   committed. The full archive lives in a private mirror (docs/DATA_SOURCES.md).
 - 149 of 460 flow markets hit the fetch limit in the run of 2026-09-16T0504Z with no
   gap flagged. Probably fine, not verified.
-- Assets beyond BTC and ETH are collected but not measured.
+- Assets beyond BTC and ETH are collected but not measured (D-100).
+- The one year-end rung that clears the maturity stress test, ETH above $5,000, is an
+  anomaly requiring confirmation until the pre-committed kill test of D-092 has run.
+  It is not called a finding, an artefact or noise before that.
