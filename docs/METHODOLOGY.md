@@ -1,7 +1,9 @@
 # METHODOLOGY.md
 
-Updated 2026-09-15. The previous version of this document was wrong in three
-places; the corrections and their reasons are below and in `DECISIONS.md`.
+Updated 2026-09-16. The previous version of this document was wrong in three
+places; the corrections and their reasons are below and in `DECISIONS.md`. The
+external review of 2026-09-16 added three clarifications without changing any
+arithmetic — section 0b.
 
 **Read this first.** Between 2026-09-14 and 2026-09-15 the measurement was taken
 apart and rebuilt to be defensible (D-073 to D-080). Three things changed that
@@ -86,6 +88,49 @@ schedule in `scripts/fees.py`; there is no settlement fee. The rounding is per
 ORDER, so an edge has no meaning until a size is named. Then the resting size at
 the quote being hit turns the edge into dollars. Live on 2026-09-15 the three
 surviving rungs were worth **$4.69 between them**.
+
+---
+
+## 0b. Three clarifications from the external review (2026-09-16)
+
+None of these changes a computed number. Each changes what a number is allowed to
+be called.
+
+**The two-expiry test is a stress test, not a bound** (D-094). Step 4 is run against
+both Deribit expiries that bracket the prediction market's close, and a rung must
+clear the option value at each. Earlier wording — here, in D-079 and in
+`measure_sensitivity.py` — said the settlement-date value "lies between" the two
+chains. That is a monotonicity argument about a tail probability, and `D·Q(S_T > K)`
+is not monotone in maturity in general: the discount factor falls with `T`, the two
+chains carry different `D`, forwards and liquidity, and the term structure can move a
+tail either way. A rung that fails the test has not survived; a rung that passes has
+passed a **conservative maturity stress test**, not cleared a bound. Alongside the
+early and late values, a linear-in-time interpolant to the settlement instant,
+
+    dsp(T*) = dsp(T1) + (T* − T1) / (T2 − T1) · [dsp(T2) − dsp(T1)]
+
+is reported as a **sensitivity** with a stated formula — never as the settlement-date
+value, and never as a model of the term structure. No volatility surface is built to
+close the gap; nearer expiries close it (D-101).
+
+**Quoted-executable is not size-executable** (D-095). Step 4 establishes a
+**quoted-executable discrepancy**: at top-of-book quotes, after both venues' fees, one
+of the two trades leaves something. It does not establish a **size-executable
+opportunity**, which would need depth beyond the best level, the option multiplier and
+minimum size, sizing the spread against the contract, legging across venues, partial
+fills, quote staleness inside the sync window, fees at the executed price, and
+slippage. No measurement in the repository meets the second standard, and no surface
+describes the first as if it did.
+
+**The claim set is frozen, and the count is a family-level statement** (D-096). The
+44 year-end rungs measured in `findings/latest.json` are the declared family. No
+p-value or false-discovery correction is applied to the quoted-edge count — the
+framework produces no independent p-values per rung, and dressing it in one would
+manufacture independence it lacks. Results are stated as "n of 44 in the declared
+family"; rungs found later start a new family; data after 2026-09-16 is a forward
+holdout. For every hypothesis from here on: discovery → hypothesis freeze → forward,
+untouched test. The one rung that survives the stress test carries a pre-committed
+kill test whose verdict rules were written before its number (D-092).
 
 ---
 
@@ -302,6 +347,14 @@ Added (D-076): **edge** is permitted, narrowly, and only for the result of the
 two-trade test at quoted prices after fees. It is a necessary condition for a
 trade and never a claim that one exists. "Arbitrage opportunity" remains banned.
 
+Added (D-095): **quoted-executable discrepancy** — what the two-trade test
+establishes at top-of-book quotes after fees; **size-executable opportunity** — the
+standard that depth, multiplier, legging, fills, staleness and slippage would have to
+meet, and that nothing here meets. The two are never interchanged.
+
+Added (D-094): **maturity stress test** for the two-expiry requirement; "bound" is
+not used for it. Added (D-096): **declared family** and **forward holdout**.
+
 ---
 
 ## 7. Still open
@@ -312,14 +365,19 @@ trade and never a claim that one exists. "Arbitrage opportunity" remains banned.
   2026-09-15; daily ladders now arrive live for the first time. Scoring should
   wait for the corrected collector to accumulate rather than run on this.
 - The one rung that survives the expiry band, ETH above $5,000, survives by about
-  0.4 cents — a margin comparable to the 12.6% strike-grid uncertainty, which has
-  not been measured on the chain that decides it (D-079).
-- BRTI against the Deribit index: size UNKNOWN, and measurable from data already
-  archived (D-075).
-- The internal identifiers are still `p` and `opt`; the `discounted_state_price`
-  naming reached the documents and the screen but not the code (D-074).
-- The measurement pipeline reads only the 14-day public window. The private
-  mirror holds everything since 2026-08-30 and is not read by CI.
+  0.4 cents — a margin comparable to the strike-grid uncertainty on the chain that
+  decides it (D-079). A pre-committed local-grid kill test is specified in D-092 and
+  its verdict is pending.
+- The discount factor has one estimator. Referees — the parity slope as an
+  estimator-consistency check, the futures basis from `underlying_price`, an external
+  rate as a dated constant — are specified in D-093 and pending.
+- BRTI against the Deribit index: measured, 63 paired readings, median under a
+  basis point (`findings/settlement_basis.json`, D-075). The averaging window and the instant
+  remain unmeasured.
+- ~~The internal identifiers are still `p` and `opt`~~ — renamed to `dsp` across the
+  code in D-086; `opt` kept deliberately.
+- ~~The measurement pipeline reads only the 14-day public window.~~ `measure.yml`
+  reads the private mirror on a manual run and records which archive it read (D-089).
 - Layer 4 (Breeden–Litzenberger) is not built; the data is ready.
 - Reference accumulation started 2026-08-30 but is not yet long enough to produce
   a statistic, and section 3 was never implemented.
