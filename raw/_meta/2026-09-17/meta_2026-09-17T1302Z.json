@@ -1,0 +1,69 @@
+{
+ "snapshot_utc": "2026-09-17T13:02:39.585650+00:00",
+ "total_seconds": 148.05,
+ "sync_window_seconds": 0.83,
+ "source_marks_seconds": {
+  "start": 0.0,
+  "deribit_end": 0.66,
+  "polymarket_end": 0.83,
+  "kalshi_end": 29.6
+ },
+ "stage_seconds": {
+  "deribit": 0.66,
+  "polymarket_events": 0.17,
+  "kalshi": 28.77,
+  "flow": 117.37,
+  "holders": "skipped (once a day)"
+ },
+ "errors": {},
+ "complete": true,
+ "flow_summary": {
+  "markets": 464,
+  "out_of_scope_markets": 253,
+  "new_trades": 4517,
+  "limit_hit": 175,
+  "WITH_GAP": 0,
+  "first_time": 58,
+  "pagination_tried": 11,
+  "pagination_worked": 11
+ },
+ "kalshi_summary": {
+  "catalogue": {
+   "Crypto": 274,
+   "Financials": 1035
+  },
+  "crypto_series_tracked": 62,
+  "observed_series_tracked": 30,
+  "series_returning_markets": 22,
+  "total_markets": 7019,
+  "observed_markets": 658
+ },
+ "holders_unexpected": null,
+ "files": [
+  {
+   "file": "raw/deribit/2026-09-17/deribit_2026-09-17T1302Z.json.gz",
+   "bytes": 71086
+  },
+  {
+   "file": "raw/polymarket_events/2026-09-17/polymarket_events_2026-09-17T1302Z.json.gz",
+   "bytes": 329906
+  },
+  {
+   "file": "raw/kalshi/2026-09-17/kalshi_2026-09-17T1302Z.json.gz",
+   "bytes": 482928
+  },
+  {
+   "file": "raw/events/trades/2026-09-17/trades_2026-09-17T1302Z.ndjson.gz",
+   "bytes": 311204
+  },
+  {
+   "file": "raw/coverage/2026-09-17/coverage_2026-09-17T1302Z.json",
+   "bytes": 168103
+  }
+ ],
+ "assets": [
+  "bitcoin",
+  "ethereum"
+ ],
+ "version": 5
+}
