@@ -23,37 +23,36 @@ question; **differentiation** lists only what is evidenced on the page read.
 
 ---
 
-## 1. Fabi, Schönleber, Ruffo & Marfè — DIRECT (academic)
+## 1. Fabi, Marfè, Ruffo & Schönleber — and FairOdds, which is the same team — DIRECT
 
 | field | value |
 |---|---|
-| NAME | "Market Efficiency in Prediction Markets — A Comparison with Derivatives" — Michele Fabi, Lorenzo Schönleber, Vittorio Ruffo, Roberto Marfè. The review synthesis called it "Cross-Market Pricing in Prediction Markets"; that title does not appear on the SSRN listing and is recorded here as the synthesis's error, not the paper's. |
-| URL | https://papers.ssrn.com/sol3/papers.cfm?abstract_id=6565258 |
-| CATEGORY | research paper |
-| HOW READ (2026-09-16) | **The SSRN page itself was not read.** It returned a Cloudflare bot check ("Performing security verification") on two attempts and the check was not circumvented. Title, authors, date and abstract come from the SSRN listing as surfaced in search, and from a conference-programme copy at aifinconf.org (file/2025/7-1.pdf), whose host refused the fetch. Every field below is therefore second-hand and marked accordingly. |
-| WHAT THEY DO | Compares Polymarket BTC and ETH prices against benchmarks derived from option-implied risk-neutral distributions. Reported sample: **nearly 5,000 contracts**. Finding: Polymarket prices broadly track the derivative-implied benchmark, and **deviations concentrate in tail and barrier contracts** and vary with sentiment, attention, volatility, demand and market frictions. Dates given in different places as 12 and 20 April 2026. |
-| METHOD | UNKNOWN in detail — second-hand. "Option-implied risk-neutral distributions extracted from the derivatives market" is the phrase used. Whether the digital is taken from a spread or from a fitted surface: UNKNOWN. Executable prices, fees, expiry matching: UNKNOWN. |
-| TARGET USER | Academic |
-| DATA | Polymarket; derivatives benchmark venue not confirmed second-hand |
-| STRENGTHS | Sample two orders of magnitude larger than ours; peer-review track; a cross-sectional explanation of the deviations rather than only measurement |
-| WEAKNESSES | UNKNOWN until the paper is read in full |
-| OVERLAP | **High.** This is our Layer A question on a much larger sample. |
-| DIFFERENTIATION | Claimed, not evidenced, until the paper is read: executable envelopes, both fee schedules, expiry-band and grid sensitivity, settlement-text audits, Kalshi. Do not assert any of these as differentiation from *this* paper before reading it. |
-| WHAT IT COSTS US | The tail concentration is the finding our own three rungs pointed at. Note 3 (long-shot premium) has prior work. Reading the paper in full is a prerequisite for Note 3 — logged as B-025 — and citing it is a G2 publication-gate item for Note 1. |
-| DATE LAST CHECKED | 2026-09-16 |
+| NAME | "Cross-Market Pricing in Prediction Markets: A Comparison with Derivatives" — M. Fabi (Telecom Paris / ENSAE), R. Marfè (Collegio Carlo Alberto & Turin), V. Ruffo (Frankfurt School), L. Schönleber (Collegio Carlo Alberto & Turin), 31 August 2026 · and **FairOdds**, the live product built on it |
+| URL | https://papers.ssrn.com/sol3/papers.cfm?abstract_id=6565258 · https://fairodds.io/ · https://fairodds.io/methodology · https://zoquantsolutions.com/ |
+| CATEGORY | research paper + live product, one team |
+| HOW READ | Paper **read in full 2026-09-18** from the 95-page PDF supplied by the owner (the SSRN page itself was behind a bot check on 2026-09-16 and the first version of this entry was second-hand; see the correction in D-110). Site read 2026-09-18. |
+| TITLE HISTORY | The PDF's own first-page footnote: *"This paper previously circulated as ‘Market Efficiency in Prediction Markets: A Comparison with Derivatives’."* Both titles are real. Recorded because this register briefly asserted the opposite. |
+| WHAT THEY DO | Compare Polymarket BTC and ETH contracts against option-implied benchmarks (OIP) from Deribit. Four contract types: **Above** and **Range** (terminal-value, European cash-or-nothing digitals) and **Reach** and **Dip** (upper/lower barrier, one-touch / first-passage). The object of study is the **CLOB−OIP wedge** and what explains it — payoff structure, maturity, directional demand, sentiment, announcements, volatility, cross-exchange fragmentation, wallet size — organised by a limits-to-arbitrage model with a specialist sector. |
+| SAMPLE | **4,860 contracts** (2,550 BTC, 2,310 ETH), ~**4.4 million trades**, **927,450** hourly CLOB−OIP observations. Deribit surfaces January 2023 – December 2025; contract-level sample January 2024 – November 2025. |
+| METHOD | Deribit data **bought from Amberdata** as hourly fixed-delta implied-volatility surfaces — not the option chain. Black pricing to recover strikes and forward prices, then the **Kou (2002) double-exponential jump-diffusion** calibrated at 7, 14, 30 and 60 days, which prices terminal and barrier payoffs in one framework. No-lookahead enforced at the CLOB timestamp. On the live site the comparison is struck against the Polymarket **YES midpoint**. |
+| FEES AND EXECUTION | The paper has appendices measuring Polymarket bid-ask spreads (III.6) and on-chain gas fees (III.5), used as descriptive and regression variables. Neither is charged against the wedge, and the option leg has no executable side by construction. The word "fee" does not appear on the methodology page at all. |
+| WHAT THEY SAY ABOUT EXPLOITABILITY, VERBATIM | Paper: wedges are interpreted "as cross-market pricing wedges relative to the stated benchmark, rather than automatically as exploitable arbitrage profits." Site: "The resulting OIP is a maturity-aligned benchmark price—not an executable option quote." |
+| HEADLINE RESULTS | Contract-level time-series correlations 0.88 Above, 0.77 Range, 0.88 Reach, 0.86 Dip. 72.6% of contract-mean wedges positive; equal-contract mean +0.72 pp, median +0.63, mean absolute 2.25 pp. Reach wedge falls from 3.80 pp early in contract life to ~0 near expiry. Polymarket-implied Kou fit places more mass beyond the 5th/95th percentile cutoffs than Deribit: +0.85 / +0.82 pp for BTC, +0.21 / +0.48 pp for ETH. Larger wallets allocate more notional to larger absolute wedges. |
+| STANDING | Presented at ~13 conferences (Moscow Finance, FC26 DeFi Workshop, Scuola Normale Pisa, Global AI Finance, D2, Frontiers in DeFi and others). Schönleber: Assistant Professor, Collegio Carlo Alberto & Turin; Professor of Practice at Frankfurt School from 2027; published in the Journal of Banking and Finance and BIS Bulletin No. 115; founder of the ToDeFi conference, co-organised with the Bank of Italy since 2024. |
+| PRODUCT STATE (2026-09-18) | fairodds.io returned 504 on two attempts on 2026-09-16 and was up on 2026-09-18. Tracks 502 markets. Its own dashboard banner read "LAST MARKET UPDATE 10 Sept, 16:22 UTC" with the warning that the upstream snapshot was stale — eight days on the read date. No public repository (searched: no `fairodds`, `zoquant` or `michelefabi` GitHub account), no social accounts linked, no pricing page. Recorded as an observation on one date, not as a conclusion about the project. |
+| OVERLAP | **The highest in this register.** Same two venues, same assets, same question, a sample two orders of magnitude larger than ours, and a published economic model of the wedge. |
+| DIFFERENTIATION | Not "we do it better" — we do not. The difference is what is measured: they measure **how large the wedge is and what explains it**; Divergence measures **how much of it survives at the prices one could actually hit, after both venues' published fees**. Their own two sentences above say that second question is outside their scope. Concretely: chain rather than a bought surface, spread digital rather than Kou, executable sides rather than midpoint, both fee schedules, two bracketing expiries, strike-grid sensitivity, verbatim settlement audits, refusal on one-sided books, and Kalshi — which they do not cover at all. |
+| WHAT IT COSTS US | Any claim of novelty for the comparison itself. Note 1 says so in "What else exists" and must keep saying so. |
+| DATE LAST CHECKED | 2026-09-18 |
 
-## 2. "FairOdds" — two different sites, neither confirmed as the one meant
+## 2. fairodds.app — a different site with the same name, not a competitor
 
 | field | value |
 |---|---|
-| NAME | FairOdds |
-| URL (a) | https://fairodds.io/ — **supplied by the owner 2026-09-16 as the intended site** |
-| STATUS (a) | **UNREACHABLE.** Two attempts at ~19:0x UTC on 2026-09-16 returned `504 Gateway Time-out` from nginx/1.28.3 (Ubuntu). Nothing about the product was read. Every field for this site is UNKNOWN. Re-check before Note 1 publishes (G2). |
-| URL (b) | https://fairodds.app/implied-probability — found by search, read 2026-09-16 |
-| WHAT (b) DOES | Sports-betting calculators: odds-format conversion (decimal / American / fractional to implied probability), Kelly, EV, arbitrage, no-vig |
-| METHOD (b) | Arithmetic odds conversion. No options data, no option model, no maturity handling, no bid/ask, no fees. |
-| OVERLAP (b) | None. Does not mention Polymarket, Deribit, crypto, BTC or options. |
-| READING | The synthesis described "FairOdds" as a live Polymarket-versus-options reference-pricing product. That does not match site (b), and site (a) did not respond. Whether the described product exists is **UNKNOWN**. No claim about it is made anywhere in the repository until a page is read. |
+| URL | https://fairodds.app/implied-probability |
+| CATEGORY | live product — sports-betting calculators |
+| WHAT THEY DO | Odds-format conversion, Kelly, EV, arbitrage and no-vig calculators. No options data, no crypto, no Polymarket. |
+| WHY IT IS HERE | It surfaced first when "FairOdds" was searched on 2026-09-16 and was briefly mistaken for the product the review synthesis meant. Kept so the next person does not repeat the search. The real one is entry 1. |
 | DATE LAST CHECKED | 2026-09-16 |
 
 ## 3. PolyGap — DIRECT (live, paid)
