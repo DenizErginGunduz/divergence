@@ -44,6 +44,29 @@ worst local executable estimate is positive in 0 of 62 judged snapshots → **no
 surviving discrepancy** (D-103). The gate is closed and this section is not edited
 further.
 
+
+**The interface condition, open when this gate was first marked closed.**
+This gate requires the verdict's exact words in Note 1, `README.md` **and the
+interface**. Note 1 and the README carried them from the start. `web/index.html` did
+not, and the reason was worse than an omission: its headline card was reading the
+band's stability block from the path it occupied before the split by tenor, so it
+had been rendering "measurement unavailable" rather than any claim at all. A second
+card counted model-free setups with a flat scan and reported 1 where the answer is 3.
+
+Fixed 2026-09-17, after the gate had been marked CLOSED. `write_findings.py` now
+carries the kill test's `verdict` block into `findings/latest.json` — copied, not
+recomputed, so two places cannot disagree about it, and the 240 KB per-snapshot
+record stays out of the browser. The card reads the tenor explicitly, is labelled
+"Clear costs at quoted prices" because that is what 3/44 means (D-095), and prints
+the verdict's own words with its snapshot counts underneath. Verified by loading
+the page and reading the card, not by a syntax check; D-086 is why that distinction
+is made. Console clean, +1,068 bytes, no rebuild (D-101 forbids one).
+
+**The gate was closed on two surfaces out of three.** That is the failure D-090
+recorded for the README, one round later, on the surface D-090 had called the one
+that could not go stale. It could. It failed loudly rather than quietly, which is
+the only thing that went right about it.
+
 ## G2 — Note 1 publish (D-097)
 
 **Pass when all of:** G1 has a recorded verdict; `findings/discount_referee.json`
