@@ -2973,12 +2973,21 @@ rather than assumed (B-021). The owner then supplied the URLs. They exist. Readi
 them costs us part of the hypothesis, and this record is where that is written down.
 
 ### What the pages say, read 2026-09-16
-**The paper is real, and the synthesis had the title wrong.** Fabi, Schönleber, Ruffo
-and Marfè, **"Market Efficiency in Prediction Markets — A Comparison with
-Derivatives"** (SSRN 6565258), not "Cross-Market Pricing in Prediction Markets" as the
-synthesis called it. SSRN's own page was behind a bot check on the read date and was
-not read; the title, authors and abstract come from the SSRN listing surfaced in
-search and from a conference programme copy. It compares Polymarket BTC and ETH
+**The paper is real.** Fabi, Schönleber, Ruffo and Marfè, SSRN 6565258.
+
+> **CORRECTED 2026-09-18.** This paragraph originally read "the synthesis had the
+> title wrong" and named "Market Efficiency in Prediction Markets" as the real
+> title. That was our error, not the synthesis's. The owner supplied the PDF on
+> 2026-09-18 and its own first-page footnote settles it: *"This paper previously
+> circulated as ‘Market Efficiency in Prediction Markets: A Comparison with
+> Derivatives’."* The current title is **"Cross-Market Pricing in Prediction
+> Markets: A Comparison with Derivatives"**, dated 31 August 2026 — exactly what the
+> synthesis said. Both titles are real; we read the older one in a search listing
+> and assumed the newer one was invented. Corrected in place rather than rewritten
+> away, because the mistake is the same class the register exists to prevent:
+> asserting from a second-hand source. The SSRN page was behind a bot check on 2026-09-16 and the entry was
+written second-hand. **That is no longer the case:** the owner supplied the 95-page
+PDF on 2026-09-18 and it has been read. It compares Polymarket BTC and ETH
 prices against option-implied risk-neutral distributions across **nearly 5,000
 contracts**, and reports that prices broadly track the benchmark while deviations
 **concentrate in tail and barrier contracts** and vary with sentiment, volatility and
@@ -3027,7 +3036,9 @@ D-098 listed seven things as the possible difference. After reading:
 | claim | status after 2026-09-16 |
 |---|---|
 | model-free spread digitals | **weakened.** Block Scholes states and derives it publicly. What is left is that we *only* do this, where they also sell a surface. |
+| | *(2026-09-18: unchanged by the paper — Fabi et al. do not use a spread digital at all. Their option side is a **Kou double-exponential jump-diffusion** calibrated to **fixed-delta implied-volatility surfaces bought from Amberdata**, not a chain. That is further from a spread digital than Block Scholes, not closer.)* |
 | quote-side executable envelopes | **weakened, not removed.** Gebele et al. do depth-aware executable reconstruction on a different comparison. No entry in the register does it on the options-versus-prediction-market comparison. |
+| | *(2026-09-18: **strengthened** by reading the paper and the product. Both say in their own words that the option side is not executable — the paper interprets wedges "rather than automatically as exploitable arbitrage profits", and fairodds.io states "The resulting OIP is a maturity-aligned benchmark price — not an executable option quote." The word "executable" is still not ours alone; the measurement on this comparison still is.)* |
 | both venues' fee schedules, per-order rounding | **stands.** No entry evidences fee-schedule modelling. |
 | expiry-gap and strike-grid sensitivity | **stands.** No entry evidences either. |
 | verbatim settlement audits | **stands.** No entry evidences reading resolution text. |
@@ -3054,6 +3065,14 @@ is the true one.
   entry 2 records that the synthesis's "FairOdds" resolves to two different sites,
   one unrelated and one that did not respond; entries 4, 9 and 10 are added or
   extended. B-021 is closed.
+- **2026-09-18: fairodds.io is up, and it is the same team.** The site is built by
+  the paper's authors — the two contact addresses are Schönleber's company
+  (ZoQuant Solutions UG) and Ruffo's — and it states that it "adapts the framework
+  developed in" the paper. Register entries 1 and 2 describe one thing, not two,
+  and are merged. Its live board carried its own staleness banner on the read date
+  (last market update eight days earlier), and its comparison is struck against the
+  **YES midpoint**. It publishes no fee treatment; the word does not appear on its
+  methodology page.
 - `fairodds.io` returned **504 Gateway Time-out** on two attempts at 19:0x UTC on
   2026-09-16. The domain is confirmed by the owner; the product is UNKNOWN. It stays
   in the register as unreachable rather than as absent, and is re-checked before Note
