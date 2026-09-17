@@ -222,41 +222,27 @@ that its result is not quotable.
 
 ---
 
-## B-025 — Read the Fabi et al. paper in full (2026-09-16)
-Entry 1 in `docs/COMPETITORS.md` is second-hand: SSRN's page was behind a bot check
-on the read date and the conference copy's host refused the fetch, so the method,
-the benchmark construction and the treatment of execution and fees are all UNKNOWN.
+## B-025 — Read the Fabi et al. paper in full — CLOSED 2026-09-18
+The owner supplied the 95-page PDF. It has been read and entry 1 of
+`docs/COMPETITORS.md` is rewritten from the paper itself: the sample (4,860
+contracts, 4.4 million trades, 927,450 hourly observations), the method (fixed-delta
+surfaces bought from Amberdata, Black pricing, Kou double-exponential jump-diffusion
+at 7/14/30/60 days), the four payoff types, the headline results, and the two
+sentences in which the authors place exploitability outside their own scope.
 
-Two things depend on reading it. **Note 3** asks whether prediction markets show a
-persistent long-shot premium; this paper reports that deviations concentrate in tail
-and barrier contracts across nearly 5,000 contracts, which is the same claim on a
-sample two orders of magnitude larger, so Note 3 cannot be specified without it.
-**Note 1** needs it cited in a related-work paragraph rather than describing an empty
-field — a G2 publication-gate item.
+Two things it settled that the second-hand entry had wrong. The title: the paper's
+own footnote says it previously circulated as "Market Efficiency in Prediction
+Markets", so both titles are real and D-110's claim that the review synthesis had
+it wrong was ours to get wrong — corrected there in place. And FairOdds: the site
+is built by the same authors, so what the register held as two entries was one.
 
-Not started. The obvious routes are the SSRN page from a normal browser session, the
-authors' own pages (Schönleber lists research publicly), or the conference programme
-PDF from a host that will serve it. Whichever is used, the register entry is rewritten
-from the paper itself and the second-hand fields are replaced, not annotated.
-
----
-
-# REMOVED IN THE CORRECTNESS SPRINT — recoverable on purpose
-
-Everything below was WORKING and was taken out between 2026-09-14 and
-2026-09-15 while the measurement was being made defensible (D-073 to D-078).
-None of it was wrong to remove on methodological grounds. Several were good on
-grounds the methodology does not measure: how quickly a stranger understands
-the screen, how a recruiter reads the repository, whether the number is
-quotable.
-
-Those are real criteria for this project, not a distraction from it. The rule
-here is the same as the rest of the backlog — recorded, not built — but the
-review date is fixed: **when the 4-6 week programme ends, every item below is
-reopened and judged again, on readability and impact as well as on rigour.**
-
-Nothing here should be deleted without that review happening first.
-
+**What it opened.** Note 3 (long-shot premium) now has a specific prior result to
+be positioned against rather than a vague overlap: the Polymarket-implied Kou fit
+places more mass beyond the 5th and 95th percentile cutoffs than Deribit, by +0.85
+and +0.82 percentage points for BTC and +0.21 and +0.48 for ETH. Any Note 3 that
+does not engage that number is not worth writing. Whether our tenor and venue mix
+can say anything it does not is UNKNOWN and is the first question to answer when
+Note 3 is specified.
 ## B-011 — The "x band" grammar
 Removed by D-076, which replaced `threshold` with an executable envelope.
 
