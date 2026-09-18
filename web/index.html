@@ -278,6 +278,10 @@ const STRIP=[
 const REPO='https://raw.githubusercontent.com/DenizErginGunduz/divergence/main/';
 const API ='https://api.github.com/repos/DenizErginGunduz/divergence/contents/';
 
+/* WORDING. The screen says "quoted gap", never "edge". Working rule 7: a price
+   difference is not automatically an opportunity, and D-095 separates a
+   quoted-executable discrepancy from a size-executable one. What a card shows is
+   the first of those, and the word has to say so. */
 /* ===================== DATA ===================== */
 async function gz(p){const r=await fetch(REPO+p+'?cb='+Date.now());
  if(!r.ok) throw new Error(p+' → '+r.status);
@@ -491,8 +495,8 @@ function notableCard(x){
       <span class="t12" style="margin-left:9px;color:${r.ratio>1.5?'var(--accent)':'var(--text-3)'}">${r.ratio.toFixed(1)}×</span>
     </div>
     <div class="t10 dim2" style="margin-top:6px">${r.edge==null?'no two-sided option quote'
-      :(r.edge>0?'edge '+c2(r.edge)+(r.value==null?'':' · $'+r.value.toFixed(2)+' at top of book')
-        :'no edge · short by '+c2(-r.edge))}</div>
+      :(r.edge>0?'quoted gap '+c2(r.edge)+(r.value==null?'':' · $'+r.value.toFixed(2)+' at top of book')
+        :'no quoted gap · short by '+c2(-r.edge))}</div>
   </div>`;
 }
 function chipsRow(){
@@ -631,7 +635,7 @@ function detailPanel(r){
     <div class="t11 dim" style="display:flex;margin-bottom:12px">
       <span>bucket ${c2(r.optLow)} – ${c2(r.optHigh)}</span>
       <span style="margin-left:auto">${r.edge==null?'not quotable'
-        :(r.edge>0?'<span style="color:var(--text)">edge '+c2(r.edge)+' · '+r.direction+'</span>'
+        :(r.edge>0?'<span style="color:var(--text)">quoted gap '+c2(r.edge)+' · '+r.direction+'</span>'
                   :'short by '+c2(-r.edge))}</span></div>
     <div class="checks">
       <div>prediction ${c2(r.pmBid)} / ${c2(r.pmAsk)} · option fees ${c2(r.fee)}
