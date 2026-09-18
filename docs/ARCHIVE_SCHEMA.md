@@ -415,7 +415,18 @@ The field that governs whether a comparison is meaningful:
 ```
 
 This is the elapsed time between reading the option chain and reading the prediction
-market. Observed range so far is 0.66 to 2.04 seconds. A measured difference smaller
+market. **Measured over the 48 runs in the public window on 2026-09-18:** minimum 0.62 s,
+median 1.19 s, p90 1.93 s, maximum 3.29 s.
+
+A range is written here as a distribution and with its date, because the earlier
+wording — "0.66 to 2.04 seconds" — was a range taken once and left standing. It was
+already wrong when it was written (a 2.68 s run of 2026-09-13 was in the archive),
+and a stop condition keyed on it fired on an ordinary slow response (D-111).
+
+The two widest runs on record share one signature: the Deribit read is normal and
+the Polymarket read is slow. The window is `polymarket_end`, so it is bounded by
+whichever of the two venues answers last; nothing added to the collector after that
+mark can move it. A measured difference smaller
 than what the price can move inside that window is not a market view, it is timing
 noise. An early experiment with an eight-minute gap moved a result by 33%.
 
