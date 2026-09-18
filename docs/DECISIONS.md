@@ -3232,3 +3232,49 @@ one it contradicts.
 the folder is accurate. Renaming it to `research/` while the publication gate is open
 would be the first small overclaim, and the README says where the note stands
 instead.
+
+## D-113 — The terminal gets a plain URL; the README gets a picture of it, the badges, and nothing else
+**Date:** 2026-09-18 · **Anchored to:** D-112 — nothing below changes a number, a limitation or a claim · **Changes:** `.github/workflows/pages.yml` (new), `README.md`, `web/terminal.png` (new), repository settings (Pages, homepage, Wiki and Projects tabs), one status line each in `docs/PRODUCT.md` and `docs/DESIGN.md`
+
+### The publication decision
+`web/index.html` has been reachable only through an htmlpreview link. GitHub Pages
+is switched on, with the owner's approval, and serves the page at
+`https://denizergingunduz.github.io/divergence/`. The repository is already public
+and the page reads only files that are already public in it
+(`raw.githubusercontent.com` and the contents API), so the site exposes nothing that
+was not exposed before; what changes is that a visitor can open the terminal without
+a workaround. That is still a publication decision, which is why it has a record.
+
+### How it is served, and why that way
+By a workflow (`pages.yml`) that uploads `web/` alone, not by serving the repository
+root or `docs/`. Serving from the root would hand Jekyll the entire repository —
+the decision log, the rolling `raw/` archive of gzipped vendor payloads, the tests —
+and copy it to a public site as if it were meant to be browsed there. Uploading
+`web/` publishes exactly one file. A redirecting `index.html` at the root would have
+been one more file at the top of the tree that has nothing to do with the work. The
+workflow runs only when `web/` or itself changes; the three daily archive commits do
+not redeploy anything, because the page reads the archive live.
+
+### What the README gains
+A screenshot of the running terminal (`web/terminal.png`, taken 2026-09-18 from
+snapshot 2026-09-18T0504Z, captioned with what it shows and nothing more), the CI
+badges for `tests` and `ref-check` (they say the checks are real, and in this
+repository the checks fail builds), and the site link. The count of `measure.yml`
+steps in the status section is corrected from eleven to thirteen — two steps were
+added on 2026-09-16 (D-103, D-104) and the sentence was not updated.
+
+### What the two older documents gain
+`docs/PRODUCT.md` and `docs/DESIGN.md` describe the research screen as it stood on
+2026-09-14 and cite the numbers of their own decision records, some of which have
+moved since (the "2 of 26" of D-066 is now "3 of 44 at quoted prices, 0 of 44 under
+the full test", D-103). Each gets one status line at the top saying what it describes,
+when, and where the current numbers live. Neither is rewritten and neither is
+deleted: the design language and the screen's reasoning are still the ones in use.
+
+### What was deliberately not done, per D-112
+No number moved. No limitation was removed or softened: the nine informative
+independent events, the 0 of 44, the prior-work concession and every retraction
+stay as written. No section was added that praises the project; the picture, the
+badges and the link are things a visitor can verify, not things they are asked to
+believe. The empty Wiki and Projects tabs are switched off because an empty tab is a
+promise of content that does not exist.
