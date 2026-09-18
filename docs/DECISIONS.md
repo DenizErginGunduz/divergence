@@ -2255,7 +2255,7 @@ Eight claims in one file are now machine-checked. The rest rests on audits like 
 one, which is why they are numbered and repeated rather than treated as finished.
 
 ## D-091 — The external review is closed; the project becomes three layers, and the repository becomes its memory
-**Date:** 2026-09-16 · **Source:** `drafts/REVIEW_PACKAGE.md` reviewed independently by three AI systems and synthesised by the owner · **Produces:** `docs/STRATEGY.md`, `docs/RESEARCH_ROADMAP.md`, `docs/PRODUCT_ROADMAP.md`, `docs/COMPETITORS.md`, `docs/EXPOSURE_ENGINE.md`, `docs/DECISION_GATES.md`, `docs/IDEA_BACKLOG.md`
+**Date:** 2026-09-16 · **Source:** `the review package (kept outside the repository)` reviewed independently by three AI systems and synthesised by the owner · **Produces:** `docs/STRATEGY.md`, `docs/RESEARCH_ROADMAP.md`, `docs/PRODUCT_ROADMAP.md`, `docs/PRIOR_WORK.md`, `docs/EXPOSURE_ENGINE.md`, `docs/DECISION_GATES.md`, `docs/IDEA_BACKLOG.md`
 
 The review loop that the package in `drafts/` was written for has run and ended. This
 record and the eleven after it (D-092 … D-102) carry its conclusions into the log so
@@ -2508,7 +2508,7 @@ sample is nine informative independent events, and no scoring is run on it. A
 mostly-null result is acceptable and is expected.
 
 ## D-098 — Competitors exist, and the novelty claim is narrowed to the discipline, not the comparison
-**Date:** 2026-09-16 · **Produces:** `docs/COMPETITORS.md`
+**Date:** 2026-09-16 · **Produces:** `docs/PRIOR_WORK.md`
 
 "Prediction-market price versus Deribit option-implied probability" is not sufficient
 differentiation. The review named at least four prior or parallel efforts on the same
@@ -2964,7 +2964,7 @@ capture), D-107 (Note 1 frozen), D-108 (exposure example), D-109 (this). What
 remains open is listed in `DECISION_GATES.md` and `BACKLOG.md`, not here.
 
 ## D-110 — The owner supplied the URLs; three of the four exist, and one of them states our premise in public
-**Date:** 2026-09-16 · **Supersedes the NOT FOUND status of:** entries 1 and 3 in `docs/COMPETITORS.md` · **Narrows:** D-098 · **Closes:** B-021
+**Date:** 2026-09-16 · **Supersedes the NOT FOUND status of:** entries 1 and 3 in `docs/PRIOR_WORK.md` · **Narrows:** D-098 · **Closes:** B-021
 
 D-098 narrowed the novelty claim to the discipline rather than the comparison, and
 said so as a hypothesis with the register as its evidence. Three of the four names in
@@ -3061,7 +3061,7 @@ one we can defend. That is a smaller position than "we built the comparison" and
 is the true one.
 
 ### Consequences
-- `docs/COMPETITORS.md` entries 1 and 3 are replaced with what the pages say;
+- `docs/PRIOR_WORK.md` entries 1 and 3 are replaced with what the pages say;
   entry 2 records that the synthesis's "FairOdds" resolves to two different sites,
   one unrelated and one that did not respond; entries 4, 9 and 10 are added or
   extended. B-021 is closed.
@@ -3177,3 +3177,58 @@ one commit to remove.
 `FundingStage` in `tests/test_measurement.py`: the window asked for is 48 hours
 ending at the run instant and both instruments are requested; the response is
 stored as received; the archive version is 6. The `tests.yml` floor rises with them.
+
+## D-112 — The repository has two audiences, and only one of them should be reading the internal file
+**Date:** 2026-09-18 · **Changes:** `README.md`, `docs/COMPETITORS.md` → `docs/PRIOR_WORK.md`, removal of `drafts/REVIEW_PACKAGE.md` · **Changes no number, no limitation and no claim**
+
+### The problem
+This repository is public and is shown to people deciding whether to work with the
+author. It had been written for one audience — whoever picks the work up next, and
+the reviewers the work was sent to — and it showed. Two documents in particular were
+addressed to a reader who is not the one arriving:
+
+- `drafts/REVIEW_PACKAGE.md` opens "For: independent reviewers (including other AI
+  systems)", asks them to "be specific and adversarial", and contains a section
+  headed "Known weaknesses, stated before you find them". It was written to be
+  attacked. Handed to a reader who did not ask for it, it is a list of flaws with no
+  question attached.
+- `COMPETITORS.md` is, in substance, a prior-work survey. The filename says
+  competitive intelligence, and two rows in it score points rather than record
+  evidence.
+
+### What was done
+The review package is removed from the repository and kept outside it. It is still
+sent to reviewers as a file; it is simply not the front page of a public project.
+The register is renamed `docs/PRIOR_WORK.md` — which is what it is, and what the
+academic convention calls it — and two evaluative rows are rewritten as observations.
+The README gains a short reading order and its "Known gaps" heading becomes "Scope
+and limitations", which is the ordinary name for that section in any research
+repository.
+
+### What was NOT done, and this is the part that matters
+**Nothing about the result was softened and nothing about the limitations was
+removed.** Specifically, all of the following stay exactly as they were:
+
+- the verdict: 0 of 44 rungs in the declared family survive the full test (D-103)
+- the validation sample: nine informative independent events, and no scoring
+- the concession that the comparison is not ours — Block Scholes published the
+  call-spread derivation, Fabi et al. measured it on 4,860 contracts, PolyGap sells
+  it (D-110)
+- "What else exists" in Research Note 1
+- every retraction in this log, including D-090 and the correction inside D-110
+
+The reasoning is not modesty. It is that the prior-work register is the *evidence*
+that nothing here was taken from anyone, and a reader who cannot find it will ask
+the question the register answers. And a project that claimed a surviving edge would
+be making the claim everybody makes and nobody supports; the defensible claim is the
+one this project can actually demonstrate — that the apparent edge did not survive a
+test written before the result was known.
+
+If a future edit removes a limitation in order to look better, this record is the
+one it contradicts.
+
+### Not changed
+`drafts/` keeps its name. Note 1 is frozen at v1 (D-107) and G2 has not passed, so
+the folder is accurate. Renaming it to `research/` while the publication gate is open
+would be the first small overclaim, and the README says where the note stands
+instead.
