@@ -1,5 +1,7 @@
 # DESIGN.md — the design language
 
+> **Status (2026-09-18, D-113):** written 2026-09-14 for the research screen (`web/index.html`) and still the design language in use. It describes how the screen looks, not what the numbers are; for those, `findings/latest.json` and the README. The staged product is in `PRODUCT_ROADMAP.md`.
+
 `PRODUCT.md` records **what the screen says**; this document records **how it
 looks**.
 
