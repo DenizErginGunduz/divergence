@@ -43,7 +43,7 @@ DERIBIT = 'https://www.deribit.com/api/v2/public'
 KALSHI = 'https://external-api.kalshi.com/trade-api/v2'
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-ARCHIVE_VERSION = 5                          # schema version of the files we write
+ARCHIVE_VERSION = 6                          # schema version of the files we write (6: raw/funding, D-111)
 
 # Trade fields dropped before writing. Two kinds, neither of them market data:
 #
@@ -84,6 +84,14 @@ HOLDER_DROP = ('name', 'pseudonym', 'bio', 'profileImage',
 
 ASSETS = ['bitcoin', 'ethereum']             # D-034: the V1 measured universe
 DERIBIT_CURRENCIES = ['BTC', 'ETH']
+
+# Perpetual funding (D-111). The HISTORY endpoint, not the ticker's instantaneous
+# value: three samples a day are not a history. Each run re-asks for the last 48
+# hours, so a run every eight hours sees every hour about six times and up to five
+# consecutive missed runs leave no hole. Readers de-duplicate on timestamp; the
+# archive stores what came back.
+FUNDING_INSTRUMENTS = ['BTC-PERPETUAL', 'ETH-PERPETUAL']
+FUNDING_LOOKBACK_MS = 48 * 3600 * 1000
 PAGE = 100                                   # data-api limit
 MAX_PAGES = 6                                # cap on gap-closing attempts
 HOLDERS_HOUR = 5                             # holders fetched ONCE a day (05 UTC)
@@ -270,6 +278,32 @@ WINDOW = MARKS['polymarket_end']                # Deribit <-> Polymarket drift
 stage('kalshi', kalshi);              MARKS['kalshi_end'] = round(time.time()-t0_all, 2)
 
 
+# ---------------- 3b. Funding: the perpetuals' hourly history (D-111) ----------------
+# AFTER the synchronous reads on purpose: WINDOW above is the Deribit <-> Polymarket
+# drift the whole comparison depends on, and nothing may sit between those two
+# stages. This stage gets its own mark so its latency is visible, not hidden.
+def funding(end_ms=None):
+    """One call per perpetual: the last FUNDING_LOOKBACK_MS of hourly funding
+    points, ending at the run's instant. The JSON-RPC envelope is stored whole; the
+    'request' block is ours, so a reader can tell "no points" from "not asked"."""
+    end = int(time.time() * 1000) if end_ms is None else int(end_ms)
+    start = end - FUNDING_LOOKBACK_MS
+    out = {}
+    for name in FUNDING_INSTRUMENTS:
+        out[name] = {
+            'request': {'method': 'public/get_funding_rate_history',
+                        'instrument_name': name,
+                        'start_timestamp': start, 'end_timestamp': end},
+            'response': get('%s/get_funding_rate_history?instrument_name=%s'
+                            '&start_timestamp=%d&end_timestamp=%d'
+                            % (DERIBIT, name, start, end), timeout=30),
+        }
+    return out
+
+
+stage('funding', funding);            MARKS['funding_end'] = round(time.time()-t0_all, 2)
+
+
 # ---------------- 3. Flow: event-based, with gaps ----------------
 def _is_new(t, wm):
     """Is this trade after the watermark? Ties at the boundary split by hash."""
@@ -430,6 +464,8 @@ if 'holders' in bucket:
     save('holders', bucket['holders'])
 if 'kalshi' in bucket:
     save('kalshi', bucket['kalshi'])
+if 'funding' in bucket:
+    save('funding', bucket['funding'])
 
 flow_result = bucket.get('flow') or {'new_trades': [], 'coverage': []}
 
@@ -490,6 +526,14 @@ meta = {'snapshot_utc': now.isoformat(),
         })(bucket.get('kalshi')),
         'holders_unexpected': (len(HOLDERS_UNEXPECTED)
                                if 'holders' in bucket else None),
+        # Points returned per perpetual and the window asked for (D-111): a run
+        # that came back empty is visible here without opening the file.
+        'funding_summary': (lambda f: None if not f else {
+            'lookback_hours': FUNDING_LOOKBACK_MS // 3600000,
+            'points': {k: len(((v.get('response') or {}).get('result') or []))
+                       if isinstance((v.get('response') or {}).get('result'), list) else None
+                       for k, v in f.items()},
+        })(bucket.get('funding')),
         'files': written, 'assets': ASSETS, 'version': ARCHIVE_VERSION}
 mp = os.path.join(ROOT, 'raw', '_meta', DAY, 'meta_%s.json' % STAMP)
 os.makedirs(os.path.dirname(mp), exist_ok=True)
@@ -513,7 +557,10 @@ def _rel(p):
 paths = {}
 for w in written:
     d = w['file'].replace(os.sep, '/')
-    for name in ('kalshi', 'deribit', 'polymarket_events'):
+    # 'funding' is listed here (the block's purpose is the newest file of each
+    # stream) but is NOT in the required-streams check below: the page does not
+    # read it, and a funding failure must not mark the pointer broken (D-111).
+    for name in ('kalshi', 'deribit', 'polymarket_events', 'funding'):
         if d.startswith('raw/%s/' % name):
             paths[name] = d
 
