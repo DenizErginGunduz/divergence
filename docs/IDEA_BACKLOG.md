@@ -87,7 +87,7 @@ WHY INTERESTING: adjacent to I-005 and I-006 for on-chain resolution. · WHY NOT
 ## Research ideas (Layers A and B)
 
 ### I-101 — Cost of expressing a view (original §7.1 framing)
-STATUS: superseded by `EXPOSURE_ENGINE.md` · SOURCE: `drafts/REVIEW_PACKAGE.md` §7.1, 2026-09-16
+STATUS: superseded by `EXPOSURE_ENGINE.md` · SOURCE: the external review round, 2026-09-16 (D-091)
 REASON: the review broadened it from a cost comparison to a frontier (D-091). Kept so the original framing and its reasoning are not lost.
 
 ### I-102 — Venue selection as the product (§7.3)
