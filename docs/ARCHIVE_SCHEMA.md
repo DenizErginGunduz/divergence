@@ -15,6 +15,7 @@ raw/
   kalshi/            YYYY-MM-DD/ kalshi_<STAMP>.json.gz
   deribit/           YYYY-MM-DD/ deribit_<STAMP>.json.gz
   polymarket_events/ YYYY-MM-DD/ polymarket_events_<STAMP>.json.gz
+  funding/           YYYY-MM-DD/ funding_<STAMP>.json.gz      (archive version 6+)
   events/trades/     YYYY-MM-DD/ trades_<STAMP>.ndjson.gz
   holders/           YYYY-MM-DD/ holders_<STAMP>.json.gz
   coverage/          YYYY-MM-DD/ coverage_<STAMP>.json
@@ -84,6 +85,68 @@ still look plausible in a ratio.
 `DDMMMYY` label (`25SEP26`) and type is `C` or `P`. Expiries settle at 08:00 UTC.
 
 `mark_iv` is a percentage (84.02 means 84%). Only `measure_touch.py` uses it.
+
+---
+
+## `funding/` — the perpetuals' hourly funding history
+
+Written every run since archive version 6 (D-111, 2026-09-18). One gzipped JSON file
+per run, one key per perpetual:
+
+```json
+{
+  "BTC-PERPETUAL": {
+    "request":  { "method": "public/get_funding_rate_history",
+                  "instrument_name": "BTC-PERPETUAL",
+                  "start_timestamp": 1789541867000, "end_timestamp": 1789714667000 },
+    "response": { "jsonrpc": "2.0",
+                  "result": [ { "timestamp": 1789693200000,
+                                "index_price": 76529.69,
+                                "prev_index_price": 76355.27,
+                                "interest_8h": 5.91821175553615e-06,
+                                "interest_1h": 1.257606590607552e-06 }, ... ],
+                  "usIn": 1789714667179301, "usOut": 1789714667185192,
+                  "usDiff": 5891, "testnet": false }
+  },
+  "ETH-PERPETUAL": { ... }
+}
+```
+
+`request` is ours: the window the run asked for, in milliseconds since the Unix
+epoch. It is recorded because the response does not carry it, and without it "no
+points" and "not asked" look the same. `response` is Deribit's JSON-RPC envelope
+exactly as returned; nothing in it is renamed or removed.
+
+Fields inside `result`, with the venue's own descriptions
+(`docs/DATA_SOURCES.md` §1a quotes the documentation):
+
+| field | venue's description | note |
+|---|---|---|
+| `timestamp` | milliseconds since the Unix epoch | on the hour; whether the point describes the hour ending or beginning there is `UNKNOWN` |
+| `index_price` | "Price in base currency" | the Deribit index at the point |
+| `prev_index_price` | "Price in base currency" | the index one point earlier |
+| `interest_1h` | "1hour interest rate" | unit and sign convention as returned are `UNKNOWN`; sampled values are of order 1e-6 |
+| `interest_8h` | "8hour interest rate" | same |
+
+**How often, and why it overlaps.** Every run asks for the last **48 hours**, so
+with three runs a day each hour appears in about six consecutive files. That is
+deliberate: the series is meant to be independent of the collector's cadence, and up
+to five consecutive missed runs leave no hole in it. A reader that wants one row per
+hour de-duplicates on `timestamp` (the values for a given hour are identical across
+files when the venue has not revised them; whether it ever revises them is
+`UNKNOWN` and would show up as a disagreement between files). The archive itself
+never de-duplicates, because it stores what came back.
+
+**What this stream is not.** It is not a dated-futures stream (B-018, not
+approved): the endpoint is per instrument and returns the perpetual only. It is not
+a carry computation: nothing in the repository reads this stream yet, and the first
+reader (the exposure engine's worked example, D-108) has to state its reading of
+the `UNKNOWN`s above before it uses a number.
+
+`_meta.funding_summary` carries the points returned per instrument and the window
+asked for, so an empty run is visible without opening the file. `state/latest.json`
+lists the newest funding file under `paths.funding`; it is not one of the streams
+whose absence marks the pointer incomplete.
 
 ---
 
@@ -341,7 +404,9 @@ probably no gap — but "probably" is not a measurement, and this has not been v
 ## `_meta/` — what the run did
 
 Plain JSON. Carries `snapshot_utc`, per-stage timings, the list of files written, any
-errors, and a Kalshi summary.
+errors, a Kalshi summary and, from version 6, a funding summary (points returned
+per perpetual and the window asked for). `version` says which archive version wrote
+the run: 6 is the first with `raw/funding/`.
 
 The field that governs whether a comparison is meaningful:
 
@@ -365,7 +430,8 @@ Written every run so that a reader can find the newest snapshot with one request
   "version": 2,
   "stamp": "2026-09-11T0515Z",
   "sync_window_seconds": 0.85,
-  "paths": { "kalshi": "raw/kalshi/...", "deribit": "...", "polymarket_events": "..." },
+  "paths": { "kalshi": "raw/kalshi/...", "deribit": "...", "polymarket_events": "...",
+             "funding": "raw/funding/..." },
   "archive": { "day_count": 13, "snapshot_count": 40 }
 }
 ```
