@@ -1,0 +1,46 @@
+name: pages
+
+# Publishes web/ — one static file, web/index.html — as the GitHub Pages site,
+# so the terminal has a plain URL instead of an htmlpreview link (D-113).
+#
+# Why a workflow and not "serve from root / from docs/": the page is the only
+# thing that belongs on the site. Serving from the root would hand Jekyll the
+# whole repository — 3,000 lines of decision log, the rolling raw/ archive of
+# gzipped vendor payloads, the test suite — and copy it all to a public site
+# where none of it is meant to be browsed as HTML. Uploading web/ alone publishes
+# exactly one file and nothing else.
+#
+# The page reads the archive live from raw.githubusercontent.com, as it always
+# has; nothing is built, bundled or generated here. The site is a copy of a
+# file that is already public in this repository, so it exposes nothing new.
+
+on:
+  push:
+    branches: [main]
+    paths: ['web/**', '.github/workflows/pages.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web
+      - id: deployment
+        uses: actions/deploy-pages@v4
