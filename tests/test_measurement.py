@@ -996,5 +996,65 @@ class LadderShapeAndEvents(unittest.TestCase):
         self.assertAlmostEqual(r['ratio'], 1.0, places=6)
 
 
+class FundingStage(unittest.TestCase):
+    """D-111: the perpetuals' funding is archived as a HISTORY, re-asked with
+    overlap, and stored as it came.
+
+    The stage is lifted out of collect.py without running it (from_collector),
+    and `get` is replaced so no network is touched. What is pinned: the window
+    asked for, that both perpetuals are asked, that the response is not
+    reshaped, and the archive version that says the stream exists.
+    """
+
+    def setUp(self):
+        self.ns = from_collector('funding', 'FUNDING_INSTRUMENTS',
+                                 'FUNDING_LOOKBACK_MS', 'DERIBIT', 'ARCHIVE_VERSION')
+        self.calls = []
+        payload = {'jsonrpc': '2.0', 'usIn': 1, 'usOut': 2, 'usDiff': 1, 'testnet': False,
+                   'result': [{'timestamp': 1789693200000, 'index_price': 76529.69,
+                               'interest_8h': 5.9e-06, 'interest_1h': 1.2e-06,
+                               'prev_index_price': 76355.27}]}
+        self.payload = payload
+
+        def fake_get(url, timeout=30, attempts=3):
+            self.calls.append(url)
+            return payload
+        self.ns['get'] = fake_get
+
+    def test_the_window_is_the_lookback_ending_at_the_run_instant(self):
+        """A run every eight hours re-asking for two days sees every hour about
+        six times; that overlap is what makes a missed run leave no hole."""
+        end = 1789714667000
+        out = self.ns['funding'](end_ms=end)
+        self.assertEqual(sorted(out), sorted(self.ns['FUNDING_INSTRUMENTS']))
+        for name, v in out.items():
+            r = v['request']
+            self.assertEqual(r['end_timestamp'], end)
+            self.assertEqual(r['start_timestamp'], end - self.ns['FUNDING_LOOKBACK_MS'])
+            self.assertEqual(r['instrument_name'], name)
+            self.assertEqual(r['method'], 'public/get_funding_rate_history')
+        self.assertGreaterEqual(self.ns['FUNDING_LOOKBACK_MS'], 24 * 3600 * 1000)
+
+    def test_both_perpetuals_are_asked_from_the_history_endpoint(self):
+        self.ns['funding'](end_ms=1789714667000)
+        self.assertEqual(len(self.calls), 2)
+        for url, name in zip(self.calls, self.ns['FUNDING_INSTRUMENTS']):
+            self.assertTrue(url.startswith(self.ns['DERIBIT'] + '/get_funding_rate_history?'))
+            self.assertIn('instrument_name=%s' % name, url)
+            self.assertIn('start_timestamp=', url)
+            self.assertIn('end_timestamp=', url)
+
+    def test_the_response_is_stored_as_it_came(self):
+        """Rule 2. The JSON-RPC envelope, every field, untouched — the stage
+        wraps it beside the request and does nothing else to it."""
+        out = self.ns['funding'](end_ms=1789714667000)
+        self.assertIs(out['BTC-PERPETUAL']['response'], self.payload)
+        self.assertEqual(sorted(out['BTC-PERPETUAL']), ['request', 'response'])
+
+    def test_the_archive_version_says_the_stream_exists(self):
+        """A reader checks `_meta.version` before assuming raw/funding is there."""
+        self.assertEqual(self.ns['ARCHIVE_VERSION'], 6)
+
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
