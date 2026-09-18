@@ -20,6 +20,21 @@ file and the decision log win.
 
 Not a betting app, not a trading bot, not a signal service.
 
+### Reading order
+
+The repository is larger than it needs to be for a first read, so:
+
+| if you have | read |
+|---|---|
+| five minutes | this page, then the results table below |
+| half an hour | [Research Note 1](drafts/RESEARCH_NOTE_1.md) — the whole argument, end to end |
+| an hour | add [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md) for the derivations and [`docs/PRIOR_WORK.md`](docs/PRIOR_WORK.md) for what else exists in this area and who did it first |
+| you are checking a specific number | [`findings/latest.json`](findings/latest.json), then the script named in the block that produced it |
+| you are taking the project over | [`docs/ARCHIVE_SCHEMA.md`](docs/ARCHIVE_SCHEMA.md) and [`scripts/README.md`](scripts/README.md) |
+
+`docs/DECISIONS.md` is the full log — every decision, every retraction, 175 KB of it.
+It is a reference, not a read. Nothing on this page depends on opening it.
+
 ---
 
 ## The catch that makes this non-trivial
@@ -119,7 +134,7 @@ findings/latest.json   measurement output, written by CI
 web/index.html         the terminal, reads the archive live
 docs/                  methodology, data sources, product and design decisions
 docs/STRATEGY.md       what the project is now (three layers), read with RESEARCH_ROADMAP,
-                       PRODUCT_ROADMAP, DECISION_GATES, COMPETITORS, IDEA_BACKLOG (D-091)
+                       PRODUCT_ROADMAP, DECISION_GATES, PRIOR_WORK, IDEA_BACKLOG (D-091)
 ```
 
 ---
@@ -178,19 +193,25 @@ For the data, go to the venues.
 
 ---
 
-## Status
+## Status, scope and limitations
 
-Working: collector, archive, the eleven measurement steps `measure.yml` runs in
-order, two documentation checkers, terminal UI.
+**Running:** the collector (three times daily in CI), the archive, the eleven
+measurement steps `measure.yml` runs in order, two documentation checkers, and the
+terminal UI. Tests: 80, no dependencies.
 
-Known gaps, tracked openly:
+**In progress:** Research Note 1 is frozen at v1 (D-107) and waits on its publication
+gate; the exposure-design branch is specified and not yet computed; the product stages
+are defined behind evidence gates and not built (`docs/DECISION_GATES.md`).
 
-- The decision log is being folded into architecture decision records. Numbers that
-  carried no reasoning of their own have been removed rather than renumbered.
+**Scope, stated so that nothing here is read as more than it is:**
+
 - `raw/` is a rolling 14-day window. It bounds the working tree, not git history:
   `.git` still grows about 4 MB a day and a full clone reaches every snapshot ever
   committed. The full archive lives in a private mirror (docs/DATA_SOURCES.md).
-- 149 of 460 flow markets hit the fetch limit in the run of 2026-09-16T0504Z with no
+- The forecast-quality question is not answered and is not answerable yet: the
+  resolved-event sample is nine informative independent events, and no scoring has
+  been run on it (`docs/VALIDATION_SPEC.md`).
+- In the run of 2026-09-16T0504Z, 149 of 460 flow markets hit the fetch limit with no
   gap flagged. Probably fine, not verified.
 - Assets beyond BTC and ETH are collected but not measured (D-100).
 - ETH above $5,000, the one year-end rung that cleared the mark-price maturity stress
