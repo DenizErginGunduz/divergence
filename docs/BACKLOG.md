@@ -140,7 +140,7 @@ surface is ever built, it is for a different question and under a new decision.
 
 ## B-021 — Three competitors named in the review could not be found — CLOSED 2026-09-16 (D-110)
 **Closed the same day it was opened.** The owner supplied the URLs and the pages were
-read. Two of the three exist and are now entries 1 and 3 in `docs/COMPETITORS.md`;
+read. Two of the three exist and are now entries 1 and 3 in `docs/PRIOR_WORK.md`;
 the third, fairodds.io, is a confirmed domain that returned 504 on two attempts and
 stays in the register as unreachable rather than absent, to be re-checked before
 Note 1 publishes.
@@ -228,7 +228,7 @@ that its result is not quotable.
 
 ## B-025 — Read the Fabi et al. paper in full — CLOSED 2026-09-18
 The owner supplied the 95-page PDF. It has been read and entry 1 of
-`docs/COMPETITORS.md` is rewritten from the paper itself: the sample (4,860
+`docs/PRIOR_WORK.md` is rewritten from the paper itself: the sample (4,860
 contracts, 4.4 million trades, 927,450 hourly observations), the method (fixed-delta
 surfaces bought from Amberdata, Black pricing, Kou double-exponential jump-diffusion
 at 7/14/30/60 days), the four payoff types, the headline results, and the two
