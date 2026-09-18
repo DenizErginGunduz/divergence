@@ -1,5 +1,7 @@
 # Divergence
 
+[![tests](https://github.com/DenizErginGunduz/divergence/actions/workflows/tests.yml/badge.svg)](https://github.com/DenizErginGunduz/divergence/actions/workflows/tests.yml) [![ref-check](https://github.com/DenizErginGunduz/divergence/actions/workflows/ref_check.yml/badge.svg)](https://github.com/DenizErginGunduz/divergence/actions/workflows/ref_check.yml) · **Live screen:** [denizergingunduz.github.io/divergence](https://denizergingunduz.github.io/divergence/)
+
 Two markets price the same future event. This measures how far apart they are, and
 how much of that distance survives contact with reality.
 
@@ -19,6 +21,10 @@ are the findings file's; where any page and the findings disagree, the findings
 file and the decision log win.
 
 Not a betting app, not a trading bot, not a signal service.
+
+![The research screen: header with snapshot number and sync window, four finding cards, the notable-rungs row, and the asset list](web/terminal.png)
+
+*`web/index.html` as rendered on 2026-09-18 from snapshot 2026-09-18T0504Z (47 snapshots in the 14-day window at that moment, sync window 0.62 s). Three of the four cards carry findings measured on 2026-09-16 and cite their decision records; the tail-premium card is computed live from the snapshot. The rungs row shows the quoted sides and what the option chain implies at that instant. The live page reads the newest snapshot from this repository and changes three times a day; the picture does not.*
 
 ### Reading order
 
@@ -195,8 +201,8 @@ For the data, go to the venues.
 
 ## Status, scope and limitations
 
-**Running:** the collector (three times daily in CI), the archive, the eleven
-measurement steps `measure.yml` runs in order, two documentation checkers, and the
+**Running:** the collector (three times daily in CI), the archive, the thirteen
+scripted steps `measure.yml` runs in order (archive smoke test to written findings), two documentation checkers, and the
 terminal UI. Tests: 80, no dependencies.
 
 **In progress:** Research Note 1 is frozen at v1 (D-107) and waits on its publication
