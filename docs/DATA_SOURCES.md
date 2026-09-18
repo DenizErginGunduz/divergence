@@ -45,6 +45,77 @@ consistent. One data dependency dropped.
 missed day's chain is lost permanently. That is the reason the archive exists
 (D-037).
 
+### 1a. Perpetual funding · `LIVE-VERIFIED` 2026-09-18 (B-019, D-111)
+
+Same venue, same public host, no key. Three endpoints were read in the
+documentation and one was chosen; the reasons are in D-111.
+
+| endpoint | what it returns | used |
+|---|---|---|
+| `public/get_funding_rate_history` | hourly history for one perpetual over a window | **yes** — the archived stream |
+| `public/get_funding_rate_value` | one number for a window | no — loses the hourly detail |
+| `public/ticker` (`current_funding`, `funding_8h`) | the instantaneous value | no — three samples a day are not a history |
+
+**Documentation, quoted** ([public/get_funding_rate_history](https://docs.deribit.com/api-reference/market-data/public-get_funding_rate_history), read 2026-09-18):
+
+> "Retrieves hourly historical funding rate (interest rate) data for a PERPETUAL
+> instrument over a specified time period."
+
+Parameters, as documented: `instrument_name` (required, string, "Instrument name");
+`start_timestamp` (required, integer, "The earliest timestamp to return result from
+(milliseconds since the UNIX epoch)"); `end_timestamp` (required, integer, "The most
+recent timestamp to return result from (milliseconds since the UNIX epoch)").
+
+Response fields, as documented: `timestamp` (integer, milliseconds since the Unix
+epoch); `index_price` (number, "Price in base currency"); `prev_index_price` (number,
+"Price in base currency"); `interest_1h` (number, "1hour interest rate");
+`interest_8h` (number, "8hour interest rate").
+
+**The call, tried** (2026-09-18T0657Z, `BTC-PERPETUAL`, window 2026-09-18T0000Z to
+2026-09-19T0000Z): 6 elements, timestamps 01:00 to 06:00 UTC on the hour — the
+point stamped at the window's start instant was not returned, and points after the
+call's instant do not exist yet. Top-level keys `jsonrpc, result, usIn, usOut,
+usDiff, testnet`; element keys exactly `timestamp, index_price, interest_8h,
+interest_1h, prev_index_price`. `ETH-PERPETUAL` answers the same shape.
+
+**How the venue defines the rate** ([Funding Specifications](https://support.deribit.com/hc/en-us/articles/31424939178397-Funding-Specifications), read 2026-09-18), quoted:
+
+> "Premium Rate = ((Mark Price - Deribit Index) / Deribit Index) * 100%"
+>
+> "If the premium rate is within -0.025% and 0.025% range, the actual funding rate
+> will be reduced to 0.00%."
+>
+> "Funding Rate = Minimum (Maximum_Cap, Maximum (Minimum_Cap, (Maximum (0.025%,
+> Premium Rate) + Minimum (-0.025%, Premium Rate))))"
+>
+> "Time Fraction = Funding Rate Time Period / 8 hours"
+>
+> "Funding Payment = Funding Rate * Position Size * Time Fraction"
+>
+> "When the funding rate is positive, long position holders pay funding to the short
+> position holders; when the funding rate is negative, short position holders pay
+> funding to the long position holders."
+>
+> "funding is actually calculated and paid/received continuously and can be seen in
+> real time in the realised session profit (RSPL)."
+
+Caps on the same page: BTC −0.5% / +0.5%; ETH −1.0% / +1.0%; USDC and USDT −5.0% /
++5.0%.
+
+**What is `UNKNOWN`.** The unit and sign of `interest_8h` / `interest_1h` as returned
+(a fraction, a percentage, or something else; the documentation says "8hour interest
+rate" and no more — the sampled values are of order 1e-6 to 1e-5). Whether a point's
+`interest_1h` is the hour ending or the hour beginning at its `timestamp`. Whether
+`start_timestamp` is exclusive (one observed call suggests so; not documented). The
+public rate limit on this endpoint. None of these is assumed anywhere; the stream
+stores the response as it came and a reader states its own reading.
+
+**Terms.** The same Deribit Terms of Service quoted under *Data rights* below govern
+this stream; there is no funding-specific clause. It is market data of the same class
+as the option chain already archived, and the position taken there (research use, the
+rolling public window, the private mirror) is not changed by it. That is our reading,
+not the venue's ruling.
+
 ---
 
 ## 2. Polymarket · `LIVE-VERIFIED`
