@@ -3178,6 +3178,55 @@ one commit to remove.
 ending at the run instant and both instruments are requested; the response is
 stored as received; the archive version is 6. The `tests.yml` floor rises with them.
 
+
+### The stop condition fired on the first run, and it was the condition that was wrong
+**Added 2026-09-18, after the 13:01Z run — the first under archive version 6.**
+
+The funding stage itself is clean: `raw/funding/2026-09-18/funding_2026-09-18T1301Z.json.gz`,
+48 hourly points per perpetual, both instruments, `funding_summary` as specified, no
+errors, `version` 6, the pointer carrying `paths.funding`.
+
+But `sync_window_seconds` came back **3.29 s**, outside the "0.66–2.04 s to date"
+written above, so the run was stopped and reported.
+
+**The mechanism rules the stage out, and the code is where that is settled.** In
+`collect.py`, `WINDOW = MARKS['polymarket_end']` is assigned on line 277; `kalshi` runs on
+278 and `funding` on 304. The window is closed before the funding stage is reached, so
+nothing that stage does can widen it. On this run funding took 0.41 s and finished at
+56.4 s — fifty-three seconds after the window had been measured.
+
+**The archive says the same.** Across the 48 runs in the public window:
+minimum 0.62 s, median 1.19 s, p90 1.93 s, maximum 3.29 s. The two widest share a
+signature — Deribit normal, Polymarket slow:
+
+| run | window | deribit | polymarket | version |
+|---|---|---|---|---|
+| 2026-09-18T1301Z | 3.29 | 0.95 | **2.34** | 6 |
+| 2026-09-13T1311Z | 2.68 | 0.97 | **1.71** | 3 |
+
+The second predates the funding stage by five days.
+
+**So the rule was wrong, not the run.** "0.66–2.04 s to date" was already false when
+it was written here: the 2.68 s run of 2026-09-13 was in the archive at the time. A
+threshold that history has already crossed fires on ordinary noise, which is what
+happened. The range in `docs/ARCHIVE_SCHEMA.md` carried the same error and is corrected
+there as a dated distribution.
+
+**The condition is restated, for this stage and any stage added after the window:**
+
+1. A stage placed after `MARKS['polymarket_end']` cannot affect the window. The check
+   is the placement, and it is a line number, not a measurement.
+2. What is worth watching is whether the *distribution* of `polymarket_end` shifts, not
+   whether one run exceeds a number. A single observation above a previous maximum,
+   with the venue breakdown showing which side was slow, is a latency event and is
+   recorded as one.
+3. A stage inserted **before** that mark is a different matter and would need the
+   window re-measured across several runs before it stayed.
+
+D-111 is otherwise unchanged. No further run was scheduled to settle this, because
+another observation cannot discriminate: a fast next run would not clear a stage the
+placement had already cleared, and a slow one would be another Polymarket latency
+event. Watching it would have been asking a question whose answer was already fixed.
 ## D-112 — The repository has two audiences, and only one of them should be reading the internal file
 **Date:** 2026-09-18 · **Changes:** `README.md`, `docs/COMPETITORS.md` → `docs/PRIOR_WORK.md`, removal of `drafts/REVIEW_PACKAGE.md` · **Changes no number, no limitation and no claim**
 
