@@ -3081,3 +3081,99 @@ is the true one.
   cosmetic edit.
 - Reading the Fabi et al. paper in full is a prerequisite for Note 3, not for Note 1.
   Logged as B-025.
+
+## D-111 — Perpetual funding is archived as an hourly history from Deribit, re-asked with overlap, after the synchronous reads
+**Date:** 2026-09-18 · **Approves:** B-019 (owner's approval of 2026-09-18) · **Produced by:** `collector/collect.py` (`funding()`), `docs/DATA_SOURCES.md` §1a, `docs/ARCHIVE_SCHEMA.md` · **Archive version:** 5 → 6
+
+### Scope
+Ingest only: the funding rate of the BTC and ETH perpetuals into `raw/funding/`, and
+its documentation. No carry computation, no exposure engine, no change to
+`measure.yml`, nothing on the page. The measured universe is unchanged (D-100).
+
+### Venue
+Deribit. It is the venue whose option chain the whole comparison rests on, so its
+perpetual's funding is the carry that an exposure comparison against that chain
+would actually face; its premium is measured against the same Deribit index the
+digital is priced on; it needs no key; and its terms are already quoted and taken a
+position on (`DATA_SOURCES.md`, *Data rights*) — no new terms enter the project.
+Other venues' perpetuals are a different basis and are not collected.
+
+### Endpoint
+`public/get_funding_rate_history`, per instrument, `BTC-PERPETUAL` and
+`ETH-PERPETUAL`. Read in the documentation and tried on 2026-09-18 (quoted in
+`DATA_SOURCES.md` §1a): hourly points with `timestamp, index_price,
+prev_index_price, interest_1h, interest_8h`. The instantaneous fields in
+`public/ticker` (`current_funding`, `funding_8h`) are not used: sampled three times a
+day they are three points, not a history, and the three instants are not aligned
+with anything. `public/get_funding_rate_value` returns one aggregate number for a
+window and loses the hours. The history endpoint is per instrument and returns the
+perpetual only — no dated future comes with it, so B-018 is untouched.
+
+### Sampling — a history independent of the collector's cadence
+Every run asks for the last **48 hours** ending at the run's instant. Points are
+hourly, so a run returns about 48 rows per instrument and a run every eight hours
+sees each hour about six times. The overlap is the point: a missed run leaves no
+hole, and up to five consecutive missed runs (40 hours) leave none either. The cost
+is a few kilobytes per run. Readers de-duplicate on `timestamp`; the archive does
+not, because the archive stores what came back (rule 2).
+
+The reason for 48 rather than the owner's example of 24: 24 hours survives one
+missed run and not two, and the collector has missed runs before (the paging cap
+of 2026-09-15 was a silent miss of a different kind). The difference in storage is
+nil.
+
+### Placement — after the synchronous reads
+The stage runs **after** `kalshi`, in the same region as `flow` and `holders`.
+`WINDOW = MARKS['polymarket_end']` — the Deribit-to-Polymarket drift the whole
+comparison depends on, 0.66–2.04 s to date — is not touched and not redefined. The
+stage gets its own mark, `funding_end`, so its latency is visible in
+`source_marks_seconds`. After the first run under this version,
+`sync_window_seconds` is compared with the previous runs; a visible widening is a
+stop condition.
+
+### What is stored
+`raw/funding/YYYY-MM-DD/funding_<STAMP>.json.gz`, one file per run, gzipped JSON in
+the layout of the other streams:
+
+```
+{ "BTC-PERPETUAL": { "request": { "method", "start_timestamp", "end_timestamp" },
+                     "response": <the JSON-RPC envelope exactly as returned> },
+  "ETH-PERPETUAL": { ... } }
+```
+
+The response is stored whole — envelope, `usIn`/`usOut`/`usDiff`, `testnet`, every
+element with every field. No field is dropped, so the D-087/D-088 question does not
+arise. `request` is ours: it records the window asked for, which the response does
+not carry, so a reader can tell "no points" from "not asked".
+
+`_meta` gains `funding_summary` (points returned per instrument, and the window
+asked for) so a run that returned nothing is visible without opening the file.
+`state/latest.json` gains `funding` in `paths`, because that block's stated purpose
+is "the newest snapshot of each stream" and a reader should not have to list a
+directory to find it; it is **not** added to the pointer's required-streams check,
+because the page does not read it and a funding failure must not mark the pointer
+broken.
+
+### What stays UNKNOWN, on purpose
+The unit and sign convention of `interest_8h` / `interest_1h` as returned; whether a
+point's hour ends or begins at its `timestamp`; whether `start_timestamp` is
+exclusive (one call suggests so); the endpoint's public rate limit. All four are
+written in `DATA_SOURCES.md` §1a and none is assumed in code. The first consumer of
+this stream (the exposure engine's worked example, D-108, layer D) has to state its
+reading of them before it uses a number.
+
+### Terms
+The Deribit Terms of Service quoted in `DATA_SOURCES.md` restrict redistribution of
+"market data and/or derived data" to personal use, and that clause already governs
+the option chain in `raw/deribit/`. The funding stream is the same class of data
+from the same venue under the same clause; the position recorded there (research
+use, the rolling public window, the private mirror) is applied to it unchanged. The
+owner's stop condition named "terms that restrict redistributing this data": the
+restriction is not new and was already decided, which is why this record proceeds
+and says so rather than stopping — if the owner reads it differently, the stream is
+one commit to remove.
+
+### Tests
+`FundingStage` in `tests/test_measurement.py`: the window asked for is 48 hours
+ending at the run instant and both instruments are requested; the response is
+stored as received; the archive version is 6. The `tests.yml` floor rises with them.
