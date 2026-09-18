@@ -115,7 +115,7 @@ also give the dated-futures basis and roll that `docs/EXPOSURE_ENGINE.md` needs
 (`ARCHIVE_VERSION`, `docs/ARCHIVE_SCHEMA.md`) and the collector is the one thing
 that must not be touched casually. Asked about before it is built (D-101).
 
-## B-019 — Perpetual funding ingest, minimal (2026-09-16)
+## B-019 — Perpetual funding ingest, minimal — APPROVED AND BUILT 2026-09-18 (D-111)
 The exposure-design branch (D-091, Layer B) cannot compute a perpetual's carry
 without a funding stream, and V1 of the product (D-099) cannot show a
 perpetual column without it. What is needed is small: the funding rate per
@@ -124,6 +124,10 @@ existing snapshots. Which venue, which endpoint, and its terms: `UNKNOWN` until
 read. A collector change, so it is planned, its terms are quoted in
 `docs/DATA_SOURCES.md` first, and it is asked about before it is built. Gate G6
 in `docs/DECISION_GATES.md` depends on it.
+**Outcome:** the owner approved on 2026-09-18. Deribit's
+`public/get_funding_rate_history`, hourly, re-asked over the last 48 hours on every
+run, stored whole under `raw/funding/` (archive version 6). Ingest only; the carry
+computation and the exposure engine are not started by this (D-111).
 
 ## B-020 — A volatility surface for the year-end gap — REJECTED (2026-09-16)
 Recorded as rejected rather than as an idea. An SVI or any other fitted surface
