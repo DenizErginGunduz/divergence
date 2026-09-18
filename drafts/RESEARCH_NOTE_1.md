@@ -39,7 +39,7 @@ control, and about what is left at the end.
 ## What else exists
 
 This comparison is not new, and the register that says so is part of the work
-(`docs/COMPETITORS.md`, D-098 and D-110). Four entries in it bear directly on what
+(`docs/PRIOR_WORK.md`, D-098 and D-110). Four entries in it bear directly on what
 follows.
 
 **The construction is published.** Block Scholes, in a report dated 2 July 2026,
