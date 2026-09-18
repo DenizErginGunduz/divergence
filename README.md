@@ -215,8 +215,10 @@ are defined behind evidence gates and not built (`docs/DECISION_GATES.md`).
   `.git` still grows about 4 MB a day and a full clone reaches every snapshot ever
   committed. The full archive lives in a private mirror (docs/DATA_SOURCES.md).
 - The forecast-quality question is not answered and is not answerable yet: the
-  resolved-event sample is nine informative independent events, and no scoring has
-  been run on it (`docs/VALIDATION_SPEC.md`).
+  resolved-event sample is nine informative independent events — the count over the
+  full private mirror, under the definition of D-081, which separates events whose
+  quote carried information from fifteen-minute contracts quoted minutes before they
+  settle — and no scoring has been run on it (`docs/VALIDATION_SPEC.md`).
 - In the run of 2026-09-16T0504Z, 149 of 460 flow markets hit the fetch limit with no
   gap flagged. Probably fine, not verified.
 - Assets beyond BTC and ETH are collected but not measured (D-100).
