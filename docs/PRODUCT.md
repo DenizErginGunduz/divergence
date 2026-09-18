@@ -1,5 +1,7 @@
 # PRODUCT.md — why the screen looks the way it does
 
+> **Status (2026-09-18, D-113):** written 2026-09-14 for the research screen (`web/index.html`) as it stood then. The numbers quoted below are those of the decision records they cite and some have moved since — the "2 of 26" of D-066 is now 3 of 44 at quoted prices and 0 of 44 under the full test (D-103). Current numbers: `findings/latest.json` and the README. The staged product is in `PRODUCT_ROADMAP.md`. Kept because the screen's reasoning is still the one in use.
+
 This document is the bridge between `DECISIONS.md` and the interface. That file
 records **what we measured**; this one records **what those measurements mean on
 screen**.
