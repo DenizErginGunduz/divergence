@@ -1,20 +1,20 @@
 {
  "version": 2,
- "snapshot_utc": "2026-09-22T13:01:34.680227+00:00",
+ "snapshot_utc": "2026-09-22T21:04:21.816509+00:00",
  "day": "2026-09-22",
- "stamp": "2026-09-22T1301Z",
- "sync_window_seconds": 0.91,
+ "stamp": "2026-09-22T2104Z",
+ "sync_window_seconds": 1.7,
  "complete": true,
  "paths": {
-  "deribit": "raw/deribit/2026-09-22/deribit_2026-09-22T1301Z.json.gz",
-  "polymarket_events": "raw/polymarket_events/2026-09-22/polymarket_events_2026-09-22T1301Z.json.gz",
-  "kalshi": "raw/kalshi/2026-09-22/kalshi_2026-09-22T1301Z.json.gz",
-  "funding": "raw/funding/2026-09-22/funding_2026-09-22T1301Z.json.gz"
+  "deribit": "raw/deribit/2026-09-22/deribit_2026-09-22T2104Z.json.gz",
+  "polymarket_events": "raw/polymarket_events/2026-09-22/polymarket_events_2026-09-22T2104Z.json.gz",
+  "kalshi": "raw/kalshi/2026-09-22/kalshi_2026-09-22T2104Z.json.gz",
+  "funding": "raw/funding/2026-09-22/funding_2026-09-22T2104Z.json.gz"
  },
- "meta_path": "raw/_meta/2026-09-22/meta_2026-09-22T1301Z.json",
+ "meta_path": "raw/_meta/2026-09-22/meta_2026-09-22T2104Z.json",
  "archive": {
   "day_count": 14,
-  "snapshot_count": 48,
+  "snapshot_count": 49,
   "first_day": "2026-09-08",
   "last_day": "2026-09-22",
   "per_day": {
@@ -31,7 +31,7 @@
    "2026-09-19": 3,
    "2026-09-20": 3,
    "2026-09-21": 3,
-   "2026-09-22": 2
+   "2026-09-22": 3
   }
  }
 }
