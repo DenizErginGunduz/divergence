@@ -1,0 +1,116 @@
+{
+ "snapshot_utc": "2026-09-24T18:34:42.310599+00:00",
+ "total_seconds": 163.84,
+ "sync_window_seconds": 1.05,
+ "source_marks_seconds": {
+  "start": 0.0,
+  "deribit_end": 0.56,
+  "polymarket_end": 1.05,
+  "kalshi_end": 32.53,
+  "funding_end": 33.01,
+  "carry_end": 40.43
+ },
+ "stage_seconds": {
+  "deribit": 0.56,
+  "polymarket_events": 0.49,
+  "kalshi": 31.48,
+  "funding": 0.48,
+  "carry": 7.43,
+  "flow": 122.09,
+  "holders": "skipped (once a day)"
+ },
+ "errors": {},
+ "complete": true,
+ "flow_summary": {
+  "markets": 480,
+  "out_of_scope_markets": 254,
+  "new_trades": 4414,
+  "limit_hit": 177,
+  "WITH_GAP": 0,
+  "first_time": 77,
+  "pagination_tried": 5,
+  "pagination_worked": 5
+ },
+ "kalshi_summary": {
+  "catalogue": {
+   "Crypto": 276,
+   "Financials": 1079
+  },
+  "crypto_series_tracked": 64,
+  "observed_series_tracked": 30,
+  "series_returning_markets": 23,
+  "total_markets": 7030,
+  "observed_markets": 2271
+ },
+ "holders_unexpected": null,
+ "funding_summary": {
+  "lookback_hours": 48,
+  "points": {
+   "BTC-PERPETUAL": 48,
+   "ETH-PERPETUAL": 48
+  }
+ },
+ "carry_summary": {
+  "lookback_hours": 192,
+  "hyperliquid_rows": {
+   "BTC": 192,
+   "ETH": 192,
+   "xyz:CL": 192,
+   "xyz:BRENTOIL": 192,
+   "xyz:GOLD": 192,
+   "xyz:SILVER": 192,
+   "xyz:SP500": 192,
+   "xyz:XYZ100": 192
+  },
+  "hyperliquid_absent": [],
+  "polymarket_rows": {
+   "BTC-USD": 192,
+   "ETH-USD": 192,
+   "WTIOIL-USD": 192,
+   "BRENTOIL-USD": 192,
+   "GOLD-USD": 192,
+   "SILVER-USD": 192,
+   "SP500-USD": 192
+  },
+  "polymarket_absent": [],
+  "deribit_futures_ok": {
+   "BTC": true,
+   "ETH": true
+  }
+ },
+ "files": [
+  {
+   "file": "raw/deribit/2026-09-24/deribit_2026-09-24T1834Z.json.gz",
+   "bytes": 83846
+  },
+  {
+   "file": "raw/polymarket_events/2026-09-24/polymarket_events_2026-09-24T1834Z.json.gz",
+   "bytes": 335171
+  },
+  {
+   "file": "raw/kalshi/2026-09-24/kalshi_2026-09-24T1834Z.json.gz",
+   "bytes": 561686
+  },
+  {
+   "file": "raw/funding/2026-09-24/funding_2026-09-24T1834Z.json.gz",
+   "bytes": 3629
+  },
+  {
+   "file": "raw/carry/2026-09-24/carry_2026-09-24T1834Z.json.gz",
+   "bytes": 61504
+  },
+  {
+   "file": "raw/events/trades/2026-09-24/trades_2026-09-24T1834Z.ndjson.gz",
+   "bytes": 307881
+  },
+  {
+   "file": "raw/coverage/2026-09-24/coverage_2026-09-24T1834Z.json",
+   "bytes": 173705
+  }
+ ],
+ "assets": [
+  "bitcoin",
+  "ethereum"
+ ],
+ "version": 7
+}
