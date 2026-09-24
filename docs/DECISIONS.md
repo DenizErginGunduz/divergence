@@ -3654,3 +3654,53 @@ family nearly every judged snapshot is narrow already.
 The owner has set the combo-fee question aside. B-027 is closed without being done. The
 zero-fee sensitivity of D-115 stays in the output, per family, because it costs nothing
 and D-115 said it would be there; it never enters a verdict.
+
+## D-118 — The template's first run: Kalshi's result stands, Polymarket's dailies can barely be told apart from the options, and the narrow band is still empty
+**Date:** 2026-09-24 · **Applies:** D-114's verdict per family, D-117's narrow band beside it · **Evidence:** `findings/payoff_frontier.json`, `measure` workflow run #30 over the private mirror, 114 snapshots from 2026-08-30T1611Z to 2026-09-24T0515Z · **Gate:** an input to G4; nothing is promoted
+
+### Kalshi year-end — D-116 stands
+Unchanged in D-114's words: **"one venue is cheaper wherever either is"**, the
+prediction market, on 15 single buckets, none on the options. The template reproduces
+D-116 condition by condition (checked on the public window before this run). With two
+more snapshots the zero-fee sensitivity now keeps 12 of the 15 rather than 13: BTC
+90,000–95,000, ETH 1,500–1,750 and ETH 4,250–4,500 depend on the Deribit fee.
+
+**Narrow band: empty** — 0 judged rows, because no Deribit chain within 168 hours after
+the Kalshi close is listed yet. That is what D-117 expected. It fills without a new
+decision once one is; a reminder to read it is set for 2026-12-21.
+
+### Polymarket daily — technically the same verdict, resting on one condition
+In D-114's words: **"one venue is cheaper wherever either is"** — the prediction
+market. It rests on a single condition: 1,860 conditions were judged, 1,009 of them in
+at least ten snapshots, and one — BTC in [68,000, 70,000) on 2026-09-18 — was cheaper
+on Polymarket in all 21 of its judged snapshots. None was persistently cheaper on the
+options. With every Deribit fee at zero, that one condition stops qualifying and the
+sensitivity verdict is "no condition is stably cheaper on either venue". The narrow
+band is the whole family here (21,514 judged rows, all within 168 hours) and gives the
+same verdict.
+
+Across every judged row of the family, 86.9% were indistinguishable, 9.8% cheaper on
+Polymarket and 3.3% cheaper on the options. The most frequent lean either way stayed
+far below the bar: a bucket cheaper on the options in 11 of 27 snapshots, a "below K"
+cheaper on Polymarket in 25 of 29.
+
+The verdict is reported as the rule produces it and is not softened here. Read with its
+basis, it says that on the dailies the two venues are, with one fee-dependent
+exception, not separable at the quotes that existed.
+
+### Why the dailies separate so little — a reading, not a measurement
+A daily options chain near expiry lists few strikes and many one-sided quotes, so
+most conditions have no executable options price at all (in the newest snapshot, 2 of
+31 per asset had one); where they do, the strikes are close together, each spread
+crosses two bid-ask spreads and pays Deribit's fee divided by a narrow width, and the
+band between the tight and one-skip brackets on two chains is wide. A Polymarket price
+sits inside that band nearly every time. This is consistent with the counts; nothing
+in the script tests it.
+
+### What this changes
+For G4, and for any Polymarket-facing product, the cost argument is now measured on
+both families: it holds for single Kalshi year-end buckets and does not hold on
+Polymarket's daily ladders, where the comparison mostly cannot say which venue is
+cheaper. A Polymarket-first V0 would have to rest on something other than cost. The
+README's checked sentences were brought to this run's findings (104 of 108, 92.8%,
+114 snapshots and 25 days); nothing else in it moves.
