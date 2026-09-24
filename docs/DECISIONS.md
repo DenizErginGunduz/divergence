@@ -3704,3 +3704,131 @@ Polymarket's daily ladders, where the comparison mostly cannot say which venue i
 cheaper. A Polymarket-first V0 would have to rest on something other than cost. The
 README's checked sentences were brought to this run's findings (104 of 108, 92.8%,
 114 snapshots and 25 days); nothing else in it moves.
+
+## D-119 — Carry comes from Hyperliquid first and Polymarket's perpetuals second; Deribit's dated futures join the archive; Binance is parked
+**Date:** 2026-09-24 · **Owner's decision of:** 2026-09-24 · **Supersedes:** D-111's venue clause ("Other venues' perpetuals are a different basis and are not collected"); nothing else in D-111 · **Builds:** B-018 · **Produced by:** `collector/collect.py` (`carry()`), `scripts/measure_carry.py`, `docs/ARCHIVE_SCHEMA.md` §`carry/` · **Archive version:** 6 → 7
+
+### Why
+The buyer's comparison (D-114) prices terminal payoffs. The owner's question is wider:
+for one view ("WTI falls five dollars by the end of October"), what does $1,000 buy on
+each venue, including a perpetual or a dated future, and what does holding it cost per
+day and per week. That needs funding from the venues a buyer would use for a linear
+position, and dated-futures prices. Deribit's own perpetual cannot supply it: its unit
+is still unread (D-111), and the documentation page read again on 2026-09-24 still
+says only "1hour interest rate" and "8hour interest rate", so that stays `UNKNOWN`.
+
+### The owner's choice, and what the probe found
+The owner preferred Binance and Hyperliquid, and said that the two converge within a
+short time, so Hyperliquid can serve as the base. A one-off workflow
+(`probe_sources.yml`, run 36034452391, runner in Iowa, US) asked each source once:
+
+| source | answer from a GitHub runner |
+|---|---|
+| `fapi.binance.com` (funding, basis) | 451, "Service unavailable from a restricted location according to 'b. Eligibility' in https://www.binance.com/en/terms" |
+| `data.binance.vision` (monthly funding files) | 200 |
+| `api.hyperliquid.xyz/info` (funding history, both dexes) | 200 |
+| `api.perpetuals.polymarket.com` (tickers, instruments) | 200 |
+| Deribit `get_book_summary_by_currency`, `kind=future` | 200 |
+
+A different Binance host answered the same funding request with 200. It is not used:
+the refusal names Binance's eligibility terms, and reaching the same data through
+another door would be working around that refusal, not an access method. The monthly
+files are allowed but arrive weeks late, and the owner ruled that out for oil, which
+moves within hours. Binance is parked (B-028), not rejected.
+
+### Units, read before any number is shown
+**Hyperliquid** (docs, *Trading → Funding*, read 2026-09-24):
+
+> "The funding rate formula applies to 8 hour funding rate. However, funding is paid
+> every hour at one eighth of the computed rate for each hour."
+
+> "interest rate component is predetermined at 0.01% every 8 hours, which is 0.00125%
+> every hour, or 11.6% APR paid to short."
+
+> "If the contract's price is higher than the oracle price, the premium and hence the
+> funding rate will be positive, and the long position will pay the short position."
+
+> "Note that the funding payment at the end of the interval is position_size *
+> oracle_price * funding_rate."
+
+`fundingHistory` (docs, *Info endpoint → Perpetuals*): `startTime` "Start time in
+milliseconds, inclusive", `endTime` "End time in milliseconds, inclusive". The value
+returned is the **hourly** rate as a fraction: the probe's BTC rows read `0.0000125`,
+which is the quoted 0.00125% per hour. HIP-3 dexes set a funding multiplier per asset
+(`perpDexs` returns `assetToFundingMultiplier`); trade[XYZ]'s specification index,
+read through a fetch tool, gives 0.5 for its markets, and the archived `perpDexs`
+shows the value in force.
+
+**Polymarket perpetuals.** docs.polymarket.com does not open from the owner's
+connection, so the page was read through a fetch tool, which returned these as quotes;
+they are recorded as such and are to be checked against the page:
+
+> "Crypto markets use a 1.0 scale. Non-crypto markets use a 0.5 scale."
+
+> "The charge window is 1 hour. Samples are averaged over the hour, and the hourly
+> rate is applied once at the end."
+
+> "Hourly rate > 0, perp rich vs Index | Longs Pay | Shorts Receive"
+
+> "Funding is a direct transfer between longs and shorts. The protocol takes no cut."
+
+The formula as returned: `F_8h = scale × (mean_P + clamp(0.0001 − mean_P, ±0.0005))`,
+`FR_hour = clamp(F_8h / 8, ±0.04)`. The value in the API is the hourly rate as a
+fraction: the probe's `SP500-USD` ticker read `funding_rate` `0.00000625`, which is
+0.0001 / 8 × 0.5. The funding history endpoint returns "at most 100 funding-rate
+entries per request" with a `more` flag; its entries carry `timestamp` in
+milliseconds. The unit of its `start_timestamp` / `end_timestamp` parameters is not
+stated; milliseconds are sent, and the first run shows whether the rows fall inside
+the window asked for.
+
+**The owner's observation, explained in part.** The owner has paid less funding on
+Polymarket's perpetuals. The scale halves the whole rate — the interest leg and the
+premium — on non-crypto markets, so both what a long pays and what a short receives
+are halved there. Hyperliquid's trade[XYZ] markets use the same 0.5. On crypto both
+venues use 1.0 and the same interest leg, so any difference there comes from the
+premium and has to be measured, not assumed.
+
+### What is collected
+One new stream, `raw/carry/YYYY-MM-DD/carry_<STAMP>.json.gz`, written after `funding`,
+so the Deribit–Polymarket window is untouched (D-111's placement argument applies
+unchanged):
+
+- **Hyperliquid:** `perpDexs`; `metaAndAssetCtxs` for the first dex and for `xyz`
+  (current funding, mark, oracle, open interest, day notional volume); `fundingHistory`
+  for BTC and ETH on the first dex and for CL, BRENTOIL, GOLD, SILVER, SP500 and
+  XYZ100 on `xyz`. A coin that is not in that dex's universe is recorded as absent,
+  not requested.
+- **Polymarket perpetuals:** `tickers`, once a day `instruments`, and the funding
+  history for BTC-USD, ETH-USD, WTIOIL-USD, BRENTOIL-USD, GOLD-USD, SILVER-USD and
+  SP500-USD, found in the tickers by symbol, recorded as absent if not there.
+- **Deribit dated futures (B-018):** `get_book_summary_by_currency` with
+  `kind=future` and `get_instruments` with `kind=future` for BTC and ETH (the
+  perpetual comes with them), and `get_index_price` for `btc_usd` and `eth_usd`.
+
+The lookback is **eight days**, not D-111's 48 hours: a weekly average must exist
+from the first run, and 192 hourly rows are a few kilobytes. Polymarket's history is
+paged (at most four pages). Every vendor payload is stored exactly as returned, with
+our `request` block beside it. A failed venue fails only its own block.
+
+### What is derived
+`scripts/measure_carry.py` writes `findings/carry.json`, run as a step of
+`measure.yml`:
+
+- per perpetual: hourly points de-duplicated on time; the mean hourly rate over the
+  last 24 and 168 hours ending at the newest point, reported only when at least 90%
+  of the window's hours have a point (the same 90% as D-114's persistence) and
+  `UNKNOWN` otherwise; what a $1,000 long pays per day and per week at that mean,
+  at constant notional (positive means the long pays, the short receives the same);
+  the share of hours with a positive rate; the smallest and largest hour.
+- per dated future: mark over index minus one at the newest snapshot, days to
+  expiry from `expiration_timestamp`, and that premium in dollars per $1,000 and
+  annualised.
+
+These are descriptions of what was charged, not forecasts of what will be charged.
+
+### Scope, and what this does not do
+No R3 rule and no highlight is built from these numbers yet; the card only shows
+them. Deribit's perpetual funding remains `UNKNOWN` (D-111). Kalshi's commodity
+series are not added here. The data-rights order the owner set on 2026-09-24 —
+raw data private and derived data public, evaluated at the end — is B-029; it does
+not change what this record collects.
