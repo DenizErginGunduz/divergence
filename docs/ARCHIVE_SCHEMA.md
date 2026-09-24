@@ -17,6 +17,8 @@ raw/
   polymarket_events/ YYYY-MM-DD/ polymarket_events_<STAMP>.json.gz
   funding/           YYYY-MM-DD/ funding_<STAMP>.json.gz      (archive version 6+)
   carry/             YYYY-MM-DD/ carry_<STAMP>.json.gz        (archive version 7+)
+  polymarket_other/  YYYY-MM-DD/ polymarket_other_<STAMP>.json.gz (archive version 8+)
+  hip4/              YYYY-MM-DD/ hip4_<STAMP>.json.gz         (archive version 8+)
   events/trades/     YYYY-MM-DD/ trades_<STAMP>.ndjson.gz
   holders/           YYYY-MM-DD/ holders_<STAMP>.json.gz
   coverage/          YYYY-MM-DD/ coverage_<STAMP>.json
@@ -198,6 +200,12 @@ Polymarket's history is paged, at most four pages, toward whichever end its rows
 show; each page is stored. The unit of its `start_timestamp` parameter is not stated
 by the venue; milliseconds are sent and the rows show whether they fell inside.
 
+**A month once a day (version 8, D-120).** The first carry run of each UTC day asks
+for 31 days, the others for eight; `window.start_ms` says which. A Hyperliquid reply
+of 500 rows is followed by up to three more requests starting just after its newest
+row, stored under `more_pages` beside the first `request`/`response`. Polymarket's
+paging cap is nine pages.
+
 **Overlap.** Eight days asked every run, so each hour appears in about 24 files.
 Readers de-duplicate; `measure_carry.py` counts hours two files report differently.
 
@@ -207,14 +215,58 @@ whether each Deribit block came back. `state/latest.json` lists the newest file 
 
 ---
 
+## `polymarket_other/` — commodity and index events
+
+Written every run since archive version 8 (D-120). The Gamma `events` reply for each
+tag in `POLY_OTHER_TAGS` (`commodities`, `sp-500`), open events only, wrapped as
+`{"ok": true, "value": [ <event>, ... ]}` or `{"ok": false, "error": ...}` per tag.
+Events have the same shape as in `polymarket_events/`. A separate stream so the
+trade-flow stage, which walks every event of `polymarket_events/`, is unchanged. The
+tags carry terminal ladders ("WTI Crude Oil (WTI) closes above ___ on <date>",
+"What will S&P 500 (SPX) close at end of 2026?"), touch events ("hit") and Up/Down
+markets; `scripts/horizons.py` tells them apart by title.
+
+---
+
+## `hip4/` — Hyperliquid outcome markets
+
+Written every run since archive version 8 (D-120).
+
+```json
+{
+  "outcomeMeta": { "ok": true, "value": { "outcomes": [ { "outcome": 1210,
+                     "name": "template:binaryPrice",
+                     "description": "perp:BTC|priceDescription:BTC-USDC mark|seconds:1|threshold:100000|time:20261001-0000",
+                     "sideSpecs": [ {"name": "template:Yes"}, {"name": "template:No"} ],
+                     "quoteToken": "USDC", ... } ] } },
+  "allMids": { "ok": true, "value": { "#12100": "0.5", ..., "BTC": "...", ... } },
+  "books": { "#12100": { "ok": true, "value": <l2Book reply> }, "#12101": { ... } },
+  "skipped_for_cap": 0
+}
+```
+
+`#<10 × outcome + side>` names one side of an outcome (0 = Yes, 1 = No, from a
+third-party guide; to be read in Hyperliquid's documentation). Books are asked for
+both sides of every `template:binaryPrice` outcome on BTC, ETH, xyz:CL, xyz:BRENTOIL,
+xyz:GOLD, xyz:SILVER and xyz:SP500 whose `time` is after the run, at most 80 a run.
+`template:priceTouch` outcomes are in `outcomeMeta` and get no book. The `time` field
+carries no zone; it is read as UTC until the documentation says otherwise.
+**No number from this stream is shown** until settlement, fees and the relation
+between the two sides' books are read and written down (D-120).
+
+---
+
 ## `kalshi/` — catalogue and markets
 
 ```json
 {
-  "catalogue": { "Crypto": { "series": [...] }, "Financials": { "series": [...] } },
-  "selection": { "crypto": [...62 series tickers...], "observed": [...30...] },
+  "catalogue": { "Crypto": { "series": [...] }, "Financials": { "series": [...] },
+                 "Commodities": { "series": [...] } },            // Commodities since version 8
+  "selection": { "crypto": [...62 series tickers...], "observed": [...30...],
+                 "commodities": [...], "truncated": [...], "open_pass_errors": {...} },
   "markets":   { "<SERIES_TICKER>": [ ...market objects... ] },
-  "observed":  { "<SERIES_TICKER>": [ ... ] }
+  "observed":  { "<SERIES_TICKER>": [ ... ] },
+  "commodities": { "<SERIES_TICKER>": [ ... ] }                  // since version 8 (D-120)
 }
 ```
 
@@ -226,6 +278,10 @@ whether each Deribit block came back. `state/latest.json` lists the newest file 
 - `markets` — the measured universe: crypto series.
 - `observed` — an observation-only universe (indices, metals, oil). Collected but not
   yet measured.
+- `commodities` — since version 8 (D-120): the Commodities-category series whose ticker
+  matches `KALSHI_COMMODITY_RE` (WTI, Brent, gold, silver; daily, weekly, monthly and
+  their high/low series). Same market objects, same passes. Since version 8 the OPEN
+  pass of a truncated series pages up to five pages instead of one.
 
 A market object carries 41 fields. The ones the measurements use:
 
