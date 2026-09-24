@@ -41,9 +41,11 @@ GAMMA = 'https://gamma-api.polymarket.com'
 DATA = 'https://data-api.polymarket.com'
 DERIBIT = 'https://www.deribit.com/api/v2/public'
 KALSHI = 'https://external-api.kalshi.com/trade-api/v2'
+HYPERLIQUID = 'https://api.hyperliquid.xyz/info'
+POLY_PERPS = 'https://api.perpetuals.polymarket.com/v1/info'
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-ARCHIVE_VERSION = 6                          # schema version of the files we write (6: raw/funding, D-111)
+ARCHIVE_VERSION = 7                          # schema version of the files we write (6: raw/funding, D-111; 7: raw/carry, D-119)
 
 # Trade fields dropped before writing. Two kinds, neither of them market data:
 #
@@ -92,6 +94,16 @@ DERIBIT_CURRENCIES = ['BTC', 'ETH']
 # archive stores what came back.
 FUNDING_INSTRUMENTS = ['BTC-PERPETUAL', 'ETH-PERPETUAL']
 FUNDING_LOOKBACK_MS = 48 * 3600 * 1000
+# Carry (D-119): the perpetuals a buyer would use for a linear position, and
+# Deribit's dated futures. Hyperliquid is the base, Polymarket's perpetuals second.
+# Coins are ASKED FOR only if the dex's own universe lists them; an absent one is
+# recorded as absent. Eight days back, so a weekly mean exists from the first run.
+CARRY_LOOKBACK_MS = 8 * 24 * 3600 * 1000
+HL_COINS = {'': ['BTC', 'ETH'],
+            'xyz': ['CL', 'BRENTOIL', 'GOLD', 'SILVER', 'SP500', 'XYZ100']}
+POLY_PERP_SYMBOLS = ['BTC-USD', 'ETH-USD', 'WTIOIL-USD', 'BRENTOIL-USD',
+                     'GOLD-USD', 'SILVER-USD', 'SP500-USD']
+POLY_PERP_MAX_PAGES = 4                      # "at most 100 funding-rate entries per request"
 PAGE = 100                                   # data-api limit
 MAX_PAGES = 6                                # cap on gap-closing attempts
 HOLDERS_HOUR = 5                             # holders fetched ONCE a day (05 UTC)
@@ -119,6 +131,22 @@ def get(url, timeout=30, attempts=3):
             last = e
             time.sleep(1.5 * (i + 1))
     raise RuntimeError('%s -> %s' % (url[:90], str(last)[:120]))
+
+
+def post(url, body, timeout=30, attempts=3):
+    """Hyperliquid's info endpoint takes a JSON body. Same retry shape as get()."""
+    last = None
+    data = json.dumps(body).encode('utf-8')
+    hdr = dict(UA); hdr['Content-Type'] = 'application/json'
+    for i in range(attempts):
+        try:
+            with urllib.request.urlopen(
+                    urllib.request.Request(url, data=data, headers=hdr), timeout=timeout) as r:
+                return json.loads(r.read())
+        except Exception as e:
+            last = e
+            time.sleep(1.5 * (i + 1))
+    raise RuntimeError('%s %s -> %s' % (url[:60], json.dumps(body)[:60], str(last)[:120]))
 
 
 def write_gz(path, data):
@@ -304,6 +332,99 @@ def funding(end_ms=None):
 stage('funding', funding);            MARKS['funding_end'] = round(time.time()-t0_all, 2)
 
 
+# ---------------- 3c. Carry: other venues' perpetuals and Deribit's dated futures (D-119) ----------------
+# After funding, for the same reason funding sits after the synchronous reads. Each
+# venue is its own try: one venue failing records its error inside the file and
+# leaves the other two intact. Payloads are stored as returned, beside our request.
+def _try(fn):
+    try:
+        return {'ok': True, 'value': fn()}
+    except Exception as e:
+        return {'ok': False, 'error': str(e)[:300]}
+
+
+def _hyperliquid(start, end):
+    out = {'perpDexs': _try(lambda: post(HYPERLIQUID, {'type': 'perpDexs'})),
+           'ctx': {}, 'funding': {}, 'absent': []}
+    for dex, coins in HL_COINS.items():
+        body = {'type': 'metaAndAssetCtxs'}
+        if dex:
+            body['dex'] = dex
+        ctx = _try(lambda: post(HYPERLIQUID, body))
+        out['ctx'][dex or 'main'] = {'request': body, 'response': ctx}
+        listed = set()
+        if ctx['ok'] and isinstance(ctx['value'], list) and ctx['value']:
+            listed = set(u.get('name') for u in (ctx['value'][0] or {}).get('universe') or [])
+        for c in coins:
+            name = '%s:%s' % (dex, c) if dex else c
+            if listed and name not in listed:
+                out['absent'].append(name)
+                continue
+            req = {'type': 'fundingHistory', 'coin': name, 'startTime': start, 'endTime': end}
+            out['funding'][name] = {'request': req,
+                                    'response': _try(lambda: post(HYPERLIQUID, req))}
+    return out
+
+
+def _poly_perps(start, end):
+    out = {'tickers': _try(lambda: get('%s/tickers' % POLY_PERPS)), 'funding': {}, 'absent': []}
+    if not os.path.isdir(os.path.join(ROOT, 'raw', 'carry', DAY)) or now.hour == HOLDERS_HOUR:
+        out['instruments'] = _try(lambda: get('%s/instruments' % POLY_PERPS))
+    ids = {}
+    if out['tickers']['ok'] and isinstance(out['tickers']['value'], list):
+        ids = dict((t.get('symbol'), t.get('instrument_id')) for t in out['tickers']['value'])
+    for sym in POLY_PERP_SYMBOLS:
+        if sym not in ids:
+            out['absent'].append(sym)
+            continue
+        pages, lo, hi = [], start, end
+        for _ in range(POLY_PERP_MAX_PAGES):
+            req = {'instrument_id': ids[sym], 'start_timestamp': lo, 'end_timestamp': hi}
+            r = _try(lambda: get('%s/funding?instrument_id=%s&start_timestamp=%d&end_timestamp=%d'
+                                 % (POLY_PERPS, ids[sym], lo, hi)))
+            pages.append({'request': req, 'response': r})
+            v = r.get('value') if r['ok'] else None
+            rows = (v or {}).get('data') if isinstance(v, dict) else None
+            if not (isinstance(v, dict) and v.get('more') and rows):
+                break
+            ts = [int(x.get('timestamp') or 0) for x in rows]
+            # Page toward whichever end the venue has not returned yet; the order of
+            # the rows is not documented, so it is read from the rows themselves.
+            if ts[0] <= ts[-1]:
+                lo = max(ts) + 1
+            else:
+                hi = min(ts) - 1
+            if lo > hi:
+                break
+        out['funding'][sym] = pages
+    return out
+
+
+def _deribit_futures():
+    out = {}
+    for cur in DERIBIT_CURRENCIES:
+        out[cur] = {
+            'book_summary': _try(lambda: get('%s/get_book_summary_by_currency?currency=%s&kind=future'
+                                             % (DERIBIT, cur))),
+            'instruments': _try(lambda: get('%s/get_instruments?currency=%s&kind=future&expired=false'
+                                            % (DERIBIT, cur))),
+            'index': _try(lambda: get('%s/get_index_price?index_name=%s_usd' % (DERIBIT, cur.lower()))),
+        }
+    return out
+
+
+def carry(end_ms=None):
+    end = int(time.time() * 1000) if end_ms is None else int(end_ms)
+    start = end - CARRY_LOOKBACK_MS
+    return {'window': {'start_ms': start, 'end_ms': end},
+            'hyperliquid': _hyperliquid(start, end),
+            'polymarket_perps': _poly_perps(start, end),
+            'deribit_futures': _deribit_futures()}
+
+
+stage('carry', carry);                MARKS['carry_end'] = round(time.time()-t0_all, 2)
+
+
 # ---------------- 3. Flow: event-based, with gaps ----------------
 def _is_new(t, wm):
     """Is this trade after the watermark? Ties at the boundary split by hash."""
@@ -466,6 +587,8 @@ if 'kalshi' in bucket:
     save('kalshi', bucket['kalshi'])
 if 'funding' in bucket:
     save('funding', bucket['funding'])
+if 'carry' in bucket:
+    save('carry', bucket['carry'])
 
 flow_result = bucket.get('flow') or {'new_trades': [], 'coverage': []}
 
@@ -534,6 +657,20 @@ meta = {'snapshot_utc': now.isoformat(),
                        if isinstance((v.get('response') or {}).get('result'), list) else None
                        for k, v in f.items()},
         })(bucket.get('funding')),
+        # Which carry blocks came back and how many rows each (D-119).
+        'carry_summary': (lambda c: None if not c else {
+            'lookback_hours': CARRY_LOOKBACK_MS // 3600000,
+            'hyperliquid_rows': {k: (len(v['response']['value']) if v['response']['ok']
+                                     and isinstance(v['response']['value'], list) else None)
+                                 for k, v in c['hyperliquid']['funding'].items()},
+            'hyperliquid_absent': c['hyperliquid']['absent'],
+            'polymarket_rows': {k: sum(len(((p['response'].get('value') or {}).get('data') or []))
+                                       if p['response']['ok'] and isinstance(p['response'].get('value'), dict) else 0
+                                       for p in v)
+                                for k, v in c['polymarket_perps']['funding'].items()},
+            'polymarket_absent': c['polymarket_perps']['absent'],
+            'deribit_futures_ok': {k: v['book_summary']['ok'] for k, v in c['deribit_futures'].items()},
+        })(bucket.get('carry')),
         'files': written, 'assets': ASSETS, 'version': ARCHIVE_VERSION}
 mp = os.path.join(ROOT, 'raw', '_meta', DAY, 'meta_%s.json' % STAMP)
 os.makedirs(os.path.dirname(mp), exist_ok=True)
@@ -557,10 +694,10 @@ def _rel(p):
 paths = {}
 for w in written:
     d = w['file'].replace(os.sep, '/')
-    # 'funding' is listed here (the block's purpose is the newest file of each
-    # stream) but is NOT in the required-streams check below: the page does not
-    # read it, and a funding failure must not mark the pointer broken (D-111).
-    for name in ('kalshi', 'deribit', 'polymarket_events', 'funding'):
+    # 'funding' and 'carry' are listed here (the block's purpose is the newest file
+    # of each stream) but are NOT in the required-streams check below: the page does
+    # not read them, and their failure must not mark the pointer broken (D-111, D-119).
+    for name in ('kalshi', 'deribit', 'polymarket_events', 'funding', 'carry'):
         if d.startswith('raw/%s/' % name):
             paths[name] = d
 
