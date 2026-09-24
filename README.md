@@ -201,9 +201,9 @@ For the data, go to the venues.
 
 ## Status, scope and limitations
 
-**Running:** the collector (three times daily in CI), the archive, the thirteen
+**Running:** the collector (three times daily in CI), the archive, the fourteen
 scripted steps `measure.yml` runs in order (archive smoke test to written findings), two documentation checkers, and the
-terminal UI. Tests: 80, no dependencies.
+terminal UI. Tests: 93, no dependencies.
 
 **In progress:** Research Note 1 is frozen at v1 (D-107) and waits on its publication
 gate; the exposure-design branch is specified and not yet computed; the product stages
