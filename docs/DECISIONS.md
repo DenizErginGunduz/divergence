@@ -3469,3 +3469,51 @@ whether ranking instruments against a person's risk profile is regulated advice;
 the data rights of showing either venue's prices in a product (`DATA_SOURCES.md`,
 *Data rights*; the Kalshi Developer Agreement is unread). None of them is answered
 here. All three stand in front of G4 unchanged.
+
+## D-115 — Deribit discounts combo orders; the buyer's comparison gets a zero-fee sensitivity, added after a first look and labelled as such
+**Date:** 2026-09-24 · **Amends:** D-114 (adds a sensitivity; changes no rule and no threshold) · **Produced by:** `scripts/measure_payoff.py` (`sensitivity_combo_fees`)
+
+### What was found, and when
+While `measure_payoff.py` was being checked against `measure_band.rungs()` on the
+14-day public window — a debugging run, whose numbers are not published — the Deribit
+fee turned out to be a large part of the options cost of a bucket — four crossed
+legs, each charged 0.03% of the index divided by the bracket width, which on the
+year-end BTC buckets is more than the Kalshi price of some of them. Checking the fee rule on that
+account found a sentence the project had not read. Deribit's Combo Books page,
+quoted:
+
+> "The cheapest direction of a Combo has reduced fees, meaning less fees to pay
+> compared to executing each leg individually."
+
+The page lists call spreads, put spreads and butterflies among the combos. It does not
+say how large the reduction is. Every spread in this project — the band, the kill
+test, D-114 — is charged leg by leg, in full. For an arbitrageur that is the safe
+direction for claiming an edge and the unsafe one for trusting a null (below). For
+the buyer's comparison it is one-sided in the same way: it can only make the
+options side look dearer than a buyer entering the spread as one combo would pay.
+
+### What is done about it
+D-114's fee model stays the verdict's fee model; changing it now, after a first look
+at the data, would be the edited-after-the-evidence rule D-114 forbids. Beside the
+verdict, the same rules are applied once more with every Deribit fee set to zero — the
+most favourable case for Deribit the combo sentence could possibly mean — and reported
+as `sensitivity_combo_fees`, which the verdict never reads. A condition that stays
+cheaper on Kalshi with no Deribit fee at all does not depend on the combo rule; one
+that flips does, and is reported as depending on a number that is `UNKNOWN`.
+
+### What this record admits
+The sensitivity was added after the assistant had seen D-114's rules applied to the
+public window, and after seeing that the fee was large. It is added anyway because
+it can only weaken a finding in Kalshi's favour, never strengthen one, and because
+leaving a known unmodelled discount out of the report would be worse. Whether combo
+books also quote tighter prices than the legs crossed separately is `UNKNOWN`: the
+archive reads `book_summary` for single options only.
+
+The same sentence bears on the arbitrage results, and not in a comfortable direction:
+there, an overstated option fee makes a discrepancy harder to find, so it is the side
+that could have manufactured D-103's null. A local check by the assistant on the public
+window — a debugging run, not a published figure — found the kill test's verdict
+unchanged with every Deribit fee set to zero. That is not the mirror and not the
+workflow, so it settles nothing on the record; B-027 makes it a sensitivity the
+workflow reports. Until then D-103 stands as written, with this caveat attached to it
+here and not edited into it.
