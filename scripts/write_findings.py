@@ -318,13 +318,14 @@ def kill_test_block():
 
 
 def payoff_frontier_block():
-    """The buyer's comparison (D-114), small enough for the page to carry.
+    """The buyer's comparison (D-114, D-117), small enough for the page to carry.
 
     Copied from findings/payoff_frontier.json, which measure_payoff.py writes
-    earlier in the same workflow: the verdict, the conditions it rests on and
-    the combo-fee sensitivity (D-115), WITHOUT the per-condition table and the
-    reference ticket. Recomputing any of it here would make two places able to
-    disagree. None when the file is absent.
+    earlier in the same workflow: per family, the verdict, the narrow-band
+    verdict, the stable conditions and the combo-fee sensitivity (D-115),
+    WITHOUT the per-condition table and the reference ticket. Recomputing any of
+    it here would make two places able to disagree. None when the file is
+    absent.
     """
     path = os.path.join(ROOT, 'findings', 'payoff_frontier.json')
     try:
@@ -332,14 +333,18 @@ def payoff_frontier_block():
             k = json.load(f)
     except (OSError, ValueError):
         return None
-    verdict = k.get('verdict')
-    if not isinstance(verdict, dict):
+    families = k.get('families')
+    if not isinstance(families, dict):
         return None
-    return {'decision': k.get('decision'), 'family': k.get('family'),
-            'archive': k.get('archive'), 'verdict': verdict,
-            'stable_conditions': k.get('stable_conditions'),
-            'sensitivity_combo_fees': k.get('sensitivity_combo_fees')}
-
+    out = {'decision': k.get('decision'), 'archive': k.get('archive'), 'families': {}}
+    for name, fam in families.items():
+        out['families'][name] = {
+            'prediction_venue': fam.get('prediction_venue'),
+            'verdict': fam.get('verdict'),
+            'narrow_band': fam.get('narrow_band'),
+            'stable_conditions': fam.get('stable_conditions'),
+            'sensitivity_combo_fees': fam.get('sensitivity_combo_fees')}
+    return out
 
 def main():
     all_stamps = stamps('_meta')
@@ -385,8 +390,12 @@ def main():
         if not isinstance(m, dict):
             print('  %-26s absent' % name)
             continue
-        if name in ('kill_test_eth5k', 'payoff_frontier'):
+        if name == 'kill_test_eth5k':
             print('  %-26s %s' % (name, m['verdict'].get('verdict')))
+            continue
+        if name == 'payoff_frontier':
+            for fam, v in m['families'].items():
+                print('  %-26s %s: %s' % (name, fam, (v.get('verdict') or {}).get('verdict')))
             continue
         k = m.get('stability') or {}
         if k:
