@@ -2,10 +2,894 @@
  "produced_by": "scripts/measure_carry.py",
  "decision": "D-119",
  "archive": "/tmp/mirror/raw",
- "files_read": 0,
- "newest_stamp": null,
- "perpetuals": {},
- "futures": {},
+ "files_read": 1,
+ "newest_stamp": "2026-09-24T1834Z",
+ "perpetuals": {
+  "hyperliquid:BTC": {
+   "venue": "hyperliquid",
+   "instrument": "BTC",
+   "underlying": "BTC",
+   "rate_unit": "fraction per hour; positive = long pays (D-119)",
+   "points": 192,
+   "first_hour_ms": 1789585200000,
+   "last_hour_ms": 1790272800000,
+   "disagreements": 0,
+   "last_rate": 1.25e-05,
+   "windows": {
+    "24h": {
+     "mean_hourly": 8.280804166666668e-06,
+     "coverage": 1.0,
+     "long_pays_per_1000_per_day": 0.1987393,
+     "long_pays_per_1000_per_week": 1.3911751
+    },
+    "168h": {
+     "mean_hourly": 1.3138920238095237e-05,
+     "coverage": 1.0,
+     "long_pays_per_1000_per_day": 0.31533408571428573,
+     "long_pays_per_1000_per_week": 2.2073386
+    }
+   },
+   "share_positive_168h": 0.9761904761904762,
+   "min_hourly_168h": -7.2281e-06,
+   "max_hourly_168h": 8.97697e-05,
+   "context_newest_snapshot": {
+    "markPx": "84261.0",
+    "oraclePx": "84290.0",
+    "openInterest": "39062.37648",
+    "dayNtlVlm": "3997812314.5084986687",
+    "funding": "0.0000125"
+   }
+  },
+  "hyperliquid:ETH": {
+   "venue": "hyperliquid",
+   "instrument": "ETH",
+   "underlying": "ETH",
+   "rate_unit": "fraction per hour; positive = long pays (D-119)",
+   "points": 192,
+   "first_hour_ms": 1789585200000,
+   "last_hour_ms": 1790272800000,
+   "disagreements": 0,
+   "last_rate": 1.25e-05,
+   "windows": {
+    "24h": {
+     "mean_hourly": 1.25e-05,
+     "coverage": 1.0,
+     "long_pays_per_1000_per_day": 0.30000000000000004,
+     "long_pays_per_1000_per_week": 2.1
+    },
+    "168h": {
+     "mean_hourly": 1.3975781547619049e-05,
+     "coverage": 1.0,
+     "long_pays_per_1000_per_day": 0.3354187571428572,
+     "long_pays_per_1000_per_week": 2.3479313000000004
+    }
+   },
+   "share_positive_168h": 1.0,
+   "min_hourly_168h": 4.0376e-06,
+   "max_hourly_168h": 5.12319e-05,
+   "context_newest_snapshot": {
+    "markPx": "2680.1",
+    "oraclePx": "2680.4",
+    "openInterest": "1066643.1970000002",
+    "dayNtlVlm": "1088067529.1459298134",
+    "funding": "0.0000125"
+   }
+  },
+  "hyperliquid:xyz:BRENTOIL": {
+   "venue": "hyperliquid",
+   "instrument": "xyz:BRENTOIL",
+   "underlying": "BRENT",
+   "rate_unit": "fraction per hour; positive = long pays (D-119)",
+   "points": 192,
+   "first_hour_ms": 1789585200000,
+   "last_hour_ms": 1790272800000,
+   "disagreements": 0,
+   "last_rate": 9.015e-07,
+   "windows": {
+    "24h": {
+     "mean_hourly": 4.123866666666667e-06,
+     "coverage": 1.0,
+     "long_pays_per_1000_per_day": 0.0989728,
+     "long_pays_per_1000_per_week": 0.6928096
+    },
+    "168h": {
+     "mean_hourly": 7.325064285714286e-06,
+     "coverage": 1.0,
+     "long_pays_per_1000_per_day": 0.1758015428571429,
+     "long_pays_per_1000_per_week": 1.2306108000000002
+    }
+   },
+   "share_positive_168h": 0.8630952380952381,
+   "min_hourly_168h": -0.0001229939,
+   "max_hourly_168h": 0.0001873966,
+   "context_newest_snapshot": {
+    "markPx": "100.11",
+    "oraclePx": "100.11",
+    "openInterest": "1622644.3599999996",
+    "dayNtlVlm": "153388361.006349951",
+    "funding": "-0.0000017097"
+   }
+  },
+  "hyperliquid:xyz:CL": {
+   "venue": "hyperliquid",
+   "instrument": "xyz:CL",
+   "underlying": "WTI",
+   "rate_unit": "fraction per hour; positive = long pays (D-119)",
+   "points": 192,
+   "first_hour_ms": 1789585200000,
+   "last_hour_ms": 1790272800000,
+   "disagreements": 0,
+   "last_rate": 6.25e-06,
+   "windows": {
+    "24h": {
+     "mean_hourly": -4.910458333333334e-06,
+     "coverage": 1.0,
+     "long_pays_per_1000_per_day": -0.11785100000000001,
+     "long_pays_per_1000_per_week": -0.824957
+    },
+    "168h": {
+     "mean_hourly": -2.3506011904761908e-06,
+     "coverage": 1.0,
+     "long_pays_per_1000_per_day": -0.056414428571428574,
+     "long_pays_per_1000_per_week": -0.39490100000000006
+    }
+   },
+   "share_positive_168h": 0.30952380952380953,
+   "min_hourly_168h": -0.0001406733,
+   "max_hourly_168h": 0.0001678992,
+   "context_newest_snapshot": {
+    "markPx": "94.591",
+    "oraclePx": "94.61",
+    "openInterest": "1627346.4079999998",
+    "dayNtlVlm": "275877377.014277041",
+    "funding": "-0.0000013502"
+   }
+  },
+  "hyperliquid:xyz:GOLD": {
+   "venue": "hyperliquid",
+   "instrument": "xyz:GOLD",
+   "underlying": "GOLD",
+   "rate_unit": "fraction per hour; positive = long pays (D-119)",
+   "points": 192,
+   "first_hour_ms": 1789585200000,
+   "last_hour_ms": 1790272800000,
+   "disagreements": 0,
+   "last_rate": 6.25e-06,
+   "windows": {
+    "24h": {
+     "mean_hourly": 1.4152266666666668e-05,
+     "coverage": 1.0,
+     "long_pays_per_1000_per_day": 0.3396544,
+     "long_pays_per_1000_per_week": 2.3775808
+    },
+    "168h": {
+     "mean_hourly": 8.770821428571429e-06,
+     "coverage": 1.0,
+     "long_pays_per_1000_per_day": 0.2104997142857143,
+     "long_pays_per_1000_per_week": 1.473498
+    }
+   },
+   "share_positive_168h": 0.9761904761904762,
+   "min_hourly_168h": -1.50941e-05,
+   "max_hourly_168h": 2.82258e-05,
+   "context_newest_snapshot": {
+    "markPx": "4271.2",
+    "oraclePx": "4270.2",
+    "openInterest": "67975.6668",
+    "dayNtlVlm": "55790213.4378599972",
+    "funding": "0.00000625"
+   }
+  },
+  "hyperliquid:xyz:SILVER": {
+   "venue": "hyperliquid",
+   "instrument": "xyz:SILVER",
+   "underlying": "SILVER",
+   "rate_unit": "fraction per hour; positive = long pays (D-119)",
+   "points": 192,
+   "first_hour_ms": 1789585200000,
+   "last_hour_ms": 1790272800000,
+   "disagreements": 0,
+   "last_rate": 2.59461e-05,
+   "windows": {
+    "24h": {
+     "mean_hourly": 2.3734783333333335e-05,
+     "coverage": 1.0,
+     "long_pays_per_1000_per_day": 0.5696348,
+     "long_pays_per_1000_per_week": 3.9874436
+    },
+    "168h": {
+     "mean_hourly": 1.0770080357142857e-05,
+     "coverage": 1.0,
+     "long_pays_per_1000_per_day": 0.2584819285714286,
+     "long_pays_per_1000_per_week": 1.8093735000000002
+    }
+   },
+   "share_positive_168h": 0.9464285714285714,
+   "min_hourly_168h": -7.25993e-05,
+   "max_hourly_168h": 4.3146e-05,
+   "context_newest_snapshot": {
+    "markPx": "63.786",
+    "oraclePx": "63.747",
+    "openInterest": "3908221.3799999999",
+    "dayNtlVlm": "91919192.7925199717",
+    "funding": "0.0000231611"
+   }
+  },
+  "hyperliquid:xyz:SP500": {
+   "venue": "hyperliquid",
+   "instrument": "xyz:SP500",
+   "underlying": "SPX",
+   "rate_unit": "fraction per hour; positive = long pays (D-119)",
+   "points": 192,
+   "first_hour_ms": 1789585200000,
+   "last_hour_ms": 1790272800000,
+   "disagreements": 0,
+   "last_rate": 6.25e-06,
+   "windows": {
+    "24h": {
+     "mean_hourly": -7.534791666666667e-07,
+     "coverage": 1.0,
+     "long_pays_per_1000_per_day": -0.018083500000000002,
+     "long_pays_per_1000_per_week": -0.12658450000000002
+    },
+    "168h": {
+     "mean_hourly": 1.2928875000000001e-06,
+     "coverage": 1.0,
+     "long_pays_per_1000_per_day": 0.031029300000000003,
+     "long_pays_per_1000_per_week": 0.2172051
+    }
+   },
+   "share_positive_168h": 0.6547619047619048,
+   "min_hourly_168h": -1.7507e-05,
+   "max_hourly_168h": 6.25e-06,
+   "context_newest_snapshot": {
+    "markPx": "7701.0",
+    "oraclePx": "7701.8",
+    "openInterest": "47624.548",
+    "dayNtlVlm": "400048932.4724000096",
+    "funding": "0.00000625"
+   }
+  },
+  "hyperliquid:xyz:XYZ100": {
+   "venue": "hyperliquid",
+   "instrument": "xyz:XYZ100",
+   "underlying": "NDX-like",
+   "rate_unit": "fraction per hour; positive = long pays (D-119)",
+   "points": 192,
+   "first_hour_ms": 1789585200000,
+   "last_hour_ms": 1790272800000,
+   "disagreements": 0,
+   "last_rate": 6.25e-06,
+   "windows": {
+    "24h": {
+     "mean_hourly": 4.81045e-06,
+     "coverage": 1.0,
+     "long_pays_per_1000_per_day": 0.11545079999999999,
+     "long_pays_per_1000_per_week": 0.8081556
+    },
+    "168h": {
+     "mean_hourly": 4.953175595238096e-06,
+     "coverage": 1.0,
+     "long_pays_per_1000_per_day": 0.1188762142857143,
+     "long_pays_per_1000_per_week": 0.8321335000000001
+    }
+   },
+   "share_positive_168h": 0.9285714285714286,
+   "min_hourly_168h": -3.87803e-05,
+   "max_hourly_168h": 1.3972e-05,
+   "context_newest_snapshot": {
+    "markPx": "30425.0",
+    "oraclePx": "30430.0",
+    "openInterest": "6298.4234",
+    "dayNtlVlm": "294480675.3719999194",
+    "funding": "0.00000625"
+   }
+  },
+  "polymarket:BRENTOIL-USD": {
+   "venue": "polymarket",
+   "instrument": "BRENTOIL-USD",
+   "underlying": "BRENT",
+   "rate_unit": "fraction per hour; positive = long pays (D-119)",
+   "points": 192,
+   "first_hour_ms": 1789585200000,
+   "last_hour_ms": 1790272800000,
+   "disagreements": 0,
+   "last_rate": 6.25e-06,
+   "windows": {
+    "24h": {
+     "mean_hourly": 6.25e-06,
+     "coverage": 1.0,
+     "long_pays_per_1000_per_day": 0.15000000000000002,
+     "long_pays_per_1000_per_week": 1.05
+    },
+    "168h": {
+     "mean_hourly": 1.4207976190476191e-05,
+     "coverage": 1.0,
+     "long_pays_per_1000_per_day": 0.3409914285714286,
+     "long_pays_per_1000_per_week": 2.38694
+    }
+   },
+   "share_positive_168h": 0.9464285714285714,
+   "min_hourly_168h": -8.343e-05,
+   "max_hourly_168h": 0.00017692,
+   "context_newest_snapshot": {
+    "index_price": "100.11",
+    "mark_price": "100.11",
+    "open_interest": "17039.949",
+    "funding_rate": "0.00000625"
+   }
+  },
+  "polymarket:BTC-USD": {
+   "venue": "polymarket",
+   "instrument": "BTC-USD",
+   "underlying": "BTC",
+   "rate_unit": "fraction per hour; positive = long pays (D-119)",
+   "points": 192,
+   "first_hour_ms": 1789585200000,
+   "last_hour_ms": 1790272800000,
+   "disagreements": 0,
+   "last_rate": -2.46e-06,
+   "windows": {
+    "24h": {
+     "mean_hourly": 5.5658333333333335e-06,
+     "coverage": 1.0,
+     "long_pays_per_1000_per_day": 0.13358,
+     "long_pays_per_1000_per_week": 0.93506
+    },
+    "168h": {
+     "mean_hourly": 1.1280714285714286e-05,
+     "coverage": 1.0,
+     "long_pays_per_1000_per_day": 0.2707371428571429,
+     "long_pays_per_1000_per_week": 1.8951600000000002
+    }
+   },
+   "share_positive_168h": 0.9702380952380952,
+   "min_hourly_168h": -8.88e-06,
+   "max_hourly_168h": 1.25e-05,
+   "context_newest_snapshot": {
+    "index_price": "84276",
+    "mark_price": "84247",
+    "open_interest": "131.34847000000000000000000000",
+    "funding_rate": "0.0000056"
+   }
+  },
+  "polymarket:ETH-USD": {
+   "venue": "polymarket",
+   "instrument": "ETH-USD",
+   "underlying": "ETH",
+   "rate_unit": "fraction per hour; positive = long pays (D-119)",
+   "points": 192,
+   "first_hour_ms": 1789585200000,
+   "last_hour_ms": 1790272800000,
+   "disagreements": 0,
+   "last_rate": 1.25e-05,
+   "windows": {
+    "24h": {
+     "mean_hourly": 1.25e-05,
+     "coverage": 1.0,
+     "long_pays_per_1000_per_day": 0.30000000000000004,
+     "long_pays_per_1000_per_week": 2.1
+    },
+    "168h": {
+     "mean_hourly": 1.2500000000000002e-05,
+     "coverage": 1.0,
+     "long_pays_per_1000_per_day": 0.30000000000000004,
+     "long_pays_per_1000_per_week": 2.1000000000000005
+    }
+   },
+   "share_positive_168h": 1.0,
+   "min_hourly_168h": 1.25e-05,
+   "max_hourly_168h": 1.25e-05,
+   "context_newest_snapshot": {
+    "index_price": "2680",
+    "mark_price": "2680",
+    "open_interest": "4000.4974",
+    "funding_rate": "0.0000125"
+   }
+  },
+  "polymarket:GOLD-USD": {
+   "venue": "polymarket",
+   "instrument": "GOLD-USD",
+   "underlying": "GOLD",
+   "rate_unit": "fraction per hour; positive = long pays (D-119)",
+   "points": 192,
+   "first_hour_ms": 1789585200000,
+   "last_hour_ms": 1790272800000,
+   "disagreements": 0,
+   "last_rate": 1.169e-05,
+   "windows": {
+    "24h": {
+     "mean_hourly": 1.4739583333333334e-05,
+     "coverage": 1.0,
+     "long_pays_per_1000_per_day": 0.35375,
+     "long_pays_per_1000_per_week": 2.4762500000000003
+    },
+    "168h": {
+     "mean_hourly": 1.2069107142857143e-05,
+     "coverage": 1.0,
+     "long_pays_per_1000_per_day": 0.28965857142857143,
+     "long_pays_per_1000_per_week": 2.02761
+    }
+   },
+   "share_positive_168h": 1.0,
+   "min_hourly_168h": 5.99e-06,
+   "max_hourly_168h": 3.971e-05,
+   "context_newest_snapshot": {
+    "index_price": "4270.2",
+    "mark_price": "4273.1",
+    "open_interest": "1009.69968",
+    "funding_rate": "0.00000901"
+   }
+  },
+  "polymarket:SILVER-USD": {
+   "venue": "polymarket",
+   "instrument": "SILVER-USD",
+   "underlying": "SILVER",
+   "rate_unit": "fraction per hour; positive = long pays (D-119)",
+   "points": 192,
+   "first_hour_ms": 1789585200000,
+   "last_hour_ms": 1790272800000,
+   "disagreements": 0,
+   "last_rate": 6.25e-06,
+   "windows": {
+    "24h": {
+     "mean_hourly": 1.0535e-05,
+     "coverage": 1.0,
+     "long_pays_per_1000_per_day": 0.25283999999999995,
+     "long_pays_per_1000_per_week": 1.76988
+    },
+    "168h": {
+     "mean_hourly": 7.284880952380952e-06,
+     "coverage": 1.0,
+     "long_pays_per_1000_per_day": 0.17483714285714286,
+     "long_pays_per_1000_per_week": 1.22386
+    }
+   },
+   "share_positive_168h": 0.9642857142857143,
+   "min_hourly_168h": -4.9e-05,
+   "max_hourly_168h": 3.918e-05,
+   "context_newest_snapshot": {
+    "index_price": "63.747",
+    "mark_price": "63.778",
+    "open_interest": "62513.325",
+    "funding_rate": "0.00000625"
+   }
+  },
+  "polymarket:SP500-USD": {
+   "venue": "polymarket",
+   "instrument": "SP500-USD",
+   "underlying": "SPX",
+   "rate_unit": "fraction per hour; positive = long pays (D-119)",
+   "points": 192,
+   "first_hour_ms": 1789585200000,
+   "last_hour_ms": 1790272800000,
+   "disagreements": 0,
+   "last_rate": 6.25e-06,
+   "windows": {
+    "24h": {
+     "mean_hourly": 6.25e-06,
+     "coverage": 1.0,
+     "long_pays_per_1000_per_day": 0.15000000000000002,
+     "long_pays_per_1000_per_week": 1.05
+    },
+    "168h": {
+     "mean_hourly": 3.7180357142857144e-06,
+     "coverage": 1.0,
+     "long_pays_per_1000_per_day": 0.08923285714285714,
+     "long_pays_per_1000_per_week": 0.62463
+    }
+   },
+   "share_positive_168h": 0.7976190476190477,
+   "min_hourly_168h": -1.035e-05,
+   "max_hourly_168h": 6.25e-06,
+   "context_newest_snapshot": {
+    "index_price": "7701.8",
+    "mark_price": "7701.7",
+    "open_interest": "1163.46612",
+    "funding_rate": "0.00000625"
+   }
+  },
+  "polymarket:WTIOIL-USD": {
+   "venue": "polymarket",
+   "instrument": "WTIOIL-USD",
+   "underlying": "WTI",
+   "rate_unit": "fraction per hour; positive = long pays (D-119)",
+   "points": 192,
+   "first_hour_ms": 1789585200000,
+   "last_hour_ms": 1790272800000,
+   "disagreements": 0,
+   "last_rate": 6.25e-06,
+   "windows": {
+    "24h": {
+     "mean_hourly": 3.2133333333333336e-06,
+     "coverage": 1.0,
+     "long_pays_per_1000_per_day": 0.07712000000000001,
+     "long_pays_per_1000_per_week": 0.5398400000000001
+    },
+    "168h": {
+     "mean_hourly": 8.60172619047619e-06,
+     "coverage": 1.0,
+     "long_pays_per_1000_per_day": 0.20644142857142858,
+     "long_pays_per_1000_per_week": 1.44509
+    }
+   },
+   "share_positive_168h": 0.9523809523809523,
+   "min_hourly_168h": -5.974e-05,
+   "max_hourly_168h": 0.00012209,
+   "context_newest_snapshot": {
+    "index_price": "94.61",
+    "mark_price": "94.55",
+    "open_interest": "19535.093",
+    "funding_rate": "0.00000625"
+   }
+  }
+ },
+ "futures": {
+  "BTC-27NOV26": {
+   "underlying": "BTC",
+   "mark": 85025.31,
+   "index": 84247.47,
+   "expiry_ms": 1795766400000,
+   "volume_usd": 19506260.0,
+   "open_interest": 32230260,
+   "premium": {
+    "premium": 0.009232799513148482,
+    "per_1000": 9.232799513148482,
+    "days": 63.558850497685185,
+    "annualised": 0.05302128336040203
+   }
+  },
+  "BTC-24SEP27": {
+   "underlying": "BTC",
+   "mark": 88715.49,
+   "index": 84247.47,
+   "expiry_ms": 1821772800000,
+   "volume_usd": 2875810.0,
+   "open_interest": 1701160,
+   "premium": {
+    "premium": 0.05303447094613056,
+    "per_1000": 53.03447094613056,
+    "days": 364.55885049768517,
+    "annualised": 0.05309864749933035
+   }
+  },
+  "BTC-9OCT26": {
+   "underlying": "BTC",
+   "mark": 84449.18,
+   "index": 84247.47,
+   "expiry_ms": 1791532800000,
+   "volume_usd": 940760.0,
+   "open_interest": 3677510,
+   "premium": {
+    "premium": 0.002394255874983431,
+    "per_1000": 2.394255874983431,
+    "days": 14.558850497685185,
+    "annualised": 0.06002557650467668
+   }
+  },
+  "BTC-26SEP26": {
+   "underlying": "BTC",
+   "mark": 84322.31,
+   "index": 84247.47,
+   "expiry_ms": 1790409600000,
+   "volume_usd": 763440.0,
+   "open_interest": 1706160,
+   "premium": {
+    "premium": 0.000888335281759689,
+    "per_1000": 0.888335281759689,
+    "days": 1.5588504976851851,
+    "annualised": 0.20800094577624356
+   }
+  },
+  "BTC-30OCT26": {
+   "underlying": "BTC",
+   "mark": 84691.43,
+   "index": 84247.47,
+   "expiry_ms": 1793347200000,
+   "volume_usd": 4384970.0,
+   "open_interest": 65184740,
+   "premium": {
+    "premium": 0.005269713143907895,
+    "per_1000": 5.269713143907895,
+    "days": 35.558850497685185,
+    "annualised": 0.0540918862844454
+   }
+  },
+  "BTC-2OCT26": {
+   "underlying": "BTC",
+   "mark": 84373.76,
+   "index": 84247.47,
+   "expiry_ms": 1790928000000,
+   "volume_usd": 4711820.0,
+   "open_interest": 6775250,
+   "premium": {
+    "premium": 0.001499036113487895,
+    "per_1000": 1.499036113487895,
+    "days": 7.558850497685185,
+    "annualised": 0.07238510426825345
+   }
+  },
+  "BTC-28SEP26": {
+   "underlying": "BTC",
+   "mark": 84343.66,
+   "index": 84247.47,
+   "expiry_ms": 1790582400000,
+   "volume_usd": 924780.0,
+   "open_interest": 881720,
+   "premium": {
+    "premium": 0.0011417553547898862,
+    "per_1000": 1.1417553547898862,
+    "days": 3.558850497685185,
+    "annualised": 0.11709980645980292
+   }
+  },
+  "BTC-25JUN27": {
+   "underlying": "BTC",
+   "mark": 87598.42,
+   "index": 84247.47,
+   "expiry_ms": 1813910400000,
+   "volume_usd": 18294080.0,
+   "open_interest": 46931110,
+   "premium": {
+    "premium": 0.03977508167307575,
+    "per_1000": 39.77508167307575,
+    "days": 273.55885049768517,
+    "annualised": 0.053070499398064616
+   }
+  },
+  "BTC-26MAR27": {
+   "underlying": "BTC",
+   "mark": 86441.04,
+   "index": 84247.47,
+   "expiry_ms": 1806048000000,
+   "volume_usd": 8293070.0,
+   "open_interest": 82478040,
+   "premium": {
+    "premium": 0.026037221058389015,
+    "per_1000": 26.037221058389015,
+    "days": 182.5588504976852,
+    "annualised": 0.05205765516382068
+   }
+  },
+  "BTC-27SEP26": {
+   "underlying": "BTC",
+   "mark": 84333.59,
+   "index": 84247.47,
+   "expiry_ms": 1790496000000,
+   "volume_usd": 1465400.0,
+   "open_interest": 1314830,
+   "premium": {
+    "premium": 0.0010222265428267985,
+    "per_1000": 1.0222265428267985,
+    "days": 2.558850497685185,
+    "annualised": 0.14581261721593763
+   }
+  },
+  "BTC-16OCT26": {
+   "underlying": "BTC",
+   "mark": 84535.41,
+   "index": 84247.47,
+   "expiry_ms": 1792137600000,
+   "volume_usd": 302330.0,
+   "open_interest": 135940,
+   "premium": {
+    "premium": 0.003417788095001484,
+    "per_1000": 3.417788095001484,
+    "days": 21.558850497685185,
+    "annualised": 0.05786452551398727
+   }
+  },
+  "BTC-25DEC26": {
+   "underlying": "BTC",
+   "mark": 85330.93,
+   "index": 84247.47,
+   "expiry_ms": 1798185600000,
+   "volume_usd": 30022050.0,
+   "open_interest": 300771930,
+   "premium": {
+    "premium": 0.012860445542162813,
+    "per_1000": 12.860445542162813,
+    "days": 91.55885049768519,
+    "annualised": 0.051268256398742176
+   }
+  },
+  "BTC-25SEP26": {
+   "underlying": "BTC",
+   "mark": 84305.95,
+   "index": 84247.47,
+   "expiry_ms": 1790323200000,
+   "volume_usd": 292482020.0,
+   "open_interest": 742307560,
+   "premium": {
+    "premium": 0.0006941454740421182,
+    "per_1000": 0.6941454740421182,
+    "days": 0.5588504976851851,
+    "annualised": 0.4533647175314839
+   }
+  },
+  "ETH-26MAR27": {
+   "underlying": "ETH",
+   "mark": 2737.4,
+   "index": 2679.4,
+   "expiry_ms": 1806048000000,
+   "volume_usd": 2396279.0,
+   "open_interest": 24664231,
+   "premium": {
+    "premium": 0.021646637306859784,
+    "per_1000": 21.646637306859784,
+    "days": 182.5588504976852,
+    "annualised": 0.043279318397680226
+   }
+  },
+  "ETH-30OCT26": {
+   "underlying": "ETH",
+   "mark": 2689.11,
+   "index": 2679.4,
+   "expiry_ms": 1793347200000,
+   "volume_usd": 4752576.0,
+   "open_interest": 32010882,
+   "premium": {
+    "premium": 0.003623945659475991,
+    "per_1000": 3.623945659475991,
+    "days": 35.558850497685185,
+    "annualised": 0.037198619955244185
+   }
+  },
+  "ETH-25DEC26": {
+   "underlying": "ETH",
+   "mark": 2707.4,
+   "index": 2679.4,
+   "expiry_ms": 1798185600000,
+   "volume_usd": 2980007.0,
+   "open_interest": 79956186,
+   "premium": {
+    "premium": 0.010450100768828907,
+    "per_1000": 10.450100768828907,
+    "days": 91.55885049768519,
+    "annualised": 0.041659400045864325
+   }
+  },
+  "ETH-9OCT26": {
+   "underlying": "ETH",
+   "mark": 2683.19,
+   "index": 2679.4,
+   "expiry_ms": 1791532800000,
+   "volume_usd": 1072586.0,
+   "open_interest": 1227888,
+   "premium": {
+    "premium": 0.001414495782637859,
+    "per_1000": 1.414495782637859,
+    "days": 14.558850497685185,
+    "annualised": 0.03546234373001545
+   }
+  },
+  "ETH-27NOV26": {
+   "underlying": "ETH",
+   "mark": 2698.15,
+   "index": 2679.4,
+   "expiry_ms": 1795766400000,
+   "volume_usd": 2225584.0,
+   "open_interest": 3642061,
+   "premium": {
+    "premium": 0.006997835336269409,
+    "per_1000": 6.997835336269409,
+    "days": 63.558850497685185,
+    "annualised": 0.04018653386173746
+   }
+  },
+  "ETH-26SEP26": {
+   "underlying": "ETH",
+   "mark": 2680.52,
+   "index": 2679.4,
+   "expiry_ms": 1790409600000,
+   "volume_usd": 409762.0,
+   "open_interest": 1029631,
+   "premium": {
+    "premium": 0.0004180040307530941,
+    "per_1000": 0.4180040307530941,
+    "days": 1.5588504976851851,
+    "annualised": 0.09787434487876825
+   }
+  },
+  "ETH-27SEP26": {
+   "underlying": "ETH",
+   "mark": 2680.78,
+   "index": 2679.4,
+   "expiry_ms": 1790496000000,
+   "volume_usd": 666137.0,
+   "open_interest": 751693,
+   "premium": {
+    "premium": 0.000515040680749479,
+    "per_1000": 0.515040680749479,
+    "days": 2.558850497685185,
+    "annualised": 0.07346652281703102
+   }
+  },
+  "ETH-25JUN27": {
+   "underlying": "ETH",
+   "mark": 2771.02,
+   "index": 2679.4,
+   "expiry_ms": 1813910400000,
+   "volume_usd": 2965171.0,
+   "open_interest": 15179844,
+   "premium": {
+    "premium": 0.03419422258714633,
+    "per_1000": 34.19422258714633,
+    "days": 273.55885049768517,
+    "annualised": 0.04562415444282627
+   }
+  },
+  "ETH-28SEP26": {
+   "underlying": "ETH",
+   "mark": 2681.09,
+   "index": 2679.4,
+   "expiry_ms": 1790582400000,
+   "volume_usd": 432326.0,
+   "open_interest": 303291,
+   "premium": {
+    "premium": 0.0006307382249757243,
+    "per_1000": 0.6307382249757243,
+    "days": 3.558850497685185,
+    "annualised": 0.0646892731981529
+   }
+  },
+  "ETH-16OCT26": {
+   "underlying": "ETH",
+   "mark": 2685.44,
+   "index": 2679.4,
+   "expiry_ms": 1792137600000,
+   "volume_usd": 4051895.0,
+   "open_interest": 468770,
+   "premium": {
+    "premium": 0.0022542360229902414,
+    "per_1000": 2.2542360229902414,
+    "days": 21.558850497685185,
+    "annualised": 0.038165121488262246
+   }
+  },
+  "ETH-2OCT26": {
+   "underlying": "ETH",
+   "mark": 2681.54,
+   "index": 2679.4,
+   "expiry_ms": 1790928000000,
+   "volume_usd": 2025315.0,
+   "open_interest": 3348722,
+   "premium": {
+    "premium": 0.0007986862730462452,
+    "per_1000": 0.7986862730462452,
+    "days": 7.558850497685185,
+    "annualised": 0.03856677543115245
+   }
+  },
+  "ETH-25SEP26": {
+   "underlying": "ETH",
+   "mark": 2680.77,
+   "index": 2679.4,
+   "expiry_ms": 1790323200000,
+   "volume_usd": 18933294.0,
+   "open_interest": 47710780,
+   "premium": {
+    "premium": 0.0005113085019032848,
+    "per_1000": 0.5113085019032848,
+    "days": 0.5588504976851851,
+    "annualised": 0.3339490686108883
+   }
+  },
+  "ETH-24SEP27": {
+   "underlying": "ETH",
+   "mark": 2806.66,
+   "index": 2679.4,
+   "expiry_ms": 1821772800000,
+   "volume_usd": 2494394.0,
+   "open_interest": 1182958,
+   "premium": {
+    "premium": 0.04749570799432701,
+    "per_1000": 47.495707994327006,
+    "days": 364.55885049768517,
+    "annualised": 0.04755318213852947
+   }
+  }
+ },
  "not_measured": {
   "deribit_perpetual_funding": "UNKNOWN unit (D-111)",
   "binance": "parked (B-028)"
