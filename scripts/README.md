@@ -23,6 +23,7 @@ python scripts/measure_touch.py         # long-horizon touch bound
 python scripts/measure_sensitivity.py   # strike grid and expiry band, as a range
 python scripts/kill_test_eth5k.py       # the pre-committed ETH above $5,000 kill test (D-092)
 python scripts/measure_payoff.py        # the buyer's comparison, per family: which venue sells the same payoff for less (D-114, D-117)
+python scripts/measure_carry.py         # funding per venue per day and week on $1,000, and the dated futures' premium (D-119)
 python scripts/discount_referee.py      # four estimates of D as implied rates (D-093)
 python scripts/measure_basis.py         # BRTI against the Deribit index
 python scripts/inventory_validation.py  # how much could ever be scored, and how much is independent
@@ -58,6 +59,7 @@ local checkout, run the workflow from the Actions tab.
 | `measure_basis.py` | The third settlement difference, measured rather than left UNKNOWN: Kalshi settles on BRTI, Deribit on its own index. (D-075) | Kalshi + Deribit |
 | `kill_test_eth5k.py` | The pre-committed local-grid kill test for the one rung that survives the maturity stress test. | Kalshi + Deribit |
 | `measure_payoff.py` | For the same terminal payoff, is it cheaper to buy on the prediction market or from the option chain, one side's costs only — and does the answer depend on the condition? D-114's rules as a template over families, each judged separately, with a narrow-band verdict beside each (D-117): the Kalshi year-end ladders and Polymarket's daily ladders. A zero-fee sensitivity for Deribit's combo rule rides along (D-115). | Kalshi + Polymarket + Deribit |
+| `measure_carry.py` | What holding a linear position has cost: Hyperliquid's and Polymarket's hourly funding de-duplicated across runs, the mean over the last 24 and 168 hours (UNKNOWN below 90% coverage) and what a $1,000 long paid at it per day and per week; Deribit's dated futures as a premium over the index, per $1,000 and annualised. Deribit's own perpetual stays UNKNOWN (D-111). (D-119) | `raw/carry/` |
 | `discount_referee.py` | Four estimates of the discount factor side by side, as implied rates; one is an estimator-consistency check, two are independent, one is an external dated constant. | Deribit |
 | `inventory_validation.py` | How many observations could ever be scored against an outcome, and how many of those are independent events. Counting before scoring. | `raw/` |
 | `write_findings.py` | Calls every measurement, writes `findings/latest.json`. | — |
