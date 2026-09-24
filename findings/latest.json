@@ -1,9 +1,9 @@
 {
  "archive": {
-  "day_count": 24,
-  "snapshot_count": 112,
+  "day_count": 25,
+  "snapshot_count": 114,
   "first": "2026-08-30T1611Z",
-  "last": "2026-09-23T2117Z"
+  "last": "2026-09-24T0515Z"
  },
  "archive_source": "private mirror",
  "produced_by": "scripts/write_findings.py",
@@ -11,18 +11,18 @@
   "friction_band_kalshi": {
    "year_end": {
     "model_free": true,
-    "exceeding": 312,
-    "measured": 4664,
-    "quotable": 4662,
+    "exceeding": 318,
+    "measured": 4752,
+    "quotable": 4750,
     "percent": 6.7,
     "percent_of_all_rungs": 6.7,
-    "mean_envelope": 0.0607,
+    "mean_envelope": 0.0608,
     "edge_value_max": 569.51,
-    "edge_value_median": 1.19,
-    "edge_value_total": 11165.55,
+    "edge_value_median": 1.16,
+    "edge_value_total": 11192.06,
     "off_grid_quotes": 0,
     "mean_density": 0.9858,
-    "mean_discount_factor": 0.987883,
+    "mean_discount_factor": 0.98788,
     "discount_fallbacks": 0,
     "expiry_gap_hours_median": 165.0,
     "ladders": [
@@ -37,43 +37,43 @@
     ],
     "stability": {
      "distinct_rungs": 44,
-     "total_observations": 4664,
-     "observations_per_rung": 106.0,
+     "total_observations": 4752,
+     "observations_per_rung": 108.0,
      "always_exceeds": 3,
      "sometimes_exceeds": 2,
      "never_exceeds": 39,
      "always_exceeding_list": [
       {
        "rung": "BTC year-end:KXBTCY-27JAN0100-T149999.99",
-       "observations": 106,
-       "exceeding": 105
+       "observations": 108,
+       "exceeding": 107
       },
       {
        "rung": "ETH year-end:KXETHY-27JAN0100-T1000.00",
-       "observations": 106,
-       "exceeding": 103
+       "observations": 108,
+       "exceeding": 105
       },
       {
        "rung": "ETH year-end:KXETHY-27JAN0100-T4999.99",
-       "observations": 106,
-       "exceeding": 102
+       "observations": 108,
+       "exceeding": 104
       }
      ]
     }
    },
    "intraday": {
     "model_free": true,
-    "exceeding": 645,
-    "measured": 14284,
-    "quotable": 5060,
-    "percent": 12.7,
+    "exceeding": 647,
+    "measured": 14482,
+    "quotable": 5066,
+    "percent": 12.8,
     "percent_of_all_rungs": 4.5,
-    "mean_envelope": 0.1428,
+    "mean_envelope": 0.1435,
     "edge_value_max": 3662.99,
     "edge_value_median": 12.88,
-    "edge_value_total": 53462.81,
+    "edge_value_total": 53482.56,
     "off_grid_quotes": 0,
-    "mean_density": 0.9989,
+    "mean_density": 0.999,
     "mean_discount_factor": 0.999875,
     "discount_fallbacks": 30,
     "expiry_gap_hours_median": -10.0,
@@ -93,12 +93,12 @@
      "ETH intraday cum"
     ],
     "stability": {
-     "distinct_rungs": 14284,
-     "total_observations": 14284,
+     "distinct_rungs": 14482,
+     "total_observations": 14482,
      "observations_per_rung": 1.0,
-     "always_exceeds": 645,
+     "always_exceeds": 647,
      "sometimes_exceeds": 0,
-     "never_exceeds": 13639,
+     "never_exceeds": 13835,
      "always_exceeding_list": [
       {
        "rung": "BTC intraday cum:KXBTCD-26SEP1510-T72999.99",
@@ -206,27 +206,27 @@
   },
   "polymarket_terminal": {
    "model_free": true,
-   "measured": 13969,
-   "quotable": 8364,
-   "exceeding": 838,
+   "measured": 14233,
+   "quotable": 8519,
+   "exceeding": 853,
    "percent": 10.0,
-   "gap_12h_exceeding": 417,
-   "gap_12h_quotable": 5450,
+   "gap_12h_exceeding": 425,
+   "gap_12h_quotable": 5539,
    "gap_12h_percent": 7.7,
-   "mean_envelope": 0.0462,
+   "mean_envelope": 0.0465,
    "mean_venue_fee": 0.0065,
    "skipped": {
-    "outside the strike range": 2930,
-    "no two-sided option quote": 2675
+    "outside the strike range": 2990,
+    "no two-sided option quote": 2724
    },
-   "touch_ladders_excluded": 1945,
+   "touch_ladders_excluded": 1981,
    "stability": {
-    "distinct_rungs": 569,
-    "total_observations": 8364,
-    "observations_per_rung": 14.7,
-    "always_exceeds": 10,
-    "sometimes_exceeds": 264,
-    "never_exceeds": 295,
+    "distinct_rungs": 570,
+    "total_observations": 8519,
+    "observations_per_rung": 14.9,
+    "always_exceeds": 6,
+    "sometimes_exceeds": 271,
+    "never_exceeds": 293,
     "always_exceeding_list": [
      {
       "rung": "ETH:2026-09-05:1900",
@@ -249,112 +249,92 @@
       "exceeding": 2
      },
      {
-      "rung": "ETH:2026-09-28:3000",
-      "observations": 6,
-      "exceeding": 6
-     },
-     {
-      "rung": "BTC:2026-09-29:78000",
-      "observations": 2,
-      "exceeding": 2
-     },
-     {
       "rung": "BTC:2026-09-29:80000",
-      "observations": 2,
-      "exceeding": 2
+      "observations": 4,
+      "exceeding": 4
      },
      {
-      "rung": "BTC:2026-09-29:90000",
-      "observations": 2,
-      "exceeding": 2
-     },
-     {
-      "rung": "BTC:2026-09-29:92000",
-      "observations": 2,
-      "exceeding": 2
-     },
-     {
-      "rung": "ETH:2026-09-29:2400",
-      "observations": 2,
-      "exceeding": 2
+      "rung": "ETH:2026-09-29:3000",
+      "observations": 1,
+      "exceeding": 1
      }
     ]
    }
   },
   "long_horizon_touch": {
    "model_free": false,
-   "measured": 2564,
+   "measured": 2612,
    "arithmetic_violations": 5,
-   "ratio_over_two": 2381,
+   "ratio_over_two": 2423,
    "violation_percent": 0.2,
-   "ratio_over_two_percent": 92.9,
+   "ratio_over_two_percent": 92.8,
    "stability": {
     "distinct_rungs": 63,
-    "total_observations": 2564,
-    "observations_per_rung": 40.7,
-    "always_exceeds": 40,
-    "sometimes_exceeds": 22,
+    "total_observations": 2612,
+    "observations_per_rung": 41.5,
+    "always_exceeds": 39,
+    "sometimes_exceeds": 23,
     "never_exceeds": 1,
     "always_exceeding_list": [
      {
       "rung": "BTC:2027-01-01:95000",
-      "observations": 111,
-      "exceeding": 100
+      "observations": 113,
+      "exceeding": 102
      },
      {
       "rung": "BTC:2027-01-01:200000",
-      "observations": 111,
-      "exceeding": 111
+      "observations": 113,
+      "exceeding": 113
      },
      {
       "rung": "BTC:2027-01-01:190000",
-      "observations": 111,
-      "exceeding": 111
+      "observations": 113,
+      "exceeding": 113
      },
      {
       "rung": "BTC:2027-01-01:180000",
-      "observations": 111,
-      "exceeding": 111
+      "observations": 113,
+      "exceeding": 113
      },
      {
       "rung": "BTC:2027-01-01:170000",
-      "observations": 111,
-      "exceeding": 111
+      "observations": 113,
+      "exceeding": 113
      },
      {
       "rung": "BTC:2027-01-01:160000",
-      "observations": 111,
-      "exceeding": 111
+      "observations": 113,
+      "exceeding": 113
      },
      {
       "rung": "BTC:2027-01-01:150000",
-      "observations": 111,
-      "exceeding": 111
+      "observations": 113,
+      "exceeding": 113
      },
      {
       "rung": "BTC:2027-01-01:140000",
-      "observations": 111,
-      "exceeding": 111
+      "observations": 113,
+      "exceeding": 113
      },
      {
       "rung": "BTC:2027-01-01:130000",
-      "observations": 111,
-      "exceeding": 111
+      "observations": 113,
+      "exceeding": 113
      },
      {
       "rung": "BTC:2027-01-01:120000",
-      "observations": 111,
-      "exceeding": 111
+      "observations": 113,
+      "exceeding": 113
      },
      {
       "rung": "BTC:2027-01-01:110000",
-      "observations": 111,
-      "exceeding": 111
+      "observations": 113,
+      "exceeding": 113
      },
      {
       "rung": "BTC:2027-01-01:100000",
-      "observations": 111,
-      "exceeding": 110
+      "observations": 113,
+      "exceeding": 112
      },
      {
       "rung": "BTC:2026-09-01:85000",
@@ -393,8 +373,8 @@
      },
      {
       "rung": "BTC:2026-10-01:97500",
-      "observations": 39,
-      "exceeding": 39
+      "observations": 41,
+      "exceeding": 41
      }
     ]
    },
@@ -402,29 +382,29 @@
   },
   "exhaustiveness_constraint": {
    "corrected": {
-    "measured": 221,
+    "measured": 227,
     "mean_ratio_to_discount": 0.998,
     "min_ratio_to_discount": 0.9945,
     "max_ratio_to_discount": 1.0,
     "departure_percent": -0.2
    },
    "naive_a": {
-    "measured": 221,
+    "measured": 227,
     "mean_ratio_to_discount": 0.998,
     "min_ratio_to_discount": 0.9945,
     "max_ratio_to_discount": 1.0,
     "departure_percent": -0.2
    },
    "naive_b": {
-    "measured": 221,
-    "mean_ratio_to_discount": 1.1435,
+    "measured": 227,
+    "mean_ratio_to_discount": 1.1453,
     "min_ratio_to_discount": 1.0843,
     "max_ratio_to_discount": 1.5007,
-    "departure_percent": 14.4
+    "departure_percent": 14.5
    },
    "note": "An exhaustive bucket set is worth the discount factor D today, because buying every bucket buys a dollar at expiry with certainty. That is arithmetic, not a preference, so a departure from D says the computation is wrong without saying which bucket is wrong. The figures below are total/D, so 1.0000 is the target. Until D-073 the target was written as 1 and the sum landed on 1 for any D, which made the check blind to the convention bug. See D-067 for the boundary rule and D-073 for the discount. Only a ladder that is a partition is summed, one event per series; cumulative ladders (every rung P(S > K) at its own threshold) and incomplete ones (a hole in the archived ladder) are counted in ladders_set_aside instead (D-105).",
    "ladders_set_aside": {
-    "cumulative": 54,
+    "cumulative": 56,
     "incomplete": 35
    }
   },
@@ -436,17 +416,17 @@
    },
    "decision": "D-092",
    "archive": {
-    "day_count": 24,
-    "snapshot_count": 112,
+    "day_count": 25,
+    "snapshot_count": 114,
     "first": "2026-08-30T1611Z",
-    "last": "2026-09-23T2117Z"
+    "last": "2026-09-24T0515Z"
    },
    "verdict": {
-    "snapshots_judged": 106,
+    "snapshots_judged": 108,
     "snapshots_positive": 0,
     "share_positive": 0.0,
     "min_margin": -0.058147,
-    "median_margin": -0.033926,
+    "median_margin": -0.034757,
     "min_value_at_depth_usd": -2504.08,
     "rules": {
      "persistence": 0.9,
@@ -454,83 +434,156 @@
      "tiny_value_usd": 1.0
     },
     "verdict": "not a surviving discrepancy",
-    "reason": "margin against the worst local executable estimate is positive in 0 of 106 snapshots (0.0%), below 90%"
+    "reason": "margin against the worst local executable estimate is positive in 0 of 108 snapshots (0.0%), below 90%"
    }
   },
   "payoff_frontier": {
-   "decision": "D-114",
-   "family": [
-    "KXBTCY",
-    "KXETHY"
-   ],
+   "decision": "D-114, D-117",
    "archive": {
-    "day_count": 24,
-    "snapshot_count": 112,
+    "day_count": 25,
+    "snapshot_count": 114,
     "first": "2026-08-30T1611Z",
-    "last": "2026-09-23T2117Z"
+    "last": "2026-09-24T0515Z"
    },
-   "verdict": {
-    "conditions": 130,
-    "conditions_with_enough_judged_snapshots": 118,
-    "stably_cheaper_on_kalshi": 15,
-    "stably_cheaper_on_deribit": 0,
-    "rules": {
-     "rel": 0.1,
-     "abs": 0.001,
-     "persistence": 0.9,
-     "min_judged": 10,
-     "skips": [
-      0,
-      1
-     ]
+   "families": {
+    "kalshi_year_end": {
+     "prediction_venue": "Kalshi",
+     "verdict": {
+      "conditions": 130,
+      "conditions_with_enough_judged_snapshots": 118,
+      "stably_cheaper_on_prediction_market": 15,
+      "stably_cheaper_on_options": 0,
+      "rules": {
+       "rel": 0.1,
+       "abs_default": 0.001,
+       "step": "venue price step (D-117)",
+       "persistence": 0.9,
+       "min_judged": 10,
+       "skips": [
+        0,
+        1
+       ]
+      },
+      "verdict": "one venue is cheaper wherever either is",
+      "venue": "prediction market"
+     },
+     "narrow_band": {
+      "hours": 168.0,
+      "judged_rows": 0,
+      "verdict": {
+       "conditions": 0,
+       "conditions_with_enough_judged_snapshots": 0,
+       "stably_cheaper_on_prediction_market": 0,
+       "stably_cheaper_on_options": 0,
+       "rules": {
+        "rel": 0.1,
+        "abs_default": 0.001,
+        "step": "venue price step (D-117)",
+        "persistence": 0.9,
+        "min_judged": 10,
+        "skips": [
+         0,
+         1
+        ]
+       },
+       "verdict": "no condition is stably cheaper on either venue"
+      },
+      "stable_conditions": {
+       "prediction": [],
+       "options": []
+      }
+     },
+     "stable_conditions": {
+      "prediction": [
+       "BTC:KXBTCY:100000:105000",
+       "BTC:KXBTCY:105000:110000",
+       "BTC:KXBTCY:50000:55000",
+       "BTC:KXBTCY:55000:60000",
+       "BTC:KXBTCY:60000:65000",
+       "BTC:KXBTCY:65000:70000",
+       "BTC:KXBTCY:90000:95000",
+       "BTC:KXBTCY:95000:100000",
+       "ETH:KXETHY:1000:1250",
+       "ETH:KXETHY:1250:1500",
+       "ETH:KXETHY:1500:1750",
+       "ETH:KXETHY:1750:2000",
+       "ETH:KXETHY:2000:2250",
+       "ETH:KXETHY:4000:4250",
+       "ETH:KXETHY:4250:4500"
+      ],
+      "options": []
+     },
+     "sensitivity_combo_fees": {
+      "what": "the same rules with every Deribit fee set to zero (D-115)",
+      "reads_into_verdict": false,
+      "verdict_if_deribit_fees_were_zero": "one venue is cheaper wherever either is",
+      "stably_cheaper_on_prediction_market": 12,
+      "stably_cheaper_on_options": 0
+     }
     },
-    "verdict": "one venue is cheaper wherever either is",
-    "venue": "kalshi"
-   },
-   "stable_conditions": {
-    "kalshi": [
-     "BTC:100000:105000",
-     "BTC:105000:110000",
-     "BTC:50000:55000",
-     "BTC:55000:60000",
-     "BTC:60000:65000",
-     "BTC:65000:70000",
-     "BTC:90000:95000",
-     "BTC:95000:100000",
-     "ETH:1000:1250",
-     "ETH:1250:1500",
-     "ETH:1500:1750",
-     "ETH:1750:2000",
-     "ETH:2000:2250",
-     "ETH:4000:4250",
-     "ETH:4250:4500"
-    ],
-    "deribit": []
-   },
-   "sensitivity_combo_fees": {
-    "what": "the same rules with every Deribit fee set to zero",
-    "why": "Deribit states that combo orders carry reduced fees; the size of the reduction is UNKNOWN and this script charges every leg in full. Zero is the most favourable case for Deribit, so a condition that stays cheaper on Kalshi here does not depend on the combo rule.",
-    "reads_into_verdict": false,
-    "verdict_if_deribit_fees_were_zero": "one venue is cheaper wherever either is",
-    "stably_cheaper_on_kalshi": 13,
-    "stably_cheaper_on_deribit": 0,
-    "stable_conditions": {
-     "kalshi": [
-      "BTC:100000:105000",
-      "BTC:105000:110000",
-      "BTC:50000:55000",
-      "BTC:55000:60000",
-      "BTC:60000:65000",
-      "BTC:65000:70000",
-      "BTC:90000:95000",
-      "BTC:95000:100000",
-      "ETH:1000:1250",
-      "ETH:1250:1500",
-      "ETH:1750:2000",
-      "ETH:2000:2250",
-      "ETH:4000:4250"
-     ],
-     "deribit": []
+    "polymarket_daily": {
+     "prediction_venue": "Polymarket",
+     "verdict": {
+      "conditions": 1860,
+      "conditions_with_enough_judged_snapshots": 1009,
+      "stably_cheaper_on_prediction_market": 1,
+      "stably_cheaper_on_options": 0,
+      "rules": {
+       "rel": 0.1,
+       "abs_default": 0.001,
+       "step": "venue price step (D-117)",
+       "persistence": 0.9,
+       "min_judged": 10,
+       "skips": [
+        0,
+        1
+       ]
+      },
+      "verdict": "one venue is cheaper wherever either is",
+      "venue": "prediction market"
+     },
+     "narrow_band": {
+      "hours": 168.0,
+      "judged_rows": 21514,
+      "verdict": {
+       "conditions": 1798,
+       "conditions_with_enough_judged_snapshots": 1009,
+       "stably_cheaper_on_prediction_market": 1,
+       "stably_cheaper_on_options": 0,
+       "rules": {
+        "rel": 0.1,
+        "abs_default": 0.001,
+        "step": "venue price step (D-117)",
+        "persistence": 0.9,
+        "min_judged": 10,
+        "skips": [
+         0,
+         1
+        ]
+       },
+       "verdict": "one venue is cheaper wherever either is",
+       "venue": "prediction market"
+      },
+      "stable_conditions": {
+       "prediction": [
+        "BTC:2026-09-18:68000.0:70000.0"
+       ],
+       "options": []
+      }
+     },
+     "stable_conditions": {
+      "prediction": [
+       "BTC:2026-09-18:68000.0:70000.0"
+      ],
+      "options": []
+     },
+     "sensitivity_combo_fees": {
+      "what": "the same rules with every Deribit fee set to zero (D-115)",
+      "reads_into_verdict": false,
+      "verdict_if_deribit_fees_were_zero": "no condition is stably cheaper on either venue",
+      "stably_cheaper_on_prediction_market": 0,
+      "stably_cheaper_on_options": 0
+     }
     }
    }
   }

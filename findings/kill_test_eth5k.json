@@ -1,9 +1,9 @@
 {
  "archive": {
-  "day_count": 24,
-  "snapshot_count": 112,
+  "day_count": 25,
+  "snapshot_count": 114,
   "first": "2026-08-30T1611Z",
-  "last": "2026-09-23T2117Z"
+  "last": "2026-09-24T0515Z"
  },
  "produced_by": "scripts/kill_test_eth5k.py",
  "decision": "D-092",
@@ -13,11 +13,11 @@
   "K": 5000.0
  },
  "verdict": {
-  "snapshots_judged": 106,
+  "snapshots_judged": 108,
   "snapshots_positive": 0,
   "share_positive": 0.0,
   "min_margin": -0.058147,
-  "median_margin": -0.033926,
+  "median_margin": -0.034757,
   "min_value_at_depth_usd": -2504.08,
   "rules": {
    "persistence": 0.9,
@@ -25,12 +25,12 @@
    "tiny_value_usd": 1.0
   },
   "verdict": "not a surviving discrepancy",
-  "reason": "margin against the worst local executable estimate is positive in 0 of 106 snapshots (0.0%), below 90%"
+  "reason": "margin against the worst local executable estimate is positive in 0 of 108 snapshots (0.0%), below 90%"
  },
  "newest_interpolant": {
-  "dsp_early": 0.013520417050000004,
-  "dsp_late": 0.03443261919999999,
-  "dsp_at_close_linear": 0.015100322432211542,
+  "dsp_early": 0.013399280674999998,
+  "dsp_late": 0.035218658942857146,
+  "dsp_at_close_linear": 0.015047722714467228,
   "weight_on_late": 0.07554945054945054,
   "note": "sensitivity, not a settlement-date value (D-094)"
  },
@@ -15754,6 +15754,312 @@
     "dsp_early": 0.013520417050000004,
     "dsp_late": 0.03443261919999999,
     "dsp_at_close_linear": 0.015100322432211542,
+    "weight_on_late": 0.07554945054945054,
+    "note": "sensitivity, not a settlement-date value (D-094)"
+   }
+  },
+  {
+   "stamp": "2026-09-24T0504Z",
+   "window": 1.77,
+   "ticker": "KXETHY-27JAN0100-T4999.99",
+   "bid": 0.026,
+   "ask": 0.027,
+   "depth": 470.44,
+   "kalshi_fee": 0.001773,
+   "kalshi_net": 0.024227,
+   "expiries": {
+    "before": {
+     "expiry": "25DEC26",
+     "hours": -165.0,
+     "D": 0.988916,
+     "D_estimated": true,
+     "F": 2721.522501143019,
+     "strike_5000_listed": true,
+     "estimators": {
+      "tight": {
+       "lower": 4800.0,
+       "upper": 5200.0,
+       "width": 400.0,
+       "dsp": 0.014378323674999995,
+       "low": 0.007401102499999994,
+       "high": 0.018166342499999998,
+       "fee": 0.004036965,
+       "cost": 0.022203307499999998,
+       "margin": 0.002024
+      },
+      "skip1": {
+       "lower": 4600.0,
+       "upper": 5500.0,
+       "width": 900.0,
+       "dsp": 0.013052853500000001,
+       "low": 0.010765239999999999,
+       "high": 0.015549791111111112,
+       "fee": 0.0017942066666666665,
+       "cost": 0.01734399777777778,
+       "margin": 0.006883
+      },
+      "skip2": {
+       "lower": 4500.0,
+       "upper": 6000.0,
+       "width": 1500.0,
+       "dsp": 0.011089991406666668,
+       "low": 0.010226978,
+       "high": 0.012918288,
+       "fee": 0.0009419584999999999,
+       "cost": 0.0138602465,
+       "margin": 0.010367
+      },
+      "onesided_lower": {
+       "lower": 4800.0,
+       "upper": 5000.0,
+       "width": 200.0,
+       "dsp": 0.015327010449999996,
+       "low": 0.0,
+       "high": 0.02422178999999999,
+       "fee": 0.00807393,
+       "cost": 0.032295719999999986,
+       "margin": -0.008068
+      },
+      "onesided_upper": {
+       "lower": 5000.0,
+       "upper": 5200.0,
+       "width": 200.0,
+       "dsp": 0.013429636899999995,
+       "low": 0.0040369649999999965,
+       "high": 0.022876135,
+       "fee": 0.00807393,
+       "cost": 0.030950065,
+       "margin": -0.006723
+      }
+     }
+    },
+    "after": {
+     "expiry": "26MAR27",
+     "hours": 2019.0,
+     "D": 0.977982,
+     "D_estimated": true,
+     "F": 2751.936651210149,
+     "strike_5000_listed": true,
+     "estimators": {
+      "tight": {
+       "lower": 4800.0,
+       "upper": 5500.0,
+       "width": 700.0,
+       "dsp": 0.03526769518571431,
+       "low": 0.02883546428571428,
+       "high": 0.04036965,
+       "fee": 0.0023068371428571427,
+       "cost": 0.04267648714285714,
+       "margin": -0.018449
+      },
+      "skip1": {
+       "lower": 4600.0,
+       "upper": 6000.0,
+       "width": 1400.0,
+       "dsp": 0.03281668072142857,
+       "low": 0.029796646428571428,
+       "high": 0.03556373928571429,
+       "fee": 0.0011534185714285714,
+       "cost": 0.036717157857142864,
+       "margin": -0.01249
+      },
+      "skip2": {
+       "lower": 4500.0,
+       "upper": 7000.0,
+       "width": 2500.0,
+       "dsp": 0.025467328268000005,
+       "low": 0.02422179,
+       "high": 0.0269131,
+       "fee": 0.0006459144,
+       "cost": 0.027559014399999998,
+       "margin": -0.003332
+      },
+      "onesided_lower": {
+       "lower": 4800.0,
+       "upper": 5000.0,
+       "width": 200.0,
+       "dsp": 0.04186332705000005,
+       "low": 0.02018482500000001,
+       "high": 0.060554474999999996,
+       "fee": 0.00807393,
+       "cost": 0.068628405,
+       "margin": -0.044401
+      },
+      "onesided_upper": {
+       "lower": 5000.0,
+       "upper": 5500.0,
+       "width": 500.0,
+       "dsp": 0.03262944244,
+       "low": 0.02422179,
+       "high": 0.04036964999999999,
+       "fee": 0.0032295719999999996,
+       "cost": 0.04359922199999999,
+       "margin": -0.019372
+      }
+     }
+    }
+   },
+   "worst_local_executable_cost": 0.068628,
+   "margin_vs_worst_local_executable": -0.044401,
+   "estimators_available": 10,
+   "value_at_depth_usd": -20.89,
+   "interpolant": {
+    "dsp_early": 0.014378323674999995,
+    "dsp_late": 0.03526769518571431,
+    "dsp_at_close_linear": 0.01595650421495781,
+    "weight_on_late": 0.07554945054945054,
+    "note": "sensitivity, not a settlement-date value (D-094)"
+   }
+  },
+  {
+   "stamp": "2026-09-24T0515Z",
+   "window": 1.41,
+   "ticker": "KXETHY-27JAN0100-T4999.99",
+   "bid": 0.026,
+   "ask": 0.027,
+   "depth": 470.44,
+   "kalshi_fee": 0.001773,
+   "kalshi_net": 0.024227,
+   "expiries": {
+    "before": {
+     "expiry": "25DEC26",
+     "hours": -165.0,
+     "D": 0.988688,
+     "D_estimated": true,
+     "F": 2722.7691662605203,
+     "strike_5000_listed": true,
+     "estimators": {
+      "tight": {
+       "lower": 4800.0,
+       "upper": 5200.0,
+       "width": 400.0,
+       "dsp": 0.013399280674999998,
+       "low": 0.008075909999999999,
+       "high": 0.0181707975,
+       "fee": 0.004037954999999999,
+       "cost": 0.022208752499999998,
+       "margin": 0.002019
+      },
+      "skip1": {
+       "lower": 4600.0,
+       "upper": 5500.0,
+       "width": 900.0,
+       "dsp": 0.013002215099999999,
+       "low": 0.010767879999999999,
+       "high": 0.015254496666666667,
+       "fee": 0.0017946466666666663,
+       "cost": 0.017049143333333332,
+       "margin": 0.007178
+      },
+      "skip2": {
+       "lower": 4500.0,
+       "upper": 6000.0,
+       "width": 1500.0,
+       "dsp": 0.011304479353333334,
+       "low": 0.010229486,
+       "high": 0.012921456,
+       "fee": 0.0009421894999999999,
+       "cost": 0.013863645499999999,
+       "margin": 0.010364
+      },
+      "onesided_lower": {
+       "lower": 4800.0,
+       "upper": 5000.0,
+       "width": 200.0,
+       "dsp": 0.0134329303,
+       "low": 0.0,
+       "high": 0.024227730000000003,
+       "fee": 0.008075909999999999,
+       "cost": 0.03230364,
+       "margin": -0.008076
+      },
+      "onesided_upper": {
+       "lower": 5000.0,
+       "upper": 5200.0,
+       "width": 200.0,
+       "dsp": 0.013365631049999998,
+       "low": 0.005383940000000003,
+       "high": 0.022881744999999995,
+       "fee": 0.008075909999999999,
+       "cost": 0.030957654999999994,
+       "margin": -0.00673
+      }
+     }
+    },
+    "after": {
+     "expiry": "26MAR27",
+     "hours": 2019.0,
+     "D": 0.977659,
+     "D_estimated": true,
+     "F": 2753.394497433751,
+     "strike_5000_listed": true,
+     "estimators": {
+      "tight": {
+       "lower": 4800.0,
+       "upper": 5500.0,
+       "width": 700.0,
+       "dsp": 0.035218658942857146,
+       "low": 0.030765371428571435,
+       "high": 0.038456714285714295,
+       "fee": 0.0023074028571428568,
+       "cost": 0.04076411714285715,
+       "margin": -0.016537
+      },
+      "skip1": {
+       "lower": 4600.0,
+       "upper": 6000.0,
+       "width": 1400.0,
+       "dsp": 0.03282665131428571,
+       "low": 0.030765371428571428,
+       "high": 0.03461104285714285,
+       "fee": 0.0011537014285714284,
+       "cost": 0.03576474428571428,
+       "margin": -0.011537
+      },
+      "skip2": {
+       "lower": 4500.0,
+       "upper": 7000.0,
+       "width": 2500.0,
+       "dsp": 0.025636168703999998,
+       "low": 0.024766123999999997,
+       "high": 0.026919699999999994,
+       "fee": 0.0006460727999999999,
+       "cost": 0.027565772799999996,
+       "margin": -0.003338
+      },
+      "onesided_lower": {
+       "lower": 4800.0,
+       "upper": 5000.0,
+       "width": 200.0,
+       "dsp": 0.04216971005000001,
+       "low": 0.02691970000000001,
+       "high": 0.05383940000000002,
+       "fee": 0.008075909999999999,
+       "cost": 0.06191531000000002,
+       "margin": -0.037688
+      },
+      "onesided_upper": {
+       "lower": 5000.0,
+       "upper": 5500.0,
+       "width": 500.0,
+       "dsp": 0.032438238499999994,
+       "low": 0.026919700000000005,
+       "high": 0.03768758,
+       "fee": 0.0032303639999999995,
+       "cost": 0.040917944,
+       "margin": -0.016691
+      }
+     }
+    }
+   },
+   "worst_local_executable_cost": 0.061915,
+   "margin_vs_worst_local_executable": -0.037688,
+   "estimators_available": 10,
+   "value_at_depth_usd": -17.73,
+   "interpolant": {
+    "dsp_early": 0.013399280674999998,
+    "dsp_late": 0.035218658942857146,
+    "dsp_at_close_linear": 0.015047722714467228,
     "weight_on_late": 0.07554945054945054,
     "note": "sensitivity, not a settlement-date value (D-094)"
    }
