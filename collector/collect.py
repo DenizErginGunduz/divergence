@@ -45,7 +45,8 @@ HYPERLIQUID = 'https://api.hyperliquid.xyz/info'
 POLY_PERPS = 'https://api.perpetuals.polymarket.com/v1/info'
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-ARCHIVE_VERSION = 7                          # schema version of the files we write (6: raw/funding, D-111; 7: raw/carry, D-119)
+ARCHIVE_VERSION = 8                          # schema version of the files we write (6: raw/funding, D-111; 7: raw/carry, D-119;
+                                             # 8: kalshi commodities, raw/polymarket_other, raw/hip4, month of funding, D-120)
 
 # Trade fields dropped before writing. Two kinds, neither of them market data:
 #
@@ -99,11 +100,15 @@ FUNDING_LOOKBACK_MS = 48 * 3600 * 1000
 # Coins are ASKED FOR only if the dex's own universe lists them; an absent one is
 # recorded as absent. Eight days back, so a weekly mean exists from the first run.
 CARRY_LOOKBACK_MS = 8 * 24 * 3600 * 1000
+# D-120: the first carry run of each UTC day asks for a month, so a 30-day mean
+# exists from the first day; the other runs keep eight days.
+CARRY_LOOKBACK_LONG_MS = 31 * 24 * 3600 * 1000
+HL_PAGE_ROWS = 500                           # a reply this long may have more behind it
 HL_COINS = {'': ['BTC', 'ETH'],
             'xyz': ['CL', 'BRENTOIL', 'GOLD', 'SILVER', 'SP500', 'XYZ100']}
 POLY_PERP_SYMBOLS = ['BTC-USD', 'ETH-USD', 'WTIOIL-USD', 'BRENTOIL-USD',
                      'GOLD-USD', 'SILVER-USD', 'SP500-USD']
-POLY_PERP_MAX_PAGES = 4                      # "at most 100 funding-rate entries per request"
+POLY_PERP_MAX_PAGES = 9                      # "at most 100 funding-rate entries per request"; 31 days = 744 rows
 PAGE = 100                                   # data-api limit
 MAX_PAGES = 6                                # cap on gap-closing attempts
 HOLDERS_HOUR = 5                             # holders fetched ONCE a day (05 UTC)
@@ -118,6 +123,15 @@ HOLDERS_HOUR = 5                             # holders fetched ONCE a day (05 UT
 KALSHI_OBSERVED_PATTERN = (r'S&P 500|SPX|Nasdaq|NDX|DJIA|Dow Jones'
                            r'|\bgold\b|\bsilver\b|\boil\b|\bcrude\b|\bWTI\b|\bBrent\b')
 KALSHI_SERIES_CAP = 90            # bound the run time
+# D-120: the commodity ladders on our assets, from the Commodities category.
+KALSHI_COMMODITY_RE = r'^KX(WTI|BRENT|GOLD|SILVER)(D|W|MON|MONTHLY|MAX|MIN|MAXM|MINM)?$'
+KALSHI_OPEN_PAGES = 5             # the open pass pages; 318 open KXBTCD markets were seen
+# D-120: Polymarket events that are not the crypto ladders, in their own stream.
+POLY_OTHER_TAGS = ['commodities', 'sp-500']
+# D-120: Hyperliquid outcome markets. Books are asked only for threshold-at-a-time
+# outcomes on these underlyings, both sides, at most HIP4_MAX_BOOKS a run.
+HIP4_UNDERLYINGS = ('BTC', 'ETH', 'xyz:CL', 'xyz:BRENTOIL', 'xyz:GOLD', 'xyz:SILVER', 'xyz:SP500')
+HIP4_MAX_BOOKS = 80
 
 
 def get(url, timeout=30, attempts=3):
@@ -216,7 +230,7 @@ def kalshi():
                  (no number is produced from these until scope is decided)
     """
     out = {'catalogue': {}, 'markets': {}, 'observed': {}, 'selection': {}}
-    for cat in ('Crypto', 'Financials'):
+    for cat in ('Crypto', 'Financials', 'Commodities'):
         try:
             out['catalogue'][cat] = get('%s/series?category=%s' % (KALSHI, cat), timeout=45)
         except Exception as e:
@@ -229,9 +243,12 @@ def kalshi():
     crypto = series('Crypto', lambda x: bool({'BTC', 'ETH'} & set(x.get('tags') or [])))
     observed = series('Financials', lambda x: bool(re.search(
         KALSHI_OBSERVED_PATTERN, (x.get('title') or '') + ' ' + ' '.join(x.get('tags') or []), re.I)))
+    commodities = series('Commodities', lambda x: bool(re.match(KALSHI_COMMODITY_RE, x.get('ticker') or '')))
     crypto = crypto[:KALSHI_SERIES_CAP]
     observed = observed[:KALSHI_SERIES_CAP // 3]
-    out['selection'] = {'crypto': crypto, 'observed': observed,
+    commodities = commodities[:KALSHI_SERIES_CAP // 3]
+    out['commodities'] = {}
+    out['selection'] = {'crypto': crypto, 'observed': observed, 'commodities': commodities,
                         'truncated': [], 'open_pass_errors': {}}
 
     PAGES, PER_PAGE = 5, 200
@@ -270,22 +287,33 @@ def kalshi():
         if len(all_rows) < CAP:
             return all_rows
         out['selection']['truncated'].append(t)
-        try:
-            d = get('%s/markets?series_ticker=%s&status=open&limit=%d'
-                    % (KALSHI, t, PER_PAGE), timeout=30)
-        except Exception as e:
-            # Recorded, not swallowed: the main pass still stands, but a run
-            # where this failed has no live quotes for a truncated series and
-            # must not be mistaken for one where none existed.
-            out['selection']['open_pass_errors'][t] = str(e)[:150]
-            return all_rows
+        # The open pass pages too (D-120): one page of 200 missed 118 of 318 open
+        # KXBTCD markets in the probe.
         seen = set(r.get('ticker') for r in all_rows)
-        for r in (d.get('markets') or []):
-            if r.get('ticker') not in seen:
-                all_rows.append(r)
+        cursor = ''
+        for _ in range(KALSHI_OPEN_PAGES):
+            u = '%s/markets?series_ticker=%s&status=open&limit=%d' % (KALSHI, t, PER_PAGE)
+            if cursor:
+                u += '&cursor=%s' % cursor
+            try:
+                d = get(u, timeout=30)
+            except Exception as e:
+                # Recorded, not swallowed: the main pass still stands, but a run
+                # where this failed has no live quotes for a truncated series and
+                # must not be mistaken for one where none existed.
+                out['selection']['open_pass_errors'][t] = str(e)[:150]
+                return all_rows
+            m = d.get('markets') or []
+            for r in m:
+                if r.get('ticker') not in seen:
+                    seen.add(r.get('ticker'))
+                    all_rows.append(r)
+            cursor = d.get('cursor') or ''
+            if not cursor or not m:
+                break
         return all_rows
 
-    for key, tickers in (('markets', crypto), ('observed', observed)):
+    for key, tickers in (('markets', crypto), ('observed', observed), ('commodities', commodities)):
         for t in tickers:
             try:
                 out[key][t] = markets(t)
@@ -361,8 +389,18 @@ def _hyperliquid(start, end):
                 out['absent'].append(name)
                 continue
             req = {'type': 'fundingHistory', 'coin': name, 'startTime': start, 'endTime': end}
-            out['funding'][name] = {'request': req,
-                                    'response': _try(lambda: post(HYPERLIQUID, req))}
+            resp = _try(lambda: post(HYPERLIQUID, req))
+            pages = [{'request': req, 'response': resp}]
+            # A reply of HL_PAGE_ROWS rows may have more behind it (D-120): ask again
+            # from just after the newest row, at most three more times.
+            for _ in range(3):
+                v = resp.get('value') if resp['ok'] else None
+                if not (isinstance(v, list) and len(v) >= HL_PAGE_ROWS):
+                    break
+                nxt = dict(req, startTime=max(int(x.get('time') or 0) for x in v) + 1)
+                resp = _try(lambda: post(HYPERLIQUID, nxt))
+                pages.append({'request': nxt, 'response': resp})
+            out['funding'][name] = pages[0] if len(pages) == 1 else dict(pages[0], more_pages=pages[1:])
     return out
 
 
@@ -413,9 +451,12 @@ def _deribit_futures():
     return out
 
 
-def carry(end_ms=None):
+def carry(end_ms=None, long_lookback=None):
     end = int(time.time() * 1000) if end_ms is None else int(end_ms)
-    start = end - CARRY_LOOKBACK_MS
+    if long_lookback is None:
+        long_lookback = (not os.path.isdir(os.path.join(ROOT, 'raw', 'carry', DAY))
+                         or now.hour == HOLDERS_HOUR)
+    start = end - (CARRY_LOOKBACK_LONG_MS if long_lookback else CARRY_LOOKBACK_MS)
     return {'window': {'start_ms': start, 'end_ms': end},
             'hyperliquid': _hyperliquid(start, end),
             'polymarket_perps': _poly_perps(start, end),
@@ -423,6 +464,55 @@ def carry(end_ms=None):
 
 
 stage('carry', carry);                MARKS['carry_end'] = round(time.time()-t0_all, 2)
+
+
+# ---------------- 3d. Polymarket events that are not the crypto ladders (D-120) ----------------
+def polymarket_other():
+    """Gamma events for the commodity and index tags, as returned. Its own stream:
+    the crypto ladders' stream and the trade-flow stage that walks it are unchanged."""
+    return dict((tag, _try(lambda: get('%s/events?tag_slug=%s&closed=false&limit=200' % (GAMMA, tag),
+                                     timeout=60))) for tag in POLY_OTHER_TAGS)
+
+
+stage('polymarket_other', polymarket_other); MARKS['polymarket_other_end'] = round(time.time()-t0_all, 2)
+
+
+# ---------------- 3e. Hyperliquid outcome markets, HIP-4 (D-120) ----------------
+def _hip4_fields(desc):
+    """'perp:BTC|priceDescription:…|threshold:100000|time:20261001-0000' -> dict."""
+    out = {}
+    for part in (desc or '').split('|'):
+        k, _, v = part.partition(':')
+        if k:
+            out[k] = v
+    return out
+
+
+def hip4(now_utc=None):
+    now_utc = now_utc or datetime.datetime.now(datetime.timezone.utc)
+    stamp = now_utc.strftime('%Y%m%d-%H%M')
+    out = {'outcomeMeta': _try(lambda: post(HYPERLIQUID, {'type': 'outcomeMeta'})),
+           'allMids': _try(lambda: post(HYPERLIQUID, {'type': 'allMids'})),
+           'books': {}, 'skipped_for_cap': 0}
+    meta = out['outcomeMeta'].get('value') if out['outcomeMeta']['ok'] else None
+    wanted = []
+    for o in ((meta or {}).get('outcomes') or []) if isinstance(meta, dict) else []:
+        f = _hip4_fields(o.get('description'))
+        if (o.get('name') == 'template:binaryPrice' and f.get('perp') in HIP4_UNDERLYINGS
+                and (f.get('time') or '') > stamp and o.get('outcome') is not None):
+            wanted.append(int(o['outcome']))
+    for oid in sorted(wanted):
+        for side in (0, 1):
+            coin = '#%d' % (10 * oid + side)
+            if len(out['books']) >= HIP4_MAX_BOOKS:
+                out['skipped_for_cap'] += 1
+                continue
+            out['books'][coin] = _try(lambda: post(HYPERLIQUID, {'type': 'l2Book', 'coin': coin}))
+            time.sleep(0.05)
+    return out
+
+
+stage('hip4', hip4);                  MARKS['hip4_end'] = round(time.time()-t0_all, 2)
 
 
 # ---------------- 3. Flow: event-based, with gaps ----------------
@@ -589,6 +679,10 @@ if 'funding' in bucket:
     save('funding', bucket['funding'])
 if 'carry' in bucket:
     save('carry', bucket['carry'])
+if 'polymarket_other' in bucket:
+    save('polymarket_other', bucket['polymarket_other'])
+if 'hip4' in bucket:
+    save('hip4', bucket['hip4'])
 
 flow_result = bucket.get('flow') or {'new_trades': [], 'coverage': []}
 
@@ -660,8 +754,9 @@ meta = {'snapshot_utc': now.isoformat(),
         # Which carry blocks came back and how many rows each (D-119).
         'carry_summary': (lambda c: None if not c else {
             'lookback_hours': CARRY_LOOKBACK_MS // 3600000,
-            'hyperliquid_rows': {k: (len(v['response']['value']) if v['response']['ok']
-                                     and isinstance(v['response']['value'], list) else None)
+            'lookback_start_ms': c['window']['start_ms'],
+            'hyperliquid_rows': {k: sum(len(p['response']['value']) for p in [v] + v.get('more_pages', [])
+                                        if p['response']['ok'] and isinstance(p['response']['value'], list))
                                  for k, v in c['hyperliquid']['funding'].items()},
             'hyperliquid_absent': c['hyperliquid']['absent'],
             'polymarket_rows': {k: sum(len(((p['response'].get('value') or {}).get('data') or []))
@@ -671,6 +766,14 @@ meta = {'snapshot_utc': now.isoformat(),
             'polymarket_absent': c['polymarket_perps']['absent'],
             'deribit_futures_ok': {k: v['book_summary']['ok'] for k, v in c['deribit_futures'].items()},
         })(bucket.get('carry')),
+        'hip4_summary': (lambda h: None if not h else {
+            'outcomes': len((((h['outcomeMeta'].get('value') or {}) if h['outcomeMeta']['ok'] else {}).get('outcomes') or [])),
+            'books': len(h['books']), 'books_failed': sum(1 for v in h['books'].values() if not v['ok']),
+            'skipped_for_cap': h['skipped_for_cap'],
+        })(bucket.get('hip4')),
+        'kalshi_commodities': (lambda k: None if not k else {
+            t: (len(v) if isinstance(v, list) else v) for t, v in (k.get('commodities') or {}).items()
+        })(bucket.get('kalshi')),
         'files': written, 'assets': ASSETS, 'version': ARCHIVE_VERSION}
 mp = os.path.join(ROOT, 'raw', '_meta', DAY, 'meta_%s.json' % STAMP)
 os.makedirs(os.path.dirname(mp), exist_ok=True)
@@ -697,7 +800,8 @@ for w in written:
     # 'funding' and 'carry' are listed here (the block's purpose is the newest file
     # of each stream) but are NOT in the required-streams check below: the page does
     # not read them, and their failure must not mark the pointer broken (D-111, D-119).
-    for name in ('kalshi', 'deribit', 'polymarket_events', 'funding', 'carry'):
+    for name in ('kalshi', 'deribit', 'polymarket_events', 'funding', 'carry',
+                 'polymarket_other', 'hip4'):
         if d.startswith('raw/%s/' % name):
             paths[name] = d
 
