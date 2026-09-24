@@ -29,6 +29,7 @@ import measure_exhaustive
 import measure_touch
 import kill_test_eth5k
 import measure_payoff
+import measure_carry
 import discount_referee
 import prune_archive
 from stability import Stability
@@ -1053,8 +1054,9 @@ class FundingStage(unittest.TestCase):
         self.assertEqual(sorted(out['BTC-PERPETUAL']), ['request', 'response'])
 
     def test_the_archive_version_says_the_stream_exists(self):
-        """A reader checks `_meta.version` before assuming raw/funding is there."""
-        self.assertEqual(self.ns['ARCHIVE_VERSION'], 6)
+        """A reader checks `_meta.version` before assuming raw/funding is there.
+        Version 7 (D-119) added raw/carry and kept raw/funding."""
+        self.assertGreaterEqual(self.ns['ARCHIVE_VERSION'], 6)
 
 
 class PayoffBuyerComparison(unittest.TestCase):
@@ -1250,6 +1252,134 @@ class PayoffBuyerComparison(unittest.TestCase):
         self.assertAlmostEqual(t['stake_usd'], round(n * 0.40 + fees.order_fee(0.40, n, 'KXBTCY'), 2))
         self.assertAlmostEqual(t['profit_if_right_usd'], round(n - t['stake_usd'], 2), places=2)
         self.assertFalse(t['depth_covers'])      # 100 resting, more needed
+
+
+class CarryStage(unittest.TestCase):
+    """D-119: Hyperliquid and Polymarket's perpetuals, and Deribit's dated
+    futures, lifted out of collect.py and run against fakes. Pinned: a coin the
+    dex does not list is recorded as absent and never asked for; the window is
+    the eight-day lookback ending at the run's instant; Polymarket's history is
+    paged in the direction its own rows show, and no further than the cap; one
+    venue failing leaves the others whole."""
+
+    def setUp(self):
+        import time as _time
+        self.ns = from_collector('_try', '_hyperliquid', '_poly_perps', '_deribit_futures',
+                                 'carry', 'CARRY_LOOKBACK_MS', 'HL_COINS', 'POLY_PERP_SYMBOLS',
+                                 'POLY_PERP_MAX_PAGES', 'HYPERLIQUID', 'POLY_PERPS', 'DERIBIT',
+                                 'DERIBIT_CURRENCIES', 'HOLDERS_HOUR', 'ARCHIVE_VERSION')
+        self.tmp = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.tmp)
+        import datetime as _dt
+        self.ns.update(os=os, time=_time, ROOT=self.tmp, DAY='2026-09-24',
+                       now=_dt.datetime(2026, 9, 24, 13, tzinfo=_dt.timezone.utc))
+        self.posts, self.gets = [], []
+
+        def fake_post(url, body, timeout=30, attempts=3):
+            self.posts.append(body)
+            if body['type'] == 'metaAndAssetCtxs':
+                names = ['xyz:CL', 'xyz:GOLD'] if body.get('dex') == 'xyz' else ['BTC', 'ETH']
+                return [{'universe': [{'name': n} for n in names]}, [{} for _ in names]]
+            if body['type'] == 'fundingHistory':
+                return [{'coin': body['coin'], 'fundingRate': '0.0000125',
+                         'premium': '0', 'time': body['startTime'] + 74}]
+            return [None]
+
+        def fake_get(url, timeout=30, attempts=3):
+            self.gets.append(url)
+            if url.endswith('/tickers'):
+                return [{'symbol': 'WTIOIL-USD', 'instrument_id': 3}]
+            if '/funding?' in url:
+                # newest first, always "more": the stage must walk backwards and stop at the cap
+                q = dict(x.split('=') for x in url.split('?')[1].split('&'))
+                hi = int(q['end_timestamp'])
+                rows = [{'funding_rate': '0.00000625', 'timestamp': hi - i * 3600000}
+                        for i in range(100)]
+                return {'data': rows, 'more': True}
+            if 'deribit' in url or url.startswith(self.ns['DERIBIT']):
+                raise RuntimeError('deribit down')
+            return {}
+        self.ns['post'], self.ns['get'] = fake_post, fake_get
+
+    def test_absent_coins_are_recorded_and_not_asked(self):
+        end = 1790270000000
+        out = self.ns['carry'](end_ms=end)
+        hl = out['hyperliquid']
+        self.assertEqual(sorted(hl['funding']), ['BTC', 'ETH', 'xyz:CL', 'xyz:GOLD'])
+        self.assertIn('xyz:SILVER', hl['absent'])
+        asked = [b['coin'] for b in self.posts if b['type'] == 'fundingHistory']
+        self.assertNotIn('xyz:SILVER', asked)
+        for b in self.posts:
+            if b['type'] == 'fundingHistory':
+                self.assertEqual(b['endTime'], end)
+                self.assertEqual(b['startTime'], end - self.ns['CARRY_LOOKBACK_MS'])
+        self.assertGreaterEqual(self.ns['CARRY_LOOKBACK_MS'], 7 * 24 * 3600 * 1000)
+        self.assertIn('BTC-USD', out['polymarket_perps']['absent'])
+
+    def test_polymarket_pages_backwards_and_stops_at_the_cap(self):
+        out = self.ns['carry'](end_ms=1790270000000)
+        pages = out['polymarket_perps']['funding']['WTIOIL-USD']
+        self.assertEqual(len(pages), 2)          # 192 hours: two pages of 100 cover it, then it stops
+        self.ns['CARRY_LOOKBACK_MS'] = 60 * 24 * 3600 * 1000
+        pages = self.ns['carry'](end_ms=1790270000000)['polymarket_perps']['funding']['WTIOIL-USD']
+        self.assertEqual(len(pages), self.ns['POLY_PERP_MAX_PAGES'])
+        his = [p['request']['end_timestamp'] for p in pages]
+        self.assertEqual(his, sorted(his, reverse=True))
+        self.assertTrue(all(p['request']['start_timestamp'] == pages[0]['request']['start_timestamp']
+                            for p in pages))
+
+    def test_one_venue_failing_leaves_the_others_whole(self):
+        out = self.ns['carry'](end_ms=1790270000000)
+        self.assertFalse(out['deribit_futures']['BTC']['book_summary']['ok'])
+        self.assertIn('deribit down', out['deribit_futures']['BTC']['book_summary']['error'])
+        self.assertTrue(out['hyperliquid']['funding']['BTC']['response']['ok'])
+
+    def test_the_archive_version_says_the_carry_stream_exists(self):
+        self.assertEqual(self.ns['ARCHIVE_VERSION'], 7)
+
+
+class CarryMeasure(unittest.TestCase):
+    """D-119's derived numbers: hourly rates as fractions, positive = long pays,
+    a window below 90% coverage is UNKNOWN rather than a smaller average."""
+
+    H = 3600 * 1000
+
+    def test_hyperliquid_stamps_fall_into_their_hour_and_disagreements_are_counted(self):
+        a = [(1790186400074, 0.0000125), (1790190000015, 0.0000125)]
+        b = [(1790190000020, 0.0000130)]            # same hour, a later file, a different value
+        series, disagree = measure_carry.merge_points([a, b])
+        self.assertEqual(sorted(series), [1790186400000, 1790190000000])
+        self.assertEqual(series[1790190000000], 0.0000130)
+        self.assertEqual(disagree, 1)
+
+    def test_a_window_below_ninety_percent_is_unknown(self):
+        end = 1790190000000
+        full = dict((end - i * self.H, 0.00001) for i in range(24))
+        m, cov = measure_carry.window_mean(full, end, 24)
+        self.assertAlmostEqual(m, 0.00001)
+        self.assertEqual(cov, 1.0)
+        for i in range(2):                       # 22 of 24 = 91.7%: still reported
+            full.pop(end - i * self.H - 5 * self.H)
+        self.assertIsNotNone(measure_carry.window_mean(full, end, 24)[0])
+        full.pop(end - 10 * self.H)              # 21 of 24 = 87.5%: UNKNOWN
+        m, cov = measure_carry.window_mean(full, end, 24)
+        self.assertIsNone(m)
+        self.assertAlmostEqual(cov, 21 / 24.0)
+
+    def test_what_a_thousand_dollar_long_pays(self):
+        """The documented interest leg, 0.00125% an hour, on $1,000 for a week."""
+        self.assertAlmostEqual(measure_carry.long_pays(0.0000125, 168), 2.1)
+        self.assertAlmostEqual(measure_carry.long_pays(-0.00001, 24), -0.24)
+        self.assertIsNone(measure_carry.long_pays(None, 24))
+
+    def test_the_dated_future_premium_and_an_expired_contract(self):
+        now = 1790270000000
+        p = measure_carry.futures_premium(101.0, 100.0, now + 73 * 24 * self.H, now)
+        self.assertAlmostEqual(p['premium'], 0.01)
+        self.assertAlmostEqual(p['per_1000'], 10.0)
+        self.assertAlmostEqual(p['annualised'], 0.05)
+        self.assertIsNone(measure_carry.futures_premium(101.0, 100.0, now - 1, now))
+        self.assertIsNone(measure_carry.futures_premium(None, 100.0, now + 1, now))
 
 
 if __name__ == '__main__':
