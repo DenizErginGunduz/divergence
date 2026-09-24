@@ -1,0 +1,4906 @@
+{
+ "archive": {
+  "day_count": 24,
+  "snapshot_count": 112,
+  "first": "2026-08-30T1611Z",
+  "last": "2026-09-23T2117Z"
+ },
+ "archive_source": "private mirror",
+ "produced_by": "scripts/measure_payoff.py",
+ "decision": "D-114",
+ "family": [
+  "KXBTCY",
+  "KXETHY"
+ ],
+ "verdict": {
+  "conditions": 130,
+  "conditions_with_enough_judged_snapshots": 118,
+  "stably_cheaper_on_kalshi": 15,
+  "stably_cheaper_on_deribit": 0,
+  "rules": {
+   "rel": 0.1,
+   "abs": 0.001,
+   "persistence": 0.9,
+   "min_judged": 10,
+   "skips": [
+    0,
+    1
+   ]
+  },
+  "verdict": "one venue is cheaper wherever either is",
+  "venue": "kalshi"
+ },
+ "stable_conditions": {
+  "kalshi": [
+   "BTC:100000:105000",
+   "BTC:105000:110000",
+   "BTC:50000:55000",
+   "BTC:55000:60000",
+   "BTC:60000:65000",
+   "BTC:65000:70000",
+   "BTC:90000:95000",
+   "BTC:95000:100000",
+   "ETH:1000:1250",
+   "ETH:1250:1500",
+   "ETH:1500:1750",
+   "ETH:1750:2000",
+   "ETH:2000:2250",
+   "ETH:4000:4250",
+   "ETH:4250:4500"
+  ],
+  "deribit": []
+ },
+ "sensitivity_combo_fees": {
+  "what": "the same rules with every Deribit fee set to zero",
+  "why": "Deribit states that combo orders carry reduced fees; the size of the reduction is UNKNOWN and this script charges every leg in full. Zero is the most favourable case for Deribit, so a condition that stays cheaper on Kalshi here does not depend on the combo rule.",
+  "reads_into_verdict": false,
+  "verdict_if_deribit_fees_were_zero": "one venue is cheaper wherever either is",
+  "stably_cheaper_on_kalshi": 13,
+  "stably_cheaper_on_deribit": 0,
+  "stable_conditions": {
+   "kalshi": [
+    "BTC:100000:105000",
+    "BTC:105000:110000",
+    "BTC:50000:55000",
+    "BTC:55000:60000",
+    "BTC:60000:65000",
+    "BTC:65000:70000",
+    "BTC:90000:95000",
+    "BTC:95000:100000",
+    "ETH:1000:1250",
+    "ETH:1250:1500",
+    "ETH:1750:2000",
+    "ETH:2000:2250",
+    "ETH:4000:4250"
+   ],
+   "deribit": []
+  }
+ },
+ "conditions": [
+  {
+   "condition": "BTC below 20,000",
+   "asset": "BTC",
+   "lo": null,
+   "hi": 20000,
+   "judged": 0,
+   "unquoted": 106,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 0,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": null,
+   "median_options_min": null,
+   "median_options_max": null
+  },
+  {
+   "condition": "BTC below 25,000",
+   "asset": "BTC",
+   "lo": null,
+   "hi": 25000,
+   "judged": 0,
+   "unquoted": 106,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 0,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": null,
+   "median_options_min": null,
+   "median_options_max": null
+  },
+  {
+   "condition": "BTC below 30,000",
+   "asset": "BTC",
+   "lo": null,
+   "hi": 30000,
+   "judged": 0,
+   "unquoted": 106,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 0,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": null,
+   "median_options_min": null,
+   "median_options_max": null
+  },
+  {
+   "condition": "BTC below 35,000",
+   "asset": "BTC",
+   "lo": null,
+   "hi": 35000,
+   "judged": 0,
+   "unquoted": 106,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 0,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": null,
+   "median_options_min": null,
+   "median_options_max": null
+  },
+  {
+   "condition": "BTC below 40,000",
+   "asset": "BTC",
+   "lo": null,
+   "hi": 40000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 40,
+   "indistinguishable": 66,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.04705144,
+   "median_options_min": 0.0190656978812499,
+   "median_options_max": 0.04551454879999994
+  },
+  {
+   "condition": "BTC below 45,000",
+   "asset": "BTC",
+   "lo": null,
+   "hi": 45000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 36,
+   "indistinguishable": 70,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.0641559,
+   "median_options_min": 0.024647715441176388,
+   "median_options_max": 0.06543097580000001
+  },
+  {
+   "condition": "BTC below 50,000",
+   "asset": "BTC",
+   "lo": null,
+   "hi": 50000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 27,
+   "indistinguishable": 79,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.08446441,
+   "median_options_min": 0.03158709557142858,
+   "median_options_max": 0.0897738505714285
+  },
+  {
+   "condition": "BTC below 55,000",
+   "asset": "BTC",
+   "lo": null,
+   "hi": 55000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 106,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.11435748999999999,
+   "median_options_min": 0.07360695066666656,
+   "median_options_max": 0.19589426399999987
+  },
+  {
+   "condition": "BTC below 60,000",
+   "asset": "BTC",
+   "lo": null,
+   "hi": 60000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 106,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.16026984,
+   "median_options_min": 0.11564835149999997,
+   "median_options_max": 0.21484602224999994
+  },
+  {
+   "condition": "BTC below 65,000",
+   "asset": "BTC",
+   "lo": null,
+   "hi": 65000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 106,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.2242198,
+   "median_options_min": 0.189691449,
+   "median_options_max": 0.33375391700000023
+  },
+  {
+   "condition": "BTC below 70,000",
+   "asset": "BTC",
+   "lo": null,
+   "hi": 70000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 106,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.31148912,
+   "median_options_min": 0.29156993337500003,
+   "median_options_max": 0.3820336160000001
+  },
+  {
+   "condition": "BTC below 75,000",
+   "asset": "BTC",
+   "lo": null,
+   "hi": 75000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 3,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 103,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.4390361,
+   "median_options_min": 0.4235578906666668,
+   "median_options_max": 0.5101937790000001
+  },
+  {
+   "condition": "BTC below 80,000",
+   "asset": "BTC",
+   "lo": null,
+   "hi": 80000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 2,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 104,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.57900364,
+   "median_options_min": 0.5509302603749999,
+   "median_options_max": 0.5803108859999997
+  },
+  {
+   "condition": "BTC below 85,000",
+   "asset": "BTC",
+   "lo": null,
+   "hi": 85000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 2,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 104,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.70223842,
+   "median_options_min": 0.6484177873083905,
+   "median_options_max": 0.723547672858499
+  },
+  {
+   "condition": "BTC below 90,000",
+   "asset": "BTC",
+   "lo": null,
+   "hi": 90000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 106,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.80642614,
+   "median_options_min": 0.711989055324404,
+   "median_options_max": 0.7822864899114799
+  },
+  {
+   "condition": "BTC below 95,000",
+   "asset": "BTC",
+   "lo": null,
+   "hi": 95000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 106,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.88345438,
+   "median_options_min": 0.780163158704601,
+   "median_options_max": 0.8920919059114799
+  },
+  {
+   "condition": "BTC below 100,000",
+   "asset": "BTC",
+   "lo": null,
+   "hi": 100000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 106,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.9388022,
+   "median_options_min": 0.8238800592829978,
+   "median_options_max": 0.9098918808210006
+  },
+  {
+   "condition": "BTC below 105,000",
+   "asset": "BTC",
+   "lo": null,
+   "hi": 105000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 106,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.97829637,
+   "median_options_min": 0.8714168271418662,
+   "median_options_max": 0.9709220892509403
+  },
+  {
+   "condition": "BTC below 110,000",
+   "asset": "BTC",
+   "lo": null,
+   "hi": 110000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 106,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 1.00685534,
+   "median_options_min": 0.8930013865379345,
+   "median_options_max": 0.9643457366362289
+  },
+  {
+   "condition": "BTC below 115,000",
+   "asset": "BTC",
+   "lo": null,
+   "hi": 115000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 2,
+   "indistinguishable": 104,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 1.02612654,
+   "median_options_min": 0.9161275233950016,
+   "median_options_max": 0.96732136660776
+  },
+  {
+   "condition": "BTC below 120,000",
+   "asset": "BTC",
+   "lo": null,
+   "hi": 120000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 7,
+   "indistinguishable": 99,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 1.03943853,
+   "median_options_min": 0.9255602067385093,
+   "median_options_max": 0.9757818634605797
+  },
+  {
+   "condition": "BTC below 125,000",
+   "asset": "BTC",
+   "lo": null,
+   "hi": 125000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 10,
+   "indistinguishable": 96,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 1.0490405999999999,
+   "median_options_min": 0.9383907175462993,
+   "median_options_max": 0.9803948934531004
+  },
+  {
+   "condition": "BTC below 130,000",
+   "asset": "BTC",
+   "lo": null,
+   "hi": 130000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 13,
+   "indistinguishable": 93,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 1.05844639,
+   "median_options_min": 0.9492087028494041,
+   "median_options_max": 0.9848995317535517
+  },
+  {
+   "condition": "BTC below 135,000",
+   "asset": "BTC",
+   "lo": null,
+   "hi": 135000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 24,
+   "indistinguishable": 82,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 1.06586851,
+   "median_options_min": 0.9545220544012005,
+   "median_options_max": 0.9860242411366983
+  },
+  {
+   "condition": "BTC below 140,000",
+   "asset": "BTC",
+   "lo": null,
+   "hi": 140000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 37,
+   "indistinguishable": 69,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 1.07233882,
+   "median_options_min": 0.9569343311193867,
+   "median_options_max": 0.9854519430342005
+  },
+  {
+   "condition": "BTC below 145,000",
+   "asset": "BTC",
+   "lo": null,
+   "hi": 145000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 41,
+   "indistinguishable": 65,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 1.07981148,
+   "median_options_min": 0.9607104103595989,
+   "median_options_max": 0.9887229876807998
+  },
+  {
+   "condition": "BTC below 150,000",
+   "asset": "BTC",
+   "lo": null,
+   "hi": 150000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 106,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.9841697699999999,
+   "median_options_min": 0.9628028129643309,
+   "median_options_max": 0.9859084373095512
+  },
+  {
+   "condition": "BTC in [20,000, 25,000)",
+   "asset": "BTC",
+   "lo": 20000,
+   "hi": 25000,
+   "judged": 0,
+   "unquoted": 106,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 0,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": null,
+   "median_options_min": null,
+   "median_options_max": null
+  },
+  {
+   "condition": "BTC above 20,000",
+   "asset": "BTC",
+   "lo": 20000,
+   "hi": null,
+   "judged": 0,
+   "unquoted": 106,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 0,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": null,
+   "median_options_min": null,
+   "median_options_max": null
+  },
+  {
+   "condition": "BTC in [25,000, 30,000)",
+   "asset": "BTC",
+   "lo": 25000,
+   "hi": 30000,
+   "judged": 0,
+   "unquoted": 106,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 0,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": null,
+   "median_options_min": null,
+   "median_options_max": null
+  },
+  {
+   "condition": "BTC above 25,000",
+   "asset": "BTC",
+   "lo": 25000,
+   "hi": null,
+   "judged": 0,
+   "unquoted": 106,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 0,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": null,
+   "median_options_min": null,
+   "median_options_max": null
+  },
+  {
+   "condition": "BTC in [30,000, 35,000)",
+   "asset": "BTC",
+   "lo": 30000,
+   "hi": 35000,
+   "judged": 0,
+   "unquoted": 106,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 0,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": null,
+   "median_options_min": null,
+   "median_options_max": null
+  },
+  {
+   "condition": "BTC above 30,000",
+   "asset": "BTC",
+   "lo": 30000,
+   "hi": null,
+   "judged": 0,
+   "unquoted": 106,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 0,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": null,
+   "median_options_min": null,
+   "median_options_max": null
+  },
+  {
+   "condition": "BTC in [35,000, 40,000)",
+   "asset": "BTC",
+   "lo": 35000,
+   "hi": 40000,
+   "judged": 0,
+   "unquoted": 106,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 0,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": null,
+   "median_options_min": null,
+   "median_options_max": null
+  },
+  {
+   "condition": "BTC above 35,000",
+   "asset": "BTC",
+   "lo": 35000,
+   "hi": null,
+   "judged": 0,
+   "unquoted": 106,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 0,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": null,
+   "median_options_min": null,
+   "median_options_max": null
+  },
+  {
+   "condition": "BTC in [40,000, 45,000)",
+   "asset": "BTC",
+   "lo": 40000,
+   "hi": 45000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 5,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 101,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.01710208,
+   "median_options_min": 0.012447912105882364,
+   "median_options_max": 0.04159613839999998
+  },
+  {
+   "condition": "BTC above 40,000",
+   "asset": "BTC",
+   "lo": 40000,
+   "hi": null,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 14,
+   "indistinguishable": 92,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 1.05428945,
+   "median_options_min": 0.9529753940627993,
+   "median_options_max": 0.9798413496858
+  },
+  {
+   "condition": "BTC in [45,000, 50,000)",
+   "asset": "BTC",
+   "lo": 45000,
+   "hi": 50000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 11,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 95,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.02030473,
+   "median_options_min": 0.016889455184873836,
+   "median_options_max": 0.0452937850285714
+  },
+  {
+   "condition": "BTC above 45,000",
+   "asset": "BTC",
+   "lo": 45000,
+   "hi": null,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 3,
+   "indistinguishable": 103,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 1.03806447,
+   "median_options_min": 0.9327670977379998,
+   "median_options_max": 0.9742575427703108
+  },
+  {
+   "condition": "BTC in [50,000, 55,000)",
+   "asset": "BTC",
+   "lo": 50000,
+   "hi": 55000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 106,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 0,
+   "stable": "kalshi",
+   "stable_without_deribit_fees": "kalshi",
+   "median_kalshi_cost": 0.02670625,
+   "median_options_min": 0.054677211619047594,
+   "median_options_max": 0.1460097954285714
+  },
+  {
+   "condition": "BTC above 50,000",
+   "asset": "BTC",
+   "lo": 50000,
+   "hi": null,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 106,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 1.01967112,
+   "median_options_min": 0.9206787682847355,
+   "median_options_max": 0.9731847699000856
+  },
+  {
+   "condition": "BTC in [55,000, 60,000)",
+   "asset": "BTC",
+   "lo": 55000,
+   "hi": 60000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 106,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 0,
+   "stable": "kalshi",
+   "stable_without_deribit_fees": "kalshi",
+   "median_kalshi_cost": 0.04055892,
+   "median_options_min": 0.07823206599999999,
+   "median_options_max": 0.1783584225
+  },
+  {
+   "condition": "BTC above 55,000",
+   "asset": "BTC",
+   "lo": 55000,
+   "hi": null,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 106,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.99638891,
+   "median_options_min": 0.8862844675704498,
+   "median_options_max": 0.9906281746703108
+  },
+  {
+   "condition": "BTC in [60,000, 65,000)",
+   "asset": "BTC",
+   "lo": 60000,
+   "hi": 65000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 106,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 0,
+   "stable": "kalshi",
+   "stable_without_deribit_fees": "kalshi",
+   "median_kalshi_cost": 0.06182452,
+   "median_options_min": 0.10376078699999991,
+   "median_options_max": 0.20264583074999998
+  },
+  {
+   "condition": "BTC above 60,000",
+   "asset": "BTC",
+   "lo": 60000,
+   "hi": null,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 106,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.95484415,
+   "median_options_min": 0.8255010407321699,
+   "median_options_max": 0.919237917517021
+  },
+  {
+   "condition": "BTC in [65,000, 70,000)",
+   "asset": "BTC",
+   "lo": 65000,
+   "hi": 70000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 106,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 0,
+   "stable": "kalshi",
+   "stable_without_deribit_fees": "kalshi",
+   "median_kalshi_cost": 0.08621073,
+   "median_options_min": 0.13700977599999997,
+   "median_options_max": 0.22634842599999982
+  },
+  {
+   "condition": "BTC above 65,000",
+   "asset": "BTC",
+   "lo": 65000,
+   "hi": null,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 106,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.8949105700000001,
+   "median_options_min": 0.7624871004821697,
+   "median_options_max": 0.8756941346463605
+  },
+  {
+   "condition": "BTC in [70,000, 75,000)",
+   "asset": "BTC",
+   "lo": 70000,
+   "hi": 75000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 84,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 22,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.12423177,
+   "median_options_min": 0.1473252001666665,
+   "median_options_max": 0.23545717050000042
+  },
+  {
+   "condition": "BTC above 70,000",
+   "asset": "BTC",
+   "lo": 70000,
+   "hi": null,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 21,
+   "indistinguishable": 85,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.81073372,
+   "median_options_min": 0.6662453651485484,
+   "median_options_max": 0.7501277610758389
+  },
+  {
+   "condition": "BTC in [75,000, 80,000)",
+   "asset": "BTC",
+   "lo": 75000,
+   "hi": 80000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 52,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 54,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.14632692000000003,
+   "median_options_min": 0.1580238297499998,
+   "median_options_max": 0.2509452479999997
+  },
+  {
+   "condition": "BTC above 75,000",
+   "asset": "BTC",
+   "lo": 75000,
+   "hi": null,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 106,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.68068974,
+   "median_options_min": 0.5856498373487998,
+   "median_options_max": 0.6619420497059996
+  },
+  {
+   "condition": "BTC in [80,000, 85,000)",
+   "asset": "BTC",
+   "lo": 80000,
+   "hi": 85000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 69,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 37,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.12844513,
+   "median_options_min": 0.14813926050000004,
+   "median_options_max": 0.2443772864262499
+  },
+  {
+   "condition": "BTC above 80,000",
+   "asset": "BTC",
+   "lo": 80000,
+   "hi": null,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 26,
+   "indistinguishable": 80,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.5338353899999999,
+   "median_options_min": 0.4720318987793011,
+   "median_options_max": 0.5035453742127997
+  },
+  {
+   "condition": "BTC in [85,000, 90,000)",
+   "asset": "BTC",
+   "lo": 85000,
+   "hi": 90000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 90,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 16,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.10735593,
+   "median_options_min": 0.13011785249999985,
+   "median_options_max": 0.23453278799999996
+  },
+  {
+   "condition": "BTC above 85,000",
+   "asset": "BTC",
+   "lo": 85000,
+   "hi": null,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 106,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.41779864,
+   "median_options_min": 0.36200808600000006,
+   "median_options_max": 0.4748238439999999
+  },
+  {
+   "condition": "BTC in [90,000, 95,000)",
+   "asset": "BTC",
+   "lo": 90000,
+   "hi": 95000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 105,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 1,
+   "stable": "kalshi",
+   "stable_without_deribit_fees": "kalshi",
+   "median_kalshi_cost": 0.08091568,
+   "median_options_min": 0.1152272439999999,
+   "median_options_max": 0.21265774599999998
+  },
+  {
+   "condition": "BTC above 90,000",
+   "asset": "BTC",
+   "lo": 90000,
+   "hi": null,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 1,
+   "indistinguishable": 105,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.31577444,
+   "median_options_min": 0.25183171200000004,
+   "median_options_max": 0.33643142775000007
+  },
+  {
+   "condition": "BTC in [95,000, 100,000)",
+   "asset": "BTC",
+   "lo": 95000,
+   "hi": 100000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 106,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 0,
+   "stable": "kalshi",
+   "stable_without_deribit_fees": "kalshi",
+   "median_kalshi_cost": 0.05651337,
+   "median_options_min": 0.08642155874999995,
+   "median_options_max": 0.1959407235000002
+  },
+  {
+   "condition": "BTC above 95,000",
+   "asset": "BTC",
+   "lo": 95000,
+   "hi": null,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 106,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.23062244,
+   "median_options_min": 0.17838079599999995,
+   "median_options_max": 0.3181843215000001
+  },
+  {
+   "condition": "BTC in [100,000, 105,000)",
+   "asset": "BTC",
+   "lo": 100000,
+   "hi": 105000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 106,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 0,
+   "stable": "kalshi",
+   "stable_without_deribit_fees": "kalshi",
+   "median_kalshi_cost": 0.039494169999999995,
+   "median_options_min": 0.07014753754166667,
+   "median_options_max": 0.17252485799999995
+  },
+  {
+   "condition": "BTC above 100,000",
+   "asset": "BTC",
+   "lo": 100000,
+   "hi": null,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 106,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.16879988,
+   "median_options_min": 0.1229205915,
+   "median_options_max": 0.21838531274999984
+  },
+  {
+   "condition": "BTC in [105,000, 110,000)",
+   "asset": "BTC",
+   "lo": 105000,
+   "hi": 110000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 106,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 0,
+   "stable": "kalshi",
+   "stable_without_deribit_fees": "kalshi",
+   "median_kalshi_cost": 0.027772679999999998,
+   "median_options_min": 0.05974886857142857,
+   "median_options_max": 0.16098335550000012
+  },
+  {
+   "condition": "BTC above 105,000",
+   "asset": "BTC",
+   "lo": 105000,
+   "hi": null,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 106,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.12720155,
+   "median_options_min": 0.09235303700000005,
+   "median_options_max": 0.22035274799999988
+  },
+  {
+   "condition": "BTC in [110,000, 115,000)",
+   "asset": "BTC",
+   "lo": 110000,
+   "hi": 115000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 62,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 44,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.01923732,
+   "median_options_min": 0.022741139394957987,
+   "median_options_max": 0.09421904974999999
+  },
+  {
+   "condition": "BTC above 110,000",
+   "asset": "BTC",
+   "lo": 110000,
+   "hi": null,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 106,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.10049712,
+   "median_options_min": 0.045028681285714287,
+   "median_options_max": 0.147380055
+  },
+  {
+   "condition": "BTC in [115,000, 120,000)",
+   "asset": "BTC",
+   "lo": 115000,
+   "hi": 120000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 73,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 33,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.01496628,
+   "median_options_min": 0.017425701999999998,
+   "median_options_max": 0.04980149772499997
+  },
+  {
+   "condition": "BTC above 115,000",
+   "asset": "BTC",
+   "lo": 115000,
+   "hi": null,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 12,
+   "indistinguishable": 94,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.08125826,
+   "median_options_min": 0.03480213164705882,
+   "median_options_max": 0.09427683599999997
+  },
+  {
+   "condition": "BTC in [120,000, 125,000)",
+   "asset": "BTC",
+   "lo": 120000,
+   "hi": 125000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 95,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 11,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.01176153,
+   "median_options_min": 0.017181125150000004,
+   "median_options_max": 0.04426879349999999
+  },
+  {
+   "condition": "BTC above 120,000",
+   "asset": "BTC",
+   "lo": 120000,
+   "hi": null,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 14,
+   "indistinguishable": 92,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.06628036,
+   "median_options_min": 0.02796710125,
+   "median_options_max": 0.07541543999999999
+  },
+  {
+   "condition": "BTC in [125,000, 130,000)",
+   "asset": "BTC",
+   "lo": 125000,
+   "hi": 130000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 79,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 27,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.010693000000000001,
+   "median_options_min": 0.013748705249999996,
+   "median_options_max": 0.03975041650000001
+  },
+  {
+   "condition": "BTC above 125,000",
+   "asset": "BTC",
+   "lo": 125000,
+   "hi": null,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 15,
+   "indistinguishable": 91,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.05557574,
+   "median_options_min": 0.02074639455,
+   "median_options_max": 0.06000298799999999
+  },
+  {
+   "condition": "BTC in [130,000, 135,000)",
+   "asset": "BTC",
+   "lo": 130000,
+   "hi": 135000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 94,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 12,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.00855552,
+   "median_options_min": 0.01168643356,
+   "median_options_max": 0.02813370266666666
+  },
+  {
+   "condition": "BTC above 130,000",
+   "asset": "BTC",
+   "lo": 130000,
+   "hi": null,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 52,
+   "indistinguishable": 54,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.04596303,
+   "median_options_min": 0.016232151600000005,
+   "median_options_max": 0.0423535176
+  },
+  {
+   "condition": "BTC in [135,000, 140,000)",
+   "asset": "BTC",
+   "lo": 135000,
+   "hi": 140000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 72,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 34,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.005348250000000001,
+   "median_options_min": 0.00769201007,
+   "median_options_max": 0.026280626400000007
+  },
+  {
+   "condition": "BTC above 135,000",
+   "asset": "BTC",
+   "lo": 135000,
+   "hi": null,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 22,
+   "indistinguishable": 84,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.039545550000000006,
+   "median_options_min": 0.009887643360000002,
+   "median_options_max": 0.04343833200000001
+  },
+  {
+   "condition": "BTC in [140,000, 145,000)",
+   "asset": "BTC",
+   "lo": 140000,
+   "hi": 145000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 28,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 78,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.006417480000000001,
+   "median_options_min": 0.005473260510833334,
+   "median_options_max": 0.02495671559999999
+  },
+  {
+   "condition": "BTC above 140,000",
+   "asset": "BTC",
+   "lo": 140000,
+   "hi": null,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 61,
+   "indistinguishable": 45,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.0341973,
+   "median_options_min": 0.007260218924999999,
+   "median_options_max": 0.029592963600000008
+  },
+  {
+   "condition": "BTC in [145,000, 150,000)",
+   "asset": "BTC",
+   "lo": 145000,
+   "hi": 150000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 27,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 79,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.0042788800000000005,
+   "median_options_min": 0.005137981502857143,
+   "median_options_max": 0.022783568699999986
+  },
+  {
+   "condition": "BTC above 145,000",
+   "asset": "BTC",
+   "lo": 145000,
+   "hi": null,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 17,
+   "indistinguishable": 89,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.02884905,
+   "median_options_min": 0.006911859459999999,
+   "median_options_max": 0.031808837300000004
+  },
+  {
+   "condition": "BTC above 150,000",
+   "asset": "BTC",
+   "lo": 150000,
+   "hi": null,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 42,
+   "indistinguishable": 64,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.02243913,
+   "median_options_min": 0.005516248571428571,
+   "median_options_max": 0.021326627600000002
+  },
+  {
+   "condition": "ETH below 1,000",
+   "asset": "ETH",
+   "lo": null,
+   "hi": 1000,
+   "judged": 105,
+   "unquoted": 1,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 105,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.039494169999999995,
+   "median_options_min": 0.019900156249999967,
+   "median_options_max": 0.06097353333333344
+  },
+  {
+   "condition": "ETH below 1,250",
+   "asset": "ETH",
+   "lo": null,
+   "hi": 1250,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 106,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.0555364,
+   "median_options_min": 0.033462855000000014,
+   "median_options_max": 0.12198639000000011
+  },
+  {
+   "condition": "ETH below 1,500",
+   "asset": "ETH",
+   "lo": null,
+   "hi": 1500,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 106,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.08330628,
+   "median_options_min": 0.06972363999999998,
+   "median_options_max": 0.15114231
+  },
+  {
+   "condition": "ETH below 1,750",
+   "asset": "ETH",
+   "lo": null,
+   "hi": 1750,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 15,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 91,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.1344819,
+   "median_options_min": 0.1343153233333333,
+   "median_options_max": 0.26202139999999996
+  },
+  {
+   "condition": "ETH below 2,000",
+   "asset": "ETH",
+   "lo": null,
+   "hi": 2000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 30,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 76,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.21861857,
+   "median_options_min": 0.240297545,
+   "median_options_max": 0.34182876000000006
+  },
+  {
+   "condition": "ETH below 2,250",
+   "asset": "ETH",
+   "lo": null,
+   "hi": 2250,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 61,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 45,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.32802042,
+   "median_options_min": 0.38876360666666665,
+   "median_options_max": 0.5043672900000002
+  },
+  {
+   "condition": "ETH below 2,500",
+   "asset": "ETH",
+   "lo": null,
+   "hi": 2500,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 35,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 71,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.50178528,
+   "median_options_min": 0.545746825,
+   "median_options_max": 0.5858839650000001
+  },
+  {
+   "condition": "ETH below 2,750",
+   "asset": "ETH",
+   "lo": null,
+   "hi": 2750,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 7,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 99,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.63774302,
+   "median_options_min": 0.6695544548333338,
+   "median_options_max": 0.7302696775199998
+  },
+  {
+   "condition": "ETH below 3,000",
+   "asset": "ETH",
+   "lo": null,
+   "hi": 3000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 106,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.75159105,
+   "median_options_min": 0.7411295476199995,
+   "median_options_max": 0.8040725647499991
+  },
+  {
+   "condition": "ETH below 3,250",
+   "asset": "ETH",
+   "lo": null,
+   "hi": 3250,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 106,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.84789418,
+   "median_options_min": 0.8101216213000002,
+   "median_options_max": 0.8941420740000003
+  },
+  {
+   "condition": "ETH below 3,500",
+   "asset": "ETH",
+   "lo": null,
+   "hi": 3500,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 106,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.90001205,
+   "median_options_min": 0.8501331101199994,
+   "median_options_max": 0.9224003180800001
+  },
+  {
+   "condition": "ETH below 3,750",
+   "asset": "ETH",
+   "lo": null,
+   "hi": 3750,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 106,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.94632676,
+   "median_options_min": 0.8911531370999997,
+   "median_options_max": 0.9472611180800001
+  },
+  {
+   "condition": "ETH below 4,000",
+   "asset": "ETH",
+   "lo": null,
+   "hi": 4000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 106,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.97801866,
+   "median_options_min": 0.9085752097000008,
+   "median_options_max": 0.9601542451800009
+  },
+  {
+   "condition": "ETH below 4,250",
+   "asset": "ETH",
+   "lo": null,
+   "hi": 4250,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 106,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.9968966,
+   "median_options_min": 0.9278322599999996,
+   "median_options_max": 0.9847828456999997
+  },
+  {
+   "condition": "ETH below 4,500",
+   "asset": "ETH",
+   "lo": null,
+   "hi": 4500,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 106,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 1.00896095,
+   "median_options_min": 0.9399991775999998,
+   "median_options_max": 0.9908367079599998
+  },
+  {
+   "condition": "ETH below 4,750",
+   "asset": "ETH",
+   "lo": null,
+   "hi": 4750,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 106,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 1.02236879,
+   "median_options_min": 0.9528857725999996,
+   "median_options_max": 0.9928978305
+  },
+  {
+   "condition": "ETH below 5,000",
+   "asset": "ETH",
+   "lo": null,
+   "hi": 5000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 106,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.97390512,
+   "median_options_min": 0.9591761920714283,
+   "median_options_max": 0.9877117250000004
+  },
+  {
+   "condition": "ETH in [1,000, 1,250)",
+   "asset": "ETH",
+   "lo": 1000,
+   "hi": 1250,
+   "judged": 105,
+   "unquoted": 1,
+   "cheaper_on_kalshi": 105,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 0,
+   "stable": "kalshi",
+   "stable_without_deribit_fees": "kalshi",
+   "median_kalshi_cost": 0.01923732,
+   "median_options_min": 0.03760096300000004,
+   "median_options_max": 0.08869566666666662
+  },
+  {
+   "condition": "ETH above 1,000",
+   "asset": "ETH",
+   "lo": 1000,
+   "hi": null,
+   "judged": 105,
+   "unquoted": 1,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 105,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.97390512,
+   "median_options_min": 0.9400860720000006,
+   "median_options_max": 0.9807682478124998
+  },
+  {
+   "condition": "ETH in [1,250, 1,500)",
+   "asset": "ETH",
+   "lo": 1250,
+   "hi": 1500,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 106,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 0,
+   "stable": "kalshi",
+   "stable_without_deribit_fees": "kalshi",
+   "median_kalshi_cost": 0.02563968,
+   "median_options_min": 0.051197710000000174,
+   "median_options_max": 0.12730285000000008
+  },
+  {
+   "condition": "ETH above 1,250",
+   "asset": "ETH",
+   "lo": 1250,
+   "hi": null,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 106,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 1.01130311,
+   "median_options_min": 0.9252922187999997,
+   "median_options_max": 0.98952347564
+  },
+  {
+   "condition": "ETH in [1,500, 1,750)",
+   "asset": "ETH",
+   "lo": 1500,
+   "hi": 1750,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 105,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 1,
+   "stable": "kalshi",
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.04694448,
+   "median_options_min": 0.08132882333333336,
+   "median_options_max": 0.16212506999999998
+  },
+  {
+   "condition": "ETH above 1,500",
+   "asset": "ETH",
+   "lo": 1500,
+   "hi": null,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 3,
+   "indistinguishable": 103,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.98718598,
+   "median_options_min": 0.8679132252000002,
+   "median_options_max": 0.9529449056400001
+  },
+  {
+   "condition": "ETH in [1,750, 2,000)",
+   "asset": "ETH",
+   "lo": 1750,
+   "hi": 2000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 106,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 0,
+   "stable": "kalshi",
+   "stable_without_deribit_fees": "kalshi",
+   "median_kalshi_cost": 0.08303412,
+   "median_options_min": 0.13171461333333334,
+   "median_options_max": 0.1984890800000001
+  },
+  {
+   "condition": "ETH above 1,750",
+   "asset": "ETH",
+   "lo": 1750,
+   "hi": null,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 3,
+   "indistinguishable": 103,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.94079301,
+   "median_options_min": 0.7970595071999996,
+   "median_options_max": 0.9166119899999993
+  },
+  {
+   "condition": "ETH in [2,000, 2,250)",
+   "asset": "ETH",
+   "lo": 2000,
+   "hi": 2250,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 106,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 0,
+   "stable": "kalshi",
+   "stable_without_deribit_fees": "kalshi",
+   "median_kalshi_cost": 0.11157824999999999,
+   "median_options_min": 0.15945802500000017,
+   "median_options_max": 0.23016525499999985
+  },
+  {
+   "condition": "ETH above 2,000",
+   "asset": "ETH",
+   "lo": 2000,
+   "hi": null,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 20,
+   "indistinguishable": 86,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.85762519,
+   "median_options_min": 0.6862732631999985,
+   "median_options_max": 0.7898453144999993
+  },
+  {
+   "condition": "ETH in [2,250, 2,500)",
+   "asset": "ETH",
+   "lo": 2250,
+   "hi": 2500,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 12,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 94,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.16626457,
+   "median_options_min": 0.15969463333333328,
+   "median_options_max": 0.23751341992000008
+  },
+  {
+   "condition": "ETH above 2,250",
+   "asset": "ETH",
+   "lo": 2250,
+   "hi": null,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 53,
+   "indistinguishable": 53,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.74618134,
+   "median_options_min": 0.576546683600001,
+   "median_options_max": 0.6664872485200006
+  },
+  {
+   "condition": "ETH in [2,500, 2,750)",
+   "asset": "ETH",
+   "lo": 2500,
+   "hi": 2750,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 35,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 71,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.14527617,
+   "median_options_min": 0.14765465756666663,
+   "median_options_max": 0.22838553864000016
+  },
+  {
+   "condition": "ETH above 2,500",
+   "asset": "ETH",
+   "lo": 2500,
+   "hi": null,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 75,
+   "indistinguishable": 31,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.57692664,
+   "median_options_min": 0.46141644799999765,
+   "median_options_max": 0.4850605579599998
+  },
+  {
+   "condition": "ETH in [2,750, 3,000)",
+   "asset": "ETH",
+   "lo": 2750,
+   "hi": 3000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 39,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 67,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.11579833,
+   "median_options_min": 0.12545728916666668,
+   "median_options_max": 0.20122676000000045
+  },
+  {
+   "condition": "ETH above 2,750",
+   "asset": "ETH",
+   "lo": 2750,
+   "hi": null,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 21,
+   "indistinguishable": 85,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.44211611,
+   "median_options_min": 0.33385388666666677,
+   "median_options_max": 0.41654214000000056
+  },
+  {
+   "condition": "ETH in [3,000, 3,250)",
+   "asset": "ETH",
+   "lo": 3000,
+   "hi": 3250,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 20,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 86,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.095733,
+   "median_options_min": 0.10140557499999996,
+   "median_options_max": 0.17181896999999974
+  },
+  {
+   "condition": "ETH above 3,000",
+   "asset": "ETH",
+   "lo": 3000,
+   "hi": null,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 43,
+   "indistinguishable": 63,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.32633724000000003,
+   "median_options_min": 0.22254004999999996,
+   "median_options_max": 0.29478995999999996
+  },
+  {
+   "condition": "ETH in [3,250, 3,500)",
+   "asset": "ETH",
+   "lo": 3250,
+   "hi": 3500,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 87,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 19,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.053325000000000004,
+   "median_options_min": 0.07724499933333331,
+   "median_options_max": 0.15289392000000038
+  },
+  {
+   "condition": "ETH above 3,250",
+   "asset": "ETH",
+   "lo": 3250,
+   "hi": null,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 106,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.2284928,
+   "median_options_min": 0.15333096,
+   "median_options_max": 0.26410005999999997
+  },
+  {
+   "condition": "ETH in [3,500, 3,750)",
+   "asset": "ETH",
+   "lo": 3500,
+   "hi": 3750,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 32,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 74,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.04055892,
+   "median_options_min": 0.04096162399999999,
+   "median_options_max": 0.13276795
+  },
+  {
+   "condition": "ETH above 3,500",
+   "asset": "ETH",
+   "lo": 3500,
+   "hi": null,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 7,
+   "indistinguishable": 99,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.17196837,
+   "median_options_min": 0.092024244,
+   "median_options_max": 0.1805852100000001
+  },
+  {
+   "condition": "ETH in [3,750, 4,000)",
+   "asset": "ETH",
+   "lo": 3750,
+   "hi": 4000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 53,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 53,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.030971130000000003,
+   "median_options_min": 0.031914464999999996,
+   "median_options_max": 0.10680037499999986
+  },
+  {
+   "condition": "ETH above 3,750",
+   "asset": "ETH",
+   "lo": 3750,
+   "hi": null,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 106,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.12711166999999998,
+   "median_options_min": 0.068169728,
+   "median_options_max": 0.17702571999999986
+  },
+  {
+   "condition": "ETH in [4,000, 4,250)",
+   "asset": "ETH",
+   "lo": 4000,
+   "hi": 4250,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 106,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 0,
+   "stable": "kalshi",
+   "stable_without_deribit_fees": "kalshi",
+   "median_kalshi_cost": 0.018169770000000002,
+   "median_options_min": 0.027947762499999997,
+   "median_options_max": 0.06696567
+  },
+  {
+   "condition": "ETH above 4,000",
+   "asset": "ETH",
+   "lo": 4000,
+   "hi": null,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 18,
+   "indistinguishable": 88,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.09936335,
+   "median_options_min": 0.046759415,
+   "median_options_max": 0.10035612999999997
+  },
+  {
+   "condition": "ETH in [4,250, 4,500)",
+   "asset": "ETH",
+   "lo": 4250,
+   "hi": 4500,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 106,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 0,
+   "stable": "kalshi",
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.01282992,
+   "median_options_min": 0.022908806000000007,
+   "median_options_max": 0.06995724
+  },
+  {
+   "condition": "ETH above 4,250",
+   "asset": "ETH",
+   "lo": 4250,
+   "hi": null,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 7,
+   "indistinguishable": 99,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.08013471,
+   "median_options_min": 0.035302336000000004,
+   "median_options_max": 0.08919445999999998
+  },
+  {
+   "condition": "ETH in [4,500, 4,750)",
+   "asset": "ETH",
+   "lo": 4500,
+   "hi": 4750,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 44,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 62,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.02030473,
+   "median_options_min": 0.01831412266666667,
+   "median_options_max": 0.06448545999999995
+  },
+  {
+   "condition": "ETH above 4,500",
+   "asset": "ETH",
+   "lo": 4500,
+   "hi": null,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 4,
+   "indistinguishable": 102,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.06837598,
+   "median_options_min": 0.024901300000000005,
+   "median_options_max": 0.07694113000000002
+  },
+  {
+   "condition": "ETH in [4,750, 5,000)",
+   "asset": "ETH",
+   "lo": 4750,
+   "hi": 5000,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 62,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 44,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.01176153,
+   "median_options_min": 0.01439771866666667,
+   "median_options_max": 0.050521881428571384
+  },
+  {
+   "condition": "ETH above 4,750",
+   "asset": "ETH",
+   "lo": 4750,
+   "hi": null,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 0,
+   "indistinguishable": 106,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.048060610000000004,
+   "median_options_min": 0.020615448,
+   "median_options_max": 0.06955647999999996
+  },
+  {
+   "condition": "ETH above 5,000",
+   "asset": "ETH",
+   "lo": 5000,
+   "hi": null,
+   "judged": 106,
+   "unquoted": 0,
+   "cheaper_on_kalshi": 0,
+   "cheaper_on_deribit": 27,
+   "indistinguishable": 79,
+   "stable": null,
+   "stable_without_deribit_fees": null,
+   "median_kalshi_cost": 0.03310273,
+   "median_options_min": 0.013214351111111109,
+   "median_options_max": 0.03409481142857143
+  }
+ ],
+ "reference_ticket": {
+  "capital_usd": 1000.0,
+  "target": 0.2,
+  "note": "illustration of D-114; nothing in the verdict reads it",
+  "assets": {
+   "BTC": {
+    "stamp": "2026-09-23T2117Z",
+    "index": 84366.1,
+    "chains": [
+     {
+      "side": "before",
+      "expiry": "25DEC26",
+      "D": 0.9869032483765029,
+      "D_estimated": true,
+      "hours": -165.0
+     },
+     {
+      "side": "after",
+      "expiry": "26MAR27",
+      "D": 0.9746074798641995,
+      "D_estimated": true,
+      "hours": 2019.0
+     }
+    ],
+    "rows": [
+     {
+      "condition": "BTC below 20,000",
+      "kalshi_cost": 0.006417,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 202,
+       "stake_usd": 1.3,
+       "profit_if_right_usd": 200.7,
+       "max_loss_usd": 1.3,
+       "depth_at_best": 863.0,
+       "depth_covers": true
+      },
+      "options_cost_min": null,
+      "options_cost_max": null,
+      "options_stake_range_usd": null,
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "unquoted"
+     },
+     {
+      "condition": "BTC in [20,000, 25,000)",
+      "kalshi_cost": 0.005348,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 202,
+       "stake_usd": 1.09,
+       "profit_if_right_usd": 200.91,
+       "max_loss_usd": 1.09,
+       "depth_at_best": 778.0,
+       "depth_covers": true
+      },
+      "options_cost_min": null,
+      "options_cost_max": null,
+      "options_stake_range_usd": null,
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "unquoted"
+     },
+     {
+      "condition": "BTC in [25,000, 30,000)",
+      "kalshi_cost": 0.005348,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 202,
+       "stake_usd": 1.09,
+       "profit_if_right_usd": 200.91,
+       "max_loss_usd": 1.09,
+       "depth_at_best": 4983.3,
+       "depth_covers": true
+      },
+      "options_cost_min": null,
+      "options_cost_max": null,
+      "options_stake_range_usd": null,
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "unquoted"
+     },
+     {
+      "condition": "BTC in [30,000, 35,000)",
+      "kalshi_cost": 0.007487,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 202,
+       "stake_usd": 1.51,
+       "profit_if_right_usd": 200.49,
+       "max_loss_usd": 1.51,
+       "depth_at_best": 284.0,
+       "depth_covers": true
+      },
+      "options_cost_min": null,
+      "options_cost_max": null,
+      "options_stake_range_usd": null,
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "unquoted"
+     },
+     {
+      "condition": "BTC in [35,000, 40,000)",
+      "kalshi_cost": 0.008556,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 202,
+       "stake_usd": 1.74,
+       "profit_if_right_usd": 200.26,
+       "max_loss_usd": 1.74,
+       "depth_at_best": 243.25,
+       "depth_covers": true
+      },
+      "options_cost_min": null,
+      "options_cost_max": null,
+      "options_stake_range_usd": null,
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "unquoted"
+     },
+     {
+      "condition": "BTC in [40,000, 45,000)",
+      "kalshi_cost": 0.01283,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 203,
+       "stake_usd": 2.61,
+       "profit_if_right_usd": 200.39,
+       "max_loss_usd": 2.61,
+       "depth_at_best": 309.0,
+       "depth_covers": true
+      },
+      "options_cost_min": 0.009162,
+      "options_cost_max": 0.031215,
+      "options_stake_range_usd": [
+       1.85,
+       6.44
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC in [45,000, 50,000)",
+      "kalshi_cost": 0.011762,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 203,
+       "stake_usd": 2.39,
+       "profit_if_right_usd": 200.61,
+       "max_loss_usd": 2.39,
+       "depth_at_best": 440.0,
+       "depth_covers": true
+      },
+      "options_cost_min": 0.012039,
+      "options_cost_max": 0.03917,
+      "options_stake_range_usd": [
+       2.44,
+       8.15
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC in [50,000, 55,000)",
+      "kalshi_cost": 0.014966,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 204,
+       "stake_usd": 3.06,
+       "profit_if_right_usd": 200.94,
+       "max_loss_usd": 3.06,
+       "depth_at_best": 698.0,
+       "depth_covers": true
+      },
+      "options_cost_min": 0.039848,
+      "options_cost_max": 0.107868,
+      "options_stake_range_usd": [
+       8.3,
+       24.18
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "kalshi"
+     },
+     {
+      "condition": "BTC in [55,000, 60,000)",
+      "kalshi_cost": 0.02564,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 206,
+       "stake_usd": 5.28,
+       "profit_if_right_usd": 200.72,
+       "max_loss_usd": 5.28,
+       "depth_at_best": 361.28,
+       "depth_covers": true
+      },
+      "options_cost_min": 0.048862,
+      "options_cost_max": 0.153968,
+      "options_stake_range_usd": [
+       10.27,
+       36.4
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "kalshi"
+     },
+     {
+      "condition": "BTC in [60,000, 65,000)",
+      "kalshi_cost": 0.039494,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 209,
+       "stake_usd": 8.26,
+       "profit_if_right_usd": 200.74,
+       "max_loss_usd": 8.26,
+       "depth_at_best": 431.48,
+       "depth_covers": true
+      },
+      "options_cost_min": 0.069954,
+      "options_cost_max": 0.153968,
+      "options_stake_range_usd": [
+       15.04,
+       36.4
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "kalshi"
+     },
+     {
+      "condition": "BTC in [65,000, 70,000)",
+      "kalshi_cost": 0.053325,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 212,
+       "stake_usd": 11.31,
+       "profit_if_right_usd": 200.69,
+       "max_loss_usd": 11.31,
+       "depth_at_best": 113.0,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.107918,
+      "options_cost_max": 0.164514,
+      "options_stake_range_usd": [
+       24.19,
+       39.38
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "kalshi"
+     },
+     {
+      "condition": "BTC in [70,000, 75,000)",
+      "kalshi_cost": 0.085152,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 219,
+       "stake_usd": 18.65,
+       "profit_if_right_usd": 200.35,
+       "max_loss_usd": 18.65,
+       "depth_at_best": 383.2,
+       "depth_covers": true
+      },
+      "options_cost_min": 0.123737,
+      "options_cost_max": 0.206697,
+      "options_stake_range_usd": [
+       28.24,
+       52.11
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "kalshi"
+     },
+     {
+      "condition": "BTC in [75,000, 80,000)",
+      "kalshi_cost": 0.111578,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 226,
+       "stake_usd": 25.22,
+       "profit_if_right_usd": 200.78,
+       "max_loss_usd": 25.22,
+       "depth_at_best": 9.83,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.134283,
+      "options_cost_max": 0.217243,
+      "options_stake_range_usd": [
+       31.02,
+       55.51
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "kalshi"
+     },
+     {
+      "condition": "BTC in [80,000, 85,000)",
+      "kalshi_cost": 0.129498,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 230,
+       "stake_usd": 29.79,
+       "profit_if_right_usd": 200.21,
+       "max_loss_usd": 29.79,
+       "depth_at_best": 620.39,
+       "depth_covers": true
+      },
+      "options_cost_min": 0.141313,
+      "options_cost_max": 0.238334,
+      "options_stake_range_usd": [
+       32.91,
+       62.58
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC in [85,000, 90,000)",
+      "kalshi_cost": 0.115798,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 227,
+       "stake_usd": 26.29,
+       "profit_if_right_usd": 200.71,
+       "max_loss_usd": 26.29,
+       "depth_at_best": 142.59,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.135165,
+      "options_cost_max": 0.233936,
+      "options_stake_range_usd": [
+       31.26,
+       61.07
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "kalshi"
+     },
+     {
+      "condition": "BTC in [90,000, 95,000)",
+      "kalshi_cost": 0.099961,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 223,
+       "stake_usd": 22.29,
+       "profit_if_right_usd": 200.71,
+       "max_loss_usd": 22.29,
+       "depth_at_best": 227.79,
+       "depth_covers": true
+      },
+      "options_cost_min": 0.127252,
+      "options_cost_max": 0.217243,
+      "options_stake_range_usd": [
+       29.16,
+       55.51
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "kalshi"
+     },
+     {
+      "condition": "BTC in [95,000, 100,000)",
+      "kalshi_cost": 0.068193,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 215,
+       "stake_usd": 14.67,
+       "profit_if_right_usd": 200.33,
+       "max_loss_usd": 14.67,
+       "depth_at_best": 0.64,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.111434,
+      "options_cost_max": 0.185605,
+      "options_stake_range_usd": [
+       25.08,
+       45.58
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "kalshi"
+     },
+     {
+      "condition": "BTC in [100,000, 105,000)",
+      "kalshi_cost": 0.063948,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 214,
+       "stake_usd": 13.69,
+       "profit_if_right_usd": 200.31,
+       "max_loss_usd": 13.69,
+       "depth_at_best": 545.5,
+       "depth_covers": true
+      },
+      "options_cost_min": 0.09913,
+      "options_cost_max": 0.164514,
+      "options_stake_range_usd": [
+       22.01,
+       39.38
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "kalshi"
+     },
+     {
+      "condition": "BTC in [105,000, 110,000)",
+      "kalshi_cost": 0.043752,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 210,
+       "stake_usd": 9.19,
+       "profit_if_right_usd": 200.81,
+       "max_loss_usd": 9.19,
+       "depth_at_best": 358.95,
+       "depth_covers": true
+      },
+      "options_cost_min": 0.080349,
+      "options_cost_max": 0.153968,
+      "options_stake_range_usd": [
+       17.47,
+       36.4
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "kalshi"
+     },
+     {
+      "condition": "BTC in [110,000, 115,000)",
+      "kalshi_cost": 0.029905,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 207,
+       "stake_usd": 6.2,
+       "profit_if_right_usd": 200.8,
+       "max_loss_usd": 6.2,
+       "depth_at_best": 497.0,
+       "depth_covers": true
+      },
+      "options_cost_min": 0.02967,
+      "options_cost_max": 0.08753,
+      "options_stake_range_usd": [
+       6.12,
+       19.19
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC in [115,000, 120,000)",
+      "kalshi_cost": 0.022439,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 205,
+       "stake_usd": 4.61,
+       "profit_if_right_usd": 200.4,
+       "max_loss_usd": 4.61,
+       "depth_at_best": 400.64,
+       "depth_covers": true
+      },
+      "options_cost_min": 0.023548,
+      "options_cost_max": 0.055682,
+      "options_stake_range_usd": [
+       4.82,
+       11.79
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC in [120,000, 125,000)",
+      "kalshi_cost": 0.024573,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 206,
+       "stake_usd": 5.07,
+       "profit_if_right_usd": 200.93,
+       "max_loss_usd": 5.07,
+       "depth_at_best": 2849.0,
+       "depth_covers": true
+      },
+      "options_cost_min": 0.021513,
+      "options_cost_max": 0.052307,
+      "options_stake_range_usd": [
+       4.4,
+       11.04
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC in [125,000, 130,000)",
+      "kalshi_cost": 0.013898,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 203,
+       "stake_usd": 2.83,
+       "profit_if_right_usd": 200.17,
+       "max_loss_usd": 2.83,
+       "depth_at_best": 414.0,
+       "depth_covers": true
+      },
+      "options_cost_min": 0.018982,
+      "options_cost_max": 0.043589,
+      "options_stake_range_usd": [
+       3.87,
+       9.12
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "kalshi"
+     },
+     {
+      "condition": "BTC in [130,000, 135,000)",
+      "kalshi_cost": 0.009624,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 202,
+       "stake_usd": 1.95,
+       "profit_if_right_usd": 200.05,
+       "max_loss_usd": 1.95,
+       "depth_at_best": 166.0,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.01353,
+      "options_cost_max": 0.026716,
+      "options_stake_range_usd": [
+       2.74,
+       5.49
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "kalshi"
+     },
+     {
+      "condition": "BTC in [135,000, 140,000)",
+      "kalshi_cost": 0.006417,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 202,
+       "stake_usd": 1.3,
+       "profit_if_right_usd": 200.7,
+       "max_loss_usd": 1.3,
+       "depth_at_best": 342.0,
+       "depth_covers": true
+      },
+      "options_cost_min": 0.008226,
+      "options_cost_max": 0.026575,
+      "options_stake_range_usd": [
+       1.66,
+       5.46
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "kalshi"
+     },
+     {
+      "condition": "BTC in [140,000, 145,000)",
+      "kalshi_cost": 0.006417,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 202,
+       "stake_usd": 1.3,
+       "profit_if_right_usd": 200.7,
+       "max_loss_usd": 1.3,
+       "depth_at_best": 341.0,
+       "depth_covers": true
+      },
+      "options_cost_min": 0.005547,
+      "options_cost_max": 0.024466,
+      "options_stake_range_usd": [
+       1.12,
+       5.02
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC in [145,000, 150,000)",
+      "kalshi_cost": 0.008556,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 202,
+       "stake_usd": 1.74,
+       "profit_if_right_usd": 200.26,
+       "max_loss_usd": 1.74,
+       "depth_at_best": 134.0,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.005309,
+      "options_cost_max": 0.022357,
+      "options_stake_range_usd": [
+       1.07,
+       4.57
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC above 150,000",
+      "kalshi_cost": 0.029905,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 207,
+       "stake_usd": 6.2,
+       "profit_if_right_usd": 200.8,
+       "max_loss_usd": 6.2,
+       "depth_at_best": 421.0,
+       "depth_covers": true
+      },
+      "options_cost_min": 0.006448,
+      "options_cost_max": 0.025732,
+      "options_stake_range_usd": [
+       1.3,
+       5.28
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "deribit"
+     },
+     {
+      "condition": "BTC above 20,000",
+      "kalshi_cost": 0.995348,
+      "kalshi_route": "no",
+      "kalshi": {
+       "contracts": 42995,
+       "stake_usd": 42795.01,
+       "profit_if_right_usd": 199.99,
+       "max_loss_usd": 42795.01,
+       "depth_at_best": 461.0,
+       "depth_covers": false
+      },
+      "options_cost_min": null,
+      "options_cost_max": null,
+      "options_stake_range_usd": null,
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "unquoted"
+     },
+     {
+      "condition": "BTC above 25,000",
+      "kalshi_cost": 1.049024,
+      "kalshi_route": "yes",
+      "kalshi": null,
+      "options_cost_min": null,
+      "options_cost_max": null,
+      "options_stake_range_usd": null,
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "unquoted"
+     },
+     {
+      "condition": "BTC below 25,000",
+      "kalshi_cost": 0.011766,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 203,
+       "stake_usd": 2.4,
+       "profit_if_right_usd": 200.6,
+       "max_loss_usd": 2.4,
+       "depth_at_best": 778.0,
+       "depth_covers": true
+      },
+      "options_cost_min": null,
+      "options_cost_max": null,
+      "options_stake_range_usd": null,
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "unquoted"
+     },
+     {
+      "condition": "BTC above 30,000",
+      "kalshi_cost": 1.043676,
+      "kalshi_route": "yes",
+      "kalshi": null,
+      "options_cost_min": null,
+      "options_cost_max": null,
+      "options_stake_range_usd": null,
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "unquoted"
+     },
+     {
+      "condition": "BTC below 30,000",
+      "kalshi_cost": 0.017114,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 204,
+       "stake_usd": 3.51,
+       "profit_if_right_usd": 200.49,
+       "max_loss_usd": 3.51,
+       "depth_at_best": 778.0,
+       "depth_covers": true
+      },
+      "options_cost_min": null,
+      "options_cost_max": null,
+      "options_stake_range_usd": null,
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "unquoted"
+     },
+     {
+      "condition": "BTC above 35,000",
+      "kalshi_cost": 1.036189,
+      "kalshi_route": "yes",
+      "kalshi": null,
+      "options_cost_min": null,
+      "options_cost_max": null,
+      "options_stake_range_usd": null,
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "unquoted"
+     },
+     {
+      "condition": "BTC below 35,000",
+      "kalshi_cost": 0.024601,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 206,
+       "stake_usd": 5.1,
+       "profit_if_right_usd": 200.9,
+       "max_loss_usd": 5.1,
+       "depth_at_best": 284.0,
+       "depth_covers": true
+      },
+      "options_cost_min": null,
+      "options_cost_max": null,
+      "options_stake_range_usd": null,
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "unquoted"
+     },
+     {
+      "condition": "BTC above 40,000",
+      "kalshi_cost": 1.027634,
+      "kalshi_route": "yes",
+      "kalshi": null,
+      "options_cost_min": 0.96364,
+      "options_cost_max": 0.986271,
+      "options_stake_range_usd": [
+       5300.53,
+       14367.18
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC below 40,000",
+      "kalshi_cost": 0.033156,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 207,
+       "stake_usd": 6.9,
+       "profit_if_right_usd": 200.1,
+       "max_loss_usd": 6.9,
+       "depth_at_best": 243.25,
+       "depth_covers": true
+      },
+      "options_cost_min": 0.01044,
+      "options_cost_max": 0.032692,
+      "options_stake_range_usd": [
+       2.11,
+       6.76
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC above 45,000",
+      "kalshi_cost": 1.014804,
+      "kalshi_route": "yes",
+      "kalshi": null,
+      "options_cost_min": 0.951283,
+      "options_cost_max": 0.98606,
+      "options_stake_range_usd": [
+       3905.32,
+       14146.78
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC below 45,000",
+      "kalshi_cost": 0.045986,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 210,
+       "stake_usd": 9.69,
+       "profit_if_right_usd": 200.31,
+       "max_loss_usd": 9.69,
+       "depth_at_best": 243.25,
+       "depth_covers": true
+      },
+      "options_cost_min": 0.01433,
+      "options_cost_max": 0.042183,
+      "options_stake_range_usd": [
+       2.91,
+       8.81
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC above 50,000",
+      "kalshi_cost": 1.003042,
+      "kalshi_route": "yes",
+      "kalshi": null,
+      "options_cost_min": 0.941464,
+      "options_cost_max": 0.982534,
+      "options_stake_range_usd": [
+       3216.68,
+       11251.01
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC below 50,000",
+      "kalshi_cost": 0.057748,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 213,
+       "stake_usd": 12.33,
+       "profit_if_right_usd": 200.67,
+       "max_loss_usd": 12.33,
+       "depth_at_best": 243.25,
+       "depth_covers": true
+      },
+      "options_cost_min": 0.018304,
+      "options_cost_max": 0.060261,
+      "options_stake_range_usd": [
+       3.73,
+       12.83
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC above 55,000",
+      "kalshi_cost": 0.988076,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 16773,
+       "stake_usd": 16573.1,
+       "profit_if_right_usd": 199.9,
+       "max_loss_usd": 16573.1,
+       "depth_at_best": 0.64,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.9268,
+      "options_cost_max": 0.999558,
+      "options_stake_range_usd": [
+       2532.24,
+       452456.0
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC below 55,000",
+      "kalshi_cost": 0.072714,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 216,
+       "stake_usd": 15.74,
+       "profit_if_right_usd": 200.26,
+       "max_loss_usd": 15.74,
+       "depth_at_best": 243.25,
+       "depth_covers": true
+      },
+      "options_cost_min": 0.046401,
+      "options_cost_max": 0.130767,
+      "options_stake_range_usd": [
+       9.73,
+       30.09
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC above 60,000",
+      "kalshi_cost": 0.962436,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 5325,
+       "stake_usd": 5125.07,
+       "profit_if_right_usd": 199.93,
+       "max_loss_usd": 5125.07,
+       "depth_at_best": 0.64,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.88075,
+      "options_cost_max": 0.967921,
+      "options_stake_range_usd": [
+       1477.15,
+       6034.58
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC below 60,000",
+      "kalshi_cost": 0.098353,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 222,
+       "stake_usd": 21.87,
+       "profit_if_right_usd": 200.13,
+       "max_loss_usd": 21.87,
+       "depth_at_best": 243.25,
+       "depth_covers": true
+      },
+      "options_cost_min": 0.064329,
+      "options_cost_max": 0.14975,
+      "options_stake_range_usd": [
+       13.75,
+       35.22
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC above 65,000",
+      "kalshi_cost": 0.922942,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 2596,
+       "stake_usd": 2396.05,
+       "profit_if_right_usd": 199.95,
+       "max_loss_usd": 2396.05,
+       "depth_at_best": 0.64,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.835403,
+      "options_cost_max": 0.97003,
+      "options_stake_range_usd": [
+       1015.09,
+       6473.35
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC below 65,000",
+      "kalshi_cost": 0.137848,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 232,
+       "stake_usd": 32.04,
+       "profit_if_right_usd": 199.96,
+       "max_loss_usd": 32.04,
+       "depth_at_best": 243.25,
+       "depth_covers": true
+      },
+      "options_cost_min": 0.106864,
+      "options_cost_max": 0.236225,
+      "options_stake_range_usd": [
+       23.93,
+       61.86
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC above 70,000",
+      "kalshi_cost": 0.869617,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 1534,
+       "stake_usd": 1334.1,
+       "profit_if_right_usd": 199.9,
+       "max_loss_usd": 1334.1,
+       "depth_at_best": 0.64,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.759474,
+      "options_cost_max": 0.873009,
+      "options_stake_range_usd": [
+       631.51,
+       1374.91
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC below 70,000",
+      "kalshi_cost": 0.191173,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 248,
+       "stake_usd": 47.45,
+       "profit_if_right_usd": 200.55,
+       "max_loss_usd": 47.45,
+       "depth_at_best": 113.0,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.169787,
+      "options_cost_max": 0.265753,
+      "options_stake_range_usd": [
+       40.9,
+       72.39
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC above 75,000",
+      "kalshi_cost": 0.784465,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 928,
+       "stake_usd": 728.05,
+       "profit_if_right_usd": 199.95,
+       "max_loss_usd": 728.05,
+       "depth_at_best": 0.64,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.680732,
+      "options_cost_max": 0.801298,
+      "options_stake_range_usd": [
+       426.43,
+       806.53
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC below 75,000",
+      "kalshi_cost": 0.276325,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 277,
+       "stake_usd": 76.6,
+       "profit_if_right_usd": 200.4,
+       "max_loss_usd": 76.6,
+       "depth_at_best": 113.0,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.275596,
+      "options_cost_max": 0.383866,
+      "options_stake_range_usd": [
+       76.09,
+       124.6
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC above 80,000",
+      "kalshi_cost": 0.672887,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 612,
+       "stake_usd": 411.87,
+       "profit_if_right_usd": 200.13,
+       "max_loss_usd": 411.87,
+       "depth_at_best": 0.64,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.580196,
+      "options_cost_max": 0.651548,
+      "options_stake_range_usd": [
+       276.41,
+       373.97
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC below 80,000",
+      "kalshi_cost": 0.387903,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 327,
+       "stake_usd": 126.91,
+       "profit_if_right_usd": 200.09,
+       "max_loss_usd": 126.91,
+       "depth_at_best": 9.83,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.391248,
+      "options_cost_max": 0.445031,
+      "options_stake_range_usd": [
+       128.54,
+       160.38
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC above 85,000",
+      "kalshi_cost": 0.543389,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 439,
+       "stake_usd": 238.63,
+       "profit_if_right_usd": 200.37,
+       "max_loss_usd": 238.63,
+       "depth_at_best": 0.64,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.497939,
+      "options_cost_max": 0.556995,
+      "options_stake_range_usd": [
+       198.36,
+       251.46
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC below 85,000",
+      "kalshi_cost": 0.517401,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 415,
+       "stake_usd": 214.8,
+       "profit_if_right_usd": 200.2,
+       "max_loss_usd": 214.8,
+       "depth_at_best": 9.83,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.528694,
+      "options_cost_max": 0.573689,
+      "options_stake_range_usd": [
+       224.35,
+       269.14
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC above 90,000",
+      "kalshi_cost": 0.42759,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 350,
+       "stake_usd": 149.72,
+       "profit_if_right_usd": 200.28,
+       "max_loss_usd": 149.72,
+       "depth_at_best": 0.64,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.375429,
+      "options_cost_max": 0.42394,
+      "options_stake_range_usd": [
+       120.22,
+       147.19
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC below 90,000",
+      "kalshi_cost": 0.633199,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 546,
+       "stake_usd": 345.82,
+       "profit_if_right_usd": 200.18,
+       "max_loss_usd": 345.82,
+       "depth_at_best": 9.83,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.611833,
+      "options_cost_max": 0.67264,
+      "options_stake_range_usd": [
+       315.24,
+       410.95
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC above 95,000",
+      "kalshi_cost": 0.327629,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 298,
+       "stake_usd": 97.68,
+       "profit_if_right_usd": 200.32,
+       "max_loss_usd": 97.68,
+       "depth_at_best": 0.64,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.268565,
+      "options_cost_max": 0.383866,
+      "options_stake_range_usd": [
+       73.44,
+       124.6
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC below 95,000",
+      "kalshi_cost": 0.733161,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 750,
+       "stake_usd": 549.97,
+       "profit_if_right_usd": 200.03,
+       "max_loss_usd": 549.97,
+       "depth_at_best": 9.83,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.694793,
+      "options_cost_max": 0.822389,
+      "options_stake_range_usd": [
+       455.29,
+       926.06
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC above 100,000",
+      "kalshi_cost": 0.259436,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 271,
+       "stake_usd": 70.36,
+       "profit_if_right_usd": 200.64,
+       "max_loss_usd": 70.36,
+       "depth_at_best": 134.0,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.185605,
+      "options_cost_max": 0.276299,
+      "options_stake_range_usd": [
+       45.58,
+       76.36
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC below 100,000",
+      "kalshi_cost": 0.801354,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 1007,
+       "stake_usd": 807.06,
+       "profit_if_right_usd": 199.94,
+       "max_loss_usd": 807.06,
+       "depth_at_best": 0.64,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.754201,
+      "options_cost_max": 0.851917,
+      "options_stake_range_usd": [
+       613.67,
+       1150.6
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC above 105,000",
+      "kalshi_cost": 0.195488,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 249,
+       "stake_usd": 48.73,
+       "profit_if_right_usd": 200.27,
+       "max_loss_usd": 48.73,
+       "depth_at_best": 134.0,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.127955,
+      "options_cost_max": 0.257317,
+      "options_stake_range_usd": [
+       29.35,
+       69.29
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC below 105,000",
+      "kalshi_cost": 0.865302,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 1485,
+       "stake_usd": 1285.07,
+       "profit_if_right_usd": 199.93,
+       "max_loss_usd": 1285.07,
+       "depth_at_best": 0.64,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.814312,
+      "options_cost_max": 0.948939,
+      "options_stake_range_usd": [
+       877.07,
+       3716.85
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC above 110,000",
+      "kalshi_cost": 0.151735,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 236,
+       "stake_usd": 35.84,
+       "profit_if_right_usd": 200.16,
+       "max_loss_usd": 35.84,
+       "depth_at_best": 134.0,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.06689,
+      "options_cost_max": 0.170841,
+      "options_stake_range_usd": [
+       14.34,
+       41.21
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC below 110,000",
+      "kalshi_cost": 0.909054,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 2200,
+       "stake_usd": 2000.01,
+       "profit_if_right_usd": 199.99,
+       "max_loss_usd": 2000.01,
+       "depth_at_best": 0.64,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.853683,
+      "options_cost_max": 0.945925,
+      "options_stake_range_usd": [
+       1166.89,
+       3498.6
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC above 115,000",
+      "kalshi_cost": 0.12183,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 228,
+       "stake_usd": 27.81,
+       "profit_if_right_usd": 200.19,
+       "max_loss_usd": 27.81,
+       "depth_at_best": 134.0,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.050123,
+      "options_cost_max": 0.122331,
+      "options_stake_range_usd": [
+       10.55,
+       27.88
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC below 115,000",
+      "kalshi_cost": 0.93896,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 3277,
+       "stake_usd": 3077.07,
+       "profit_if_right_usd": 199.93,
+       "max_loss_usd": 3077.07,
+       "depth_at_best": 0.64,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.887992,
+      "options_cost_max": 0.954,
+      "options_stake_range_usd": [
+       1585.58,
+       4147.87
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC above 120,000",
+      "kalshi_cost": 0.099391,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 223,
+       "stake_usd": 22.21,
+       "profit_if_right_usd": 200.79,
+       "max_loss_usd": 22.21,
+       "depth_at_best": 134.0,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.038387,
+      "options_cost_max": 0.097865,
+      "options_stake_range_usd": [
+       7.98,
+       21.7
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC below 120,000",
+      "kalshi_cost": 0.961399,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 5182,
+       "stake_usd": 4982.07,
+       "profit_if_right_usd": 199.93,
+       "max_loss_usd": 4982.07,
+       "depth_at_best": 0.64,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.902428,
+      "options_cost_max": 0.965812,
+      "options_stake_range_usd": [
+       1849.76,
+       5649.96
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC above 125,000",
+      "kalshi_cost": 0.074818,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 217,
+       "stake_usd": 16.28,
+       "profit_if_right_usd": 200.72,
+       "max_loss_usd": 16.28,
+       "depth_at_best": 134.0,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.027419,
+      "options_cost_max": 0.076773,
+      "options_stake_range_usd": [
+       5.64,
+       16.63
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC below 125,000",
+      "kalshi_cost": 0.985972,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 14257,
+       "stake_usd": 14057.11,
+       "profit_if_right_usd": 199.89,
+       "max_loss_usd": 14057.11,
+       "depth_at_best": 0.64,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.922638,
+      "options_cost_max": 0.980154,
+      "options_stake_range_usd": [
+       2385.25,
+       9877.58
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC above 130,000",
+      "kalshi_cost": 0.06092,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 213,
+       "stake_usd": 12.99,
+       "profit_if_right_usd": 200.01,
+       "max_loss_usd": 12.99,
+       "depth_at_best": 134.0,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.019562,
+      "options_cost_max": 0.051182,
+      "options_stake_range_usd": [
+       3.99,
+       10.79
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "deribit"
+     },
+     {
+      "condition": "BTC below 130,000",
+      "kalshi_cost": 0.99987,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 1536453,
+       "stake_usd": 1536253.11,
+       "profit_if_right_usd": 199.89,
+       "max_loss_usd": 1536253.11,
+       "depth_at_best": 0.64,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.93833,
+      "options_cost_max": 0.982685,
+      "options_stake_range_usd": [
+       3043.07,
+       11350.64
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC above 135,000",
+      "kalshi_cost": 0.051296,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 211,
+       "stake_usd": 10.84,
+       "profit_if_right_usd": 200.16,
+       "max_loss_usd": 10.84,
+       "depth_at_best": 134.0,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.012022,
+      "options_cost_max": 0.051463,
+      "options_stake_range_usd": [
+       2.43,
+       10.85
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC below 135,000",
+      "kalshi_cost": 1.009494,
+      "kalshi_route": "yes",
+      "kalshi": null,
+      "options_cost_min": 0.944573,
+      "options_cost_max": 0.986903,
+      "options_stake_range_usd": [
+       3408.36,
+       15070.96
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC above 140,000",
+      "kalshi_cost": 0.044878,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 210,
+       "stake_usd": 9.44,
+       "profit_if_right_usd": 200.56,
+       "max_loss_usd": 9.44,
+       "depth_at_best": 134.0,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.008753,
+      "options_cost_max": 0.036277,
+      "options_stake_range_usd": [
+       1.77,
+       7.53
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "deribit"
+     },
+     {
+      "condition": "BTC below 140,000",
+      "kalshi_cost": 1.015912,
+      "kalshi_route": "yes",
+      "kalshi": null,
+      "options_cost_min": 0.949539,
+      "options_cost_max": 0.984724,
+      "options_stake_range_usd": [
+       3763.43,
+       12892.25
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC above 145,000",
+      "kalshi_cost": 0.038461,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 208,
+       "stake_usd": 8.01,
+       "profit_if_right_usd": 199.99,
+       "max_loss_usd": 8.01,
+       "depth_at_best": 134.0,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.008141,
+      "options_cost_max": 0.03459,
+      "options_stake_range_usd": [
+       1.64,
+       7.17
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "deribit"
+     },
+     {
+      "condition": "BTC below 145,000",
+      "kalshi_cost": 1.022329,
+      "kalshi_route": "yes",
+      "kalshi": null,
+      "options_cost_min": 0.953797,
+      "options_cost_max": 0.989012,
+      "options_stake_range_usd": [
+       4128.74,
+       18002.34
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "BTC below 150,000",
+      "kalshi_cost": 0.975773,
+      "kalshi_route": "no",
+      "kalshi": {
+       "contracts": 8256,
+       "stake_usd": 8055.98,
+       "profit_if_right_usd": 200.02,
+       "max_loss_usd": 8055.98,
+       "depth_at_best": 9.66,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.956047,
+      "options_cost_max": 0.985585,
+      "options_stake_range_usd": [
+       4350.31,
+       13674.46
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     }
+    ],
+    "linear_references": [
+     {
+      "instrument": "spot long",
+      "leverage": 1,
+      "required_move": 0.2,
+      "required_level": 101239.32,
+      "max_loss": "the stake, linearly",
+      "carry": null
+     },
+     {
+      "instrument": "perpetual long",
+      "leverage": 2,
+      "required_move": 0.1,
+      "required_level": 92802.71,
+      "liquidation_distance": "UNKNOWN",
+      "carry": "UNKNOWN (funding unit unread, D-111)"
+     },
+     {
+      "instrument": "perpetual long",
+      "leverage": 5,
+      "required_move": 0.04,
+      "required_level": 87740.74,
+      "liquidation_distance": "UNKNOWN",
+      "carry": "UNKNOWN (funding unit unread, D-111)"
+     }
+    ]
+   },
+   "ETH": {
+    "stamp": "2026-09-23T2117Z",
+    "index": 2673.34,
+    "chains": [
+     {
+      "side": "before",
+      "expiry": "25DEC26",
+      "D": 0.9886171720400001,
+      "D_estimated": true,
+      "hours": -165.0
+     },
+     {
+      "side": "after",
+      "expiry": "26MAR27",
+      "D": 0.97736241064,
+      "D_estimated": true,
+      "hours": 2019.0
+     }
+    ],
+    "rows": [
+     {
+      "condition": "ETH below 1,000",
+      "kalshi_cost": 0.021372,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 205,
+       "stake_usd": 4.39,
+       "profit_if_right_usd": 200.61,
+       "max_loss_usd": 4.39,
+       "depth_at_best": 28.0,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.015121,
+      "options_cost_max": 0.049902,
+      "options_stake_range_usd": [
+       3.07,
+       10.5
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "ETH in [1,000, 1,250)",
+      "kalshi_cost": 0.019237,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 204,
+       "stake_usd": 3.93,
+       "profit_if_right_usd": 200.07,
+       "max_loss_usd": 3.93,
+       "depth_at_best": 0.23,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.030209,
+      "options_cost_max": 0.070398,
+      "options_stake_range_usd": [
+       6.23,
+       15.15
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "kalshi"
+     },
+     {
+      "condition": "ETH in [1,250, 1,500)",
+      "kalshi_cost": 0.020305,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 205,
+       "stake_usd": 4.17,
+       "profit_if_right_usd": 200.84,
+       "max_loss_usd": 4.17,
+       "depth_at_best": 14.0,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.037343,
+      "options_cost_max": 0.097577,
+      "options_stake_range_usd": [
+       7.76,
+       21.63
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "kalshi"
+     },
+     {
+      "condition": "ETH in [1,500, 1,750)",
+      "kalshi_cost": 0.034168,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 208,
+       "stake_usd": 7.12,
+       "profit_if_right_usd": 200.88,
+       "max_loss_usd": 7.12,
+       "depth_at_best": 3.46,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.056808,
+      "options_cost_max": 0.12431,
+      "options_stake_range_usd": [
+       12.05,
+       28.39
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "kalshi"
+     },
+     {
+      "condition": "ETH in [1,750, 2,000)",
+      "kalshi_cost": 0.069254,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 215,
+       "stake_usd": 14.89,
+       "profit_if_right_usd": 200.1,
+       "max_loss_usd": 14.89,
+       "depth_at_best": 44.62,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.100696,
+      "options_cost_max": 0.157727,
+      "options_stake_range_usd": [
+       22.39,
+       37.45
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "kalshi"
+     },
+     {
+      "condition": "ETH in [2,000, 2,250)",
+      "kalshi_cost": 0.099961,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 223,
+       "stake_usd": 22.29,
+       "profit_if_right_usd": 200.71,
+       "max_loss_usd": 22.29,
+       "depth_at_best": 35.37,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.135226,
+      "options_cost_max": 0.191144,
+      "options_stake_range_usd": [
+       31.27,
+       47.26
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "kalshi"
+     },
+     {
+      "condition": "ETH in [2,250, 2,500)",
+      "kalshi_cost": 0.133709,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 231,
+       "stake_usd": 30.9,
+       "profit_if_right_usd": 200.1,
+       "max_loss_usd": 30.9,
+       "depth_at_best": 79.55,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.143024,
+      "options_cost_max": 0.231244,
+      "options_stake_range_usd": [
+       33.38,
+       60.16
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "ETH in [2,500, 2,750)",
+      "kalshi_cost": 0.146327,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 235,
+       "stake_usd": 34.39,
+       "profit_if_right_usd": 200.61,
+       "max_loss_usd": 34.39,
+       "depth_at_best": 10.0,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.146845,
+      "options_cost_max": 0.217359,
+      "options_stake_range_usd": [
+       34.42,
+       55.54
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "ETH in [2,750, 3,000)",
+      "kalshi_cost": 0.134761,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 232,
+       "stake_usd": 31.27,
+       "profit_if_right_usd": 200.73,
+       "max_loss_usd": 31.27,
+       "depth_at_best": 1.59,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.134113,
+      "options_cost_max": 0.197827,
+      "options_stake_range_usd": [
+       30.98,
+       49.32
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "ETH in [3,000, 3,250)",
+      "kalshi_cost": 0.118962,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 228,
+       "stake_usd": 27.13,
+       "profit_if_right_usd": 200.87,
+       "max_loss_usd": 27.13,
+       "depth_at_best": 219.08,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.108493,
+      "options_cost_max": 0.16441,
+      "options_stake_range_usd": [
+       24.34,
+       39.35
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "ETH in [3,250, 3,500)",
+      "kalshi_cost": 0.091502,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 221,
+       "stake_usd": 20.23,
+       "profit_if_right_usd": 200.77,
+       "max_loss_usd": 20.23,
+       "depth_at_best": 597.45,
+       "depth_covers": true
+      },
+      "options_cost_min": 0.090671,
+      "options_cost_max": 0.14436,
+      "options_stake_range_usd": [
+       19.94,
+       33.74
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "ETH in [3,500, 3,750)",
+      "kalshi_cost": 0.045881,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 210,
+       "stake_usd": 9.64,
+       "profit_if_right_usd": 200.36,
+       "max_loss_usd": 9.64,
+       "depth_at_best": 1.84,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.051863,
+      "options_cost_max": 0.130994,
+      "options_stake_range_usd": [
+       10.94,
+       30.15
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "kalshi"
+     },
+     {
+      "condition": "ETH in [3,750, 4,000)",
+      "kalshi_cost": 0.034168,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 208,
+       "stake_usd": 7.12,
+       "profit_if_right_usd": 200.88,
+       "max_loss_usd": 7.12,
+       "depth_at_best": 101.75,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.037293,
+      "options_cost_max": 0.110498,
+      "options_stake_range_usd": [
+       7.75,
+       24.84
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "ETH in [4,000, 4,250)",
+      "kalshi_cost": 0.021372,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 205,
+       "stake_usd": 4.39,
+       "profit_if_right_usd": 200.61,
+       "max_loss_usd": 4.39,
+       "depth_at_best": 12.0,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.033283,
+      "options_cost_max": 0.064606,
+      "options_stake_range_usd": [
+       6.89,
+       13.81
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "kalshi"
+     },
+     {
+      "condition": "ETH in [4,250, 4,500)",
+      "kalshi_cost": 0.01283,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 203,
+       "stake_usd": 2.61,
+       "profit_if_right_usd": 200.39,
+       "max_loss_usd": 2.61,
+       "depth_at_best": 393.86,
+       "depth_covers": true
+      },
+      "options_cost_min": 0.028605,
+      "options_cost_max": 0.062823,
+      "options_stake_range_usd": [
+       5.89,
+       13.41
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "kalshi"
+     },
+     {
+      "condition": "ETH in [4,500, 4,750)",
+      "kalshi_cost": 0.009624,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 202,
+       "stake_usd": 1.95,
+       "profit_if_right_usd": 200.05,
+       "max_loss_usd": 1.95,
+       "depth_at_best": 1200.22,
+       "depth_covers": true
+      },
+      "options_cost_min": 0.021476,
+      "options_cost_max": 0.062823,
+      "options_stake_range_usd": [
+       4.39,
+       13.41
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "kalshi"
+     },
+     {
+      "condition": "ETH in [4,750, 5,000)",
+      "kalshi_cost": 0.006417,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 202,
+       "stake_usd": 1.3,
+       "profit_if_right_usd": 200.7,
+       "max_loss_usd": 1.3,
+       "depth_at_best": 505.39,
+       "depth_covers": true
+      },
+      "options_cost_min": 0.016872,
+      "options_cost_max": 0.046592,
+      "options_stake_range_usd": [
+       3.43,
+       9.77
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "kalshi"
+     },
+     {
+      "condition": "ETH above 5,000",
+      "kalshi_cost": 0.028839,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 206,
+       "stake_usd": 5.94,
+       "profit_if_right_usd": 200.06,
+       "max_loss_usd": 5.94,
+       "depth_at_best": 49.0,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.015743,
+      "options_cost_max": 0.040482,
+      "options_stake_range_usd": [
+       3.2,
+       8.44
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "ETH above 1,000",
+      "kalshi_cost": 0.98417,
+      "kalshi_route": "no",
+      "kalshi": {
+       "contracts": 12635,
+       "stake_usd": 12435.0,
+       "profit_if_right_usd": 200.0,
+       "max_loss_usd": 12435.0,
+       "depth_at_best": 504.0,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.947421,
+      "options_cost_max": 0.983521,
+      "options_stake_range_usd": [
+       3603.8,
+       11936.75
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "ETH above 1,250",
+      "kalshi_cost": 1.008081,
+      "kalshi_route": "yes",
+      "kalshi": null,
+      "options_cost_min": 0.935257,
+      "options_cost_max": 0.999311,
+      "options_stake_range_usd": [
+       2889.15,
+       289878.74
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "ETH below 1,250",
+      "kalshi_cost": 0.040609,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 209,
+       "stake_usd": 8.49,
+       "profit_if_right_usd": 200.51,
+       "max_loss_usd": 8.49,
+       "depth_at_best": 0.23,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.02289,
+      "options_cost_max": 0.09624,
+      "options_stake_range_usd": [
+       4.69,
+       21.3
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "ETH above 1,500",
+      "kalshi_cost": 0.987776,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 16362,
+       "stake_usd": 16162.06,
+       "profit_if_right_usd": 199.94,
+       "max_loss_usd": 16162.06,
+       "depth_at_best": 1.59,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.897831,
+      "options_cost_max": 0.969904,
+      "options_stake_range_usd": [
+       1757.53,
+       6445.36
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "ETH below 1,500",
+      "kalshi_cost": 0.060914,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 213,
+       "stake_usd": 12.99,
+       "profit_if_right_usd": 200.01,
+       "max_loss_usd": 12.99,
+       "depth_at_best": 0.23,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.046783,
+      "options_cost_max": 0.10827,
+      "options_stake_range_usd": [
+       9.82,
+       24.28
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "ETH above 1,750",
+      "kalshi_cost": 0.953608,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 4312,
+       "stake_usd": 4112.01,
+       "profit_if_right_usd": 199.99,
+       "max_loss_usd": 4112.01,
+       "depth_at_best": 1.59,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.844587,
+      "options_cost_max": 0.964557,
+      "options_stake_range_usd": [
+       1086.89,
+       5442.88
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "ETH below 1,750",
+      "kalshi_cost": 0.095082,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 222,
+       "stake_usd": 21.13,
+       "profit_if_right_usd": 200.87,
+       "max_loss_usd": 21.13,
+       "depth_at_best": 0.23,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.085547,
+      "options_cost_max": 0.189807,
+      "options_stake_range_usd": [
+       18.71,
+       46.85
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "ETH above 2,000",
+      "kalshi_cost": 0.884354,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 1730,
+       "stake_usd": 1530.01,
+       "profit_if_right_usd": 199.99,
+       "max_loss_usd": 1530.01,
+       "depth_at_best": 1.59,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.750797,
+      "options_cost_max": 0.869654,
+      "options_stake_range_usd": [
+       602.56,
+       1334.37
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "ETH below 2,000",
+      "kalshi_cost": 0.164337,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 240,
+       "stake_usd": 39.47,
+       "profit_if_right_usd": 200.53,
+       "max_loss_usd": 39.47,
+       "depth_at_best": 0.23,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.157727,
+      "options_cost_max": 0.261987,
+      "options_stake_range_usd": [
+       37.45,
+       71.0
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "ETH above 2,250",
+      "kalshi_cost": 0.784392,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 928,
+       "stake_usd": 727.98,
+       "profit_if_right_usd": 200.02,
+       "max_loss_usd": 727.98,
+       "depth_at_best": 1.59,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.648542,
+      "options_cost_max": 0.777423,
+      "options_stake_range_usd": [
+       369.06,
+       698.57
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "ETH below 2,250",
+      "kalshi_cost": 0.264298,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 272,
+       "stake_usd": 71.92,
+       "profit_if_right_usd": 200.08,
+       "max_loss_usd": 71.92,
+       "depth_at_best": 0.23,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.277136,
+      "options_cost_max": 0.403674,
+      "options_stake_range_usd": [
+       76.68,
+       135.39
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "ETH above 2,500",
+      "kalshi_cost": 0.650684,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 573,
+       "stake_usd": 372.9,
+       "profit_if_right_usd": 200.1,
+       "max_loss_usd": 372.9,
+       "depth_at_best": 1.59,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.533588,
+      "options_cost_max": 0.588953,
+      "options_stake_range_usd": [
+       228.81,
+       286.56
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "deribit"
+     },
+     {
+      "condition": "ETH below 2,500",
+      "kalshi_cost": 0.398007,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 333,
+       "stake_usd": 132.57,
+       "profit_if_right_usd": 200.43,
+       "max_loss_usd": 132.57,
+       "depth_at_best": 0.23,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.431744,
+      "options_cost_max": 0.489221,
+      "options_stake_range_usd": [
+       151.95,
+       191.56
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "ETH above 2,750",
+      "kalshi_cost": 0.504357,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 404,
+       "stake_usd": 203.82,
+       "profit_if_right_usd": 200.18,
+       "max_loss_usd": 203.82,
+       "depth_at_best": 1.59,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.433081,
+      "options_cost_max": 0.470508,
+      "options_stake_range_usd": [
+       152.78,
+       177.72
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "ETH below 2,750",
+      "kalshi_cost": 0.544334,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 439,
+       "stake_usd": 239.01,
+       "profit_if_right_usd": 199.99,
+       "max_loss_usd": 239.01,
+       "depth_at_best": 0.23,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.590619,
+      "options_cost_max": 0.632502,
+      "options_stake_range_usd": [
+       288.54,
+       344.22
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "ETH above 3,000",
+      "kalshi_cost": 0.369596,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 318,
+       "stake_usd": 117.57,
+       "profit_if_right_usd": 200.43,
+       "max_loss_usd": 117.57,
+       "depth_at_best": 1.84,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.298077,
+      "options_cost_max": 0.348871,
+      "options_stake_range_usd": [
+       84.93,
+       107.16
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "ETH below 3,000",
+      "kalshi_cost": 0.679095,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 624,
+       "stake_usd": 423.81,
+       "profit_if_right_usd": 200.19,
+       "max_loss_usd": 423.81,
+       "depth_at_best": 0.23,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.673938,
+      "options_cost_max": 0.729303,
+      "options_stake_range_usd": [
+       413.38,
+       538.83
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "ETH above 3,250",
+      "kalshi_cost": 0.250634,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 267,
+       "stake_usd": 66.95,
+       "profit_if_right_usd": 200.05,
+       "max_loss_usd": 66.95,
+       "depth_at_best": 1.84,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.205847,
+      "options_cost_max": 0.296741,
+      "options_stake_range_usd": [
+       51.84,
+       84.39
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "ETH below 3,250",
+      "kalshi_cost": 0.798057,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 991,
+       "stake_usd": 790.91,
+       "profit_if_right_usd": 200.09,
+       "max_loss_usd": 790.91,
+       "depth_at_best": 0.23,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.75102,
+      "options_cost_max": 0.844257,
+      "options_stake_range_usd": [
+       603.28,
+       1084.17
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "ETH above 3,500",
+      "kalshi_cost": 0.159132,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 238,
+       "stake_usd": 37.89,
+       "profit_if_right_usd": 200.11,
+       "max_loss_usd": 37.89,
+       "depth_at_best": 1.84,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.123508,
+      "options_cost_max": 0.208521,
+      "options_stake_range_usd": [
+       28.18,
+       52.69
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "ETH below 3,500",
+      "kalshi_cost": 0.889559,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 1811,
+       "stake_usd": 1611.06,
+       "profit_if_right_usd": 199.94,
+       "max_loss_usd": 1611.06,
+       "depth_at_best": 0.23,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.804264,
+      "options_cost_max": 0.889704,
+      "options_stake_range_usd": [
+       821.78,
+       1613.3
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "ETH above 3,750",
+      "kalshi_cost": 0.113251,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 226,
+       "stake_usd": 25.64,
+       "profit_if_right_usd": 200.36,
+       "max_loss_usd": 25.64,
+       "depth_at_best": 12.0,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.088755,
+      "options_cost_max": 0.189807,
+      "options_stake_range_usd": [
+       19.48,
+       46.85
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "ETH below 3,750",
+      "kalshi_cost": 0.935439,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 3098,
+       "stake_usd": 2898.05,
+       "profit_if_right_usd": 199.95,
+       "max_loss_usd": 2898.05,
+       "depth_at_best": 0.23,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.853498,
+      "options_cost_max": 0.92312,
+      "options_stake_range_usd": [
+       1165.17,
+       2401.47
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "ETH above 4,000",
+      "kalshi_cost": 0.079083,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 218,
+       "stake_usd": 17.27,
+       "profit_if_right_usd": 200.73,
+       "max_loss_usd": 17.27,
+       "depth_at_best": 12.0,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.062155,
+      "options_cost_max": 0.116736,
+      "options_stake_range_usd": [
+       13.25,
+       26.43
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "ETH below 4,000",
+      "kalshi_cost": 0.969608,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 6581,
+       "stake_usd": 6381.04,
+       "profit_if_right_usd": 199.96,
+       "max_loss_usd": 6381.04,
+       "depth_at_best": 0.23,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.888697,
+      "options_cost_max": 0.945844,
+      "options_stake_range_usd": [
+       1596.89,
+       3493.02
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "ETH above 4,250",
+      "kalshi_cost": 0.057711,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 213,
+       "stake_usd": 12.31,
+       "profit_if_right_usd": 200.69,
+       "max_loss_usd": 12.31,
+       "depth_at_best": 49.0,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.045981,
+      "options_cost_max": 0.101587,
+      "options_stake_range_usd": [
+       9.64,
+       22.61
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "ETH below 4,250",
+      "kalshi_cost": 0.99098,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 22173,
+       "stake_usd": 21973.07,
+       "profit_if_right_usd": 199.93,
+       "max_loss_usd": 21973.07,
+       "depth_at_best": 0.23,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.905717,
+      "options_cost_max": 0.976587,
+      "options_stake_range_usd": [
+       1921.27,
+       8342.31
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "ETH above 4,500",
+      "kalshi_cost": 0.044881,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 210,
+       "stake_usd": 9.44,
+       "profit_if_right_usd": 200.56,
+       "max_loss_usd": 9.44,
+       "depth_at_best": 49.0,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.031635,
+      "options_cost_max": 0.08822,
+      "options_stake_range_usd": [
+       6.53,
+       19.35
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "ETH below 4,500",
+      "kalshi_cost": 1.00381,
+      "kalshi_route": "yes",
+      "kalshi": null,
+      "options_cost_min": 0.922113,
+      "options_cost_max": 0.98327,
+      "options_stake_range_usd": [
+       2367.84,
+       11754.92
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "ETH above 4,750",
+      "kalshi_cost": 0.035256,
+      "kalshi_route": "yes",
+      "kalshi": {
+       "contracts": 208,
+       "stake_usd": 7.34,
+       "profit_if_right_usd": 200.66,
+       "max_loss_usd": 7.34,
+       "depth_at_best": 49.0,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.024595,
+      "options_cost_max": 0.074854,
+      "options_stake_range_usd": [
+       5.04,
+       16.18
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "ETH below 4,750",
+      "kalshi_cost": 1.013434,
+      "kalshi_route": "yes",
+      "kalshi": null,
+      "options_cost_min": 0.937797,
+      "options_cost_max": 0.996637,
+      "options_stake_range_usd": [
+       3015.28,
+       59274.11
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     },
+     {
+      "condition": "ETH below 5,000",
+      "kalshi_cost": 0.975773,
+      "kalshi_route": "no",
+      "kalshi": {
+       "contracts": 8256,
+       "stake_usd": 8055.98,
+       "profit_if_right_usd": 200.02,
+       "max_loss_usd": 8055.98,
+       "depth_at_best": 698.44,
+       "depth_covers": false
+      },
+      "options_cost_min": 0.949101,
+      "options_cost_max": 0.983939,
+      "options_stake_range_usd": [
+       3729.38,
+       12252.39
+      ],
+      "options_depth": "UNKNOWN (book_summary carries no sizes)",
+      "class_in_this_snapshot": "indistinguishable"
+     }
+    ],
+    "linear_references": [
+     {
+      "instrument": "spot long",
+      "leverage": 1,
+      "required_move": 0.2,
+      "required_level": 3208.01,
+      "max_loss": "the stake, linearly",
+      "carry": null
+     },
+     {
+      "instrument": "perpetual long",
+      "leverage": 2,
+      "required_move": 0.1,
+      "required_level": 2940.67,
+      "liquidation_distance": "UNKNOWN",
+      "carry": "UNKNOWN (funding unit unread, D-111)"
+     },
+     {
+      "instrument": "perpetual long",
+      "leverage": 5,
+      "required_move": 0.04,
+      "required_level": 2780.27,
+      "liquidation_distance": "UNKNOWN",
+      "carry": "UNKNOWN (funding unit unread, D-111)"
+     }
+    ]
+   }
+  }
+ },
+ "errors": [
+  {
+   "stamp": "2026-08-30T1611Z",
+   "error": "kalshi stream absent at 2026-08-30T1611Z: ../../../../../tmp/mirror/raw/kalshi/2026-08-30/kalshi_2026-08-30T1611Z.json.gz"
+  },
+  {
+   "stamp": "2026-08-30T1643Z",
+   "error": "kalshi stream absent at 2026-08-30T1643Z: ../../../../../tmp/mirror/raw/kalshi/2026-08-30/kalshi_2026-08-30T1643Z.json.gz"
+  },
+  {
+   "stamp": "2026-08-30T1742Z",
+   "error": "kalshi stream absent at 2026-08-30T1742Z: ../../../../../tmp/mirror/raw/kalshi/2026-08-30/kalshi_2026-08-30T1742Z.json.gz"
+  },
+  {
+   "stamp": "2026-08-30T2108Z",
+   "error": "kalshi stream absent at 2026-08-30T2108Z: ../../../../../tmp/mirror/raw/kalshi/2026-08-30/kalshi_2026-08-30T2108Z.json.gz"
+  },
+  {
+   "stamp": "2026-08-31T0508Z",
+   "error": "kalshi stream absent at 2026-08-31T0508Z: ../../../../../tmp/mirror/raw/kalshi/2026-08-31/kalshi_2026-08-31T0508Z.json.gz"
+  },
+  {
+   "stamp": "2026-08-31T1040Z",
+   "asset": "BTC",
+   "error": "no ladder"
+  },
+  {
+   "stamp": "2026-08-31T1040Z",
+   "asset": "ETH",
+   "error": "no ladder"
+  }
+ ]
+}

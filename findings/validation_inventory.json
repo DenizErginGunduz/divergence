@@ -1,49 +1,49 @@
 {
  "archive": {
-  "day_count": 17,
-  "snapshot_count": 68,
+  "day_count": 24,
+  "snapshot_count": 112,
   "first": "2026-08-30T1611Z",
-  "last": "2026-09-16T1314Z"
+  "last": "2026-09-23T2117Z"
  },
  "produced_by": "scripts/inventory_validation.py",
  "bound": "The public archive is a 14-day rolling window. These are LOWER BOUNDS; the private mirror holds everything since 2026-08-30 and is not read here.",
- "resolved_markets_seen": 5041,
- "markets_with_a_prior_quote": 157,
- "scorable_observations": 286,
- "independent_events": 121,
- "observations_per_independent_event": 2.4,
+ "resolved_markets_seen": 6446,
+ "markets_with_a_prior_quote": 238,
+ "scorable_observations": 1375,
+ "independent_events": 191,
+ "observations_per_independent_event": 7.2,
  "outcomes": {
-  "no": 99,
-  "yes": 58
+  "no": 143,
+  "yes": 95
  },
  "by_series": {
-  "KXETH15M": 56,
-  "KXBTC15M": 56,
-  "KXBTCMAXMON": 22,
+  "KXETH15M": 92,
+  "KXBTC15M": 90,
+  "KXBTCMAXMON": 24,
+  "KXBTCPRICE": 9,
   "KXBTCMINMON": 8,
-  "KXETHMAXMON": 6,
+  "KXETHMAXMON": 7,
   "KXETHMINMON": 6,
   "KXBTCMAX100": 1,
-  "KXBTCMAX150": 1,
-  "KXBTCPRICE": 1
+  "KXBTCMAX150": 1
  },
  "observations_by_series": {
-  "KXBTCMAXMON": 71,
-  "KXETH15M": 57,
-  "KXBTC15M": 57,
+  "KXBTCPRICE": 750,
+  "KXBTCMAXMON": 249,
+  "KXETHMAXMON": 117,
+  "KXETH15M": 101,
+  "KXBTC15M": 100,
   "KXBTCMINMON": 32,
-  "KXETHMAXMON": 28,
   "KXETHMINMON": 18,
-  "KXBTCPRICE": 15,
   "KXBTCMAX100": 4,
   "KXBTCMAX150": 4
  },
  "lead_hours": {
   "min": 0.02,
-  "p25": 0.23,
-  "median": 6.87,
-  "p75": 17.25,
-  "max": 718.75
+  "p25": 17.33,
+  "median": 430.7,
+  "p75": 1543.75,
+  "max": 6161.23
  },
  "snapshots_without_kalshi": 5
 }
