@@ -14,7 +14,7 @@ existed and may not be edited after the evidence is in.
 | G1 | ETH > $5k anomaly kill test | CLOSED — verdict recorded in D-103: not a surviving discrepancy |
 | G2 | Note 1 publish | OPEN — G1 verdict (D-103), referee spread (D-104), analytical freeze (D-107) and the rewritten note are in; remaining: the mechanical checks at publication |
 | G3 | Note 2 sample / data | OPEN — waiting for data; outcome capture reliable for the fifteen-minute and small series, absent for the hourly ladders until B-023 (D-106) |
-| G4 | Payoff card (V0) build | OPEN — requirements defined (D-109); discovery and data-rights answers outstanding |
+| G4 | Payoff card (V0) build | OPEN — requirements defined (D-109); discovery and data-rights answers outstanding; the buyer's comparison (D-114) returned "one venue is cheaper wherever either is" — Kalshi, single buckets only (D-116) |
 | G5 | Builders application | OPEN |
 | G6 | Event hedge studio (V1) promotion | OPEN |
 | G7 | Cross-asset expansion | OPEN |
