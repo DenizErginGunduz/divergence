@@ -317,6 +317,30 @@ def kill_test_block():
             'archive': k.get('archive'), 'verdict': verdict}
 
 
+def payoff_frontier_block():
+    """The buyer's comparison (D-114), small enough for the page to carry.
+
+    Copied from findings/payoff_frontier.json, which measure_payoff.py writes
+    earlier in the same workflow: the verdict, the conditions it rests on and
+    the combo-fee sensitivity (D-115), WITHOUT the per-condition table and the
+    reference ticket. Recomputing any of it here would make two places able to
+    disagree. None when the file is absent.
+    """
+    path = os.path.join(ROOT, 'findings', 'payoff_frontier.json')
+    try:
+        with open(path, encoding='utf-8') as f:
+            k = json.load(f)
+    except (OSError, ValueError):
+        return None
+    verdict = k.get('verdict')
+    if not isinstance(verdict, dict):
+        return None
+    return {'decision': k.get('decision'), 'family': k.get('family'),
+            'archive': k.get('archive'), 'verdict': verdict,
+            'stable_conditions': k.get('stable_conditions'),
+            'sensitivity_combo_fees': k.get('sensitivity_combo_fees')}
+
+
 def main():
     all_stamps = stamps('_meta')
     o = summary()
@@ -343,6 +367,10 @@ def main():
             # so the interface can print its exact words (G1). None if that
             # step did not run.
             'kill_test_eth5k': kill_test_block(),
+            # The buyer's comparison of D-114, carried the same way: judged by
+            # scripts/measure_payoff.py, copied here. None if that step did
+            # not run.
+            'payoff_frontier': payoff_frontier_block(),
         },
     }
 
@@ -357,7 +385,7 @@ def main():
         if not isinstance(m, dict):
             print('  %-26s absent' % name)
             continue
-        if name == 'kill_test_eth5k':
+        if name in ('kill_test_eth5k', 'payoff_frontier'):
             print('  %-26s %s' % (name, m['verdict'].get('verdict')))
             continue
         k = m.get('stability') or {}
