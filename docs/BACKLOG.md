@@ -249,7 +249,7 @@ can say anything it does not is UNKNOWN and is the first question to answer when
 Note 3 is specified.
 ---
 
-## B-026 — The buyer's comparison beyond the year-end Kalshi ladders (2026-09-24)
+## B-026 — The buyer's comparison beyond the year-end Kalshi ladders — BUILT 2026-09-24 for the Polymarket dailies (D-117)
 D-114 judges one family: `KXBTCY` and `KXETHY`, the ladders with the longest
 history and an exhaustive shape. The same question — for the same terminal payoff,
 which venue is cheaper to buy it on — applies to the Polymarket terminal ladders,
@@ -263,7 +263,7 @@ funding unit (D-111), and dated futures (B-018).
 
 ---
 
-## B-027 — Deribit's combo fee rule, read and applied (2026-09-24)
+## B-027 — Deribit's combo fee rule, read and applied — DROPPED BY THE OWNER 2026-09-24 (D-117)
 Deribit's Combo Books page says the cheapest direction of a combo "has reduced
 fees" against executing each leg individually, without saying by how much
 (D-115). Every spread in the project is charged leg by leg in full. Two things
