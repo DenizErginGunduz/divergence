@@ -1,0 +1,13 @@
+{
+ "produced_by": "scripts/measure_carry.py",
+ "decision": "D-119",
+ "archive": "/tmp/mirror/raw",
+ "files_read": 0,
+ "newest_stamp": null,
+ "perpetuals": {},
+ "futures": {},
+ "not_measured": {
+  "deribit_perpetual_funding": "UNKNOWN unit (D-111)",
+  "binance": "parked (B-028)"
+ }
+}
