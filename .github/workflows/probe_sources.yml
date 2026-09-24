@@ -1,0 +1,43 @@
+name: probe-sources
+
+# One-off reachability probe for the funding and futures sources the owner
+# prefers (Binance, Hyperliquid), plus Polymarket perps and Deribit futures
+# (B-018). It prints the HTTP status and the first bytes of each reply to the
+# log and writes nothing to the repository. Manual only; to be deleted once the
+# source decision is recorded.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Where this runner is
+        run: curl -sS -m 10 https://ipinfo.io/json | head -c 400 || true
+
+      - name: GET endpoints
+        run: |
+          get() { echo; echo "=== GET $1"; curl -sS -m 20 -o body.bin -w "status=%{http_code} bytes=%{size_download}\n" "$1" || true; head -c 600 body.bin 2>/dev/null | tr -d '\000'; echo; }
+          get "https://fapi.binance.com/fapi/v1/fundingRate?symbol=BTCUSDT&limit=3"
+          get "https://fapi.binance.com/fapi/v1/fundingRate?symbol=CLUSDT&limit=3"
+          get "https://fapi.binance.com/fapi/v1/fundingRate?symbol=XAUUSDT&limit=3"
+          get "https://fapi.binance.com/fapi/v1/fundingInfo"
+          get "https://fapi.binance.com/futures/data/basis?pair=BTCUSDT&contractType=CURRENT_QUARTER&period=1d&limit=2"
+          get "https://www.binance.com/fapi/v1/fundingRate?symbol=BTCUSDT&limit=2"
+          get "https://data.binance.vision/data/futures/um/monthly/fundingRate/CLUSDT/CLUSDT-fundingRate-2026-08.zip"
+          get "https://api.perpetuals.polymarket.com/v1/info/tickers"
+          get "https://api.perpetuals.polymarket.com/v1/info/instruments"
+          get "https://www.deribit.com/api/v2/public/get_book_summary_by_currency?currency=BTC&kind=future"
+
+      - name: POST endpoints (Hyperliquid info)
+        run: |
+          post() { echo; echo "=== POST $1"; curl -sS -m 20 -o body.bin -w "status=%{http_code} bytes=%{size_download}\n" -X POST https://api.hyperliquid.xyz/info -H 'content-type: application/json' -d "$1" || true; head -c 600 body.bin 2>/dev/null; echo; }
+          NOW=$(date +%s000); START=$((NOW-86400000))
+          post '{"type":"perpDexs"}'
+          post "{\"type\":\"fundingHistory\",\"coin\":\"BTC\",\"startTime\":$START}"
+          post '{"type":"meta","dex":"xyz"}'
+          post "{\"type\":\"fundingHistory\",\"coin\":\"xyz:CL\",\"startTime\":$START}"
+          post "{\"type\":\"fundingHistory\",\"coin\":\"xyz:WTIOIL\",\"startTime\":$START}"
+          post "{\"type\":\"fundingHistory\",\"coin\":\"xyz:GOLD\",\"startTime\":$START}"
