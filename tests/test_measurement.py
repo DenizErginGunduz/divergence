@@ -30,6 +30,7 @@ import measure_touch
 import kill_test_eth5k
 import measure_payoff
 import measure_carry
+import horizons
 import discount_referee
 import prune_archive
 from stability import Stability
@@ -1265,7 +1266,8 @@ class CarryStage(unittest.TestCase):
     def setUp(self):
         import time as _time
         self.ns = from_collector('_try', '_hyperliquid', '_poly_perps', '_deribit_futures',
-                                 'carry', 'CARRY_LOOKBACK_MS', 'HL_COINS', 'POLY_PERP_SYMBOLS',
+                                 'carry', 'CARRY_LOOKBACK_MS', 'CARRY_LOOKBACK_LONG_MS', 'HL_PAGE_ROWS',
+                                 'HL_COINS', 'POLY_PERP_SYMBOLS',
                                  'POLY_PERP_MAX_PAGES', 'HYPERLIQUID', 'POLY_PERPS', 'DERIBIT',
                                  'DERIBIT_CURRENCIES', 'HOLDERS_HOUR', 'ARCHIVE_VERSION')
         self.tmp = tempfile.mkdtemp()
@@ -1303,7 +1305,7 @@ class CarryStage(unittest.TestCase):
 
     def test_absent_coins_are_recorded_and_not_asked(self):
         end = 1790270000000
-        out = self.ns['carry'](end_ms=end)
+        out = self.ns['carry'](end_ms=end, long_lookback=False)
         hl = out['hyperliquid']
         self.assertEqual(sorted(hl['funding']), ['BTC', 'ETH', 'xyz:CL', 'xyz:GOLD'])
         self.assertIn('xyz:SILVER', hl['absent'])
@@ -1317,11 +1319,11 @@ class CarryStage(unittest.TestCase):
         self.assertIn('BTC-USD', out['polymarket_perps']['absent'])
 
     def test_polymarket_pages_backwards_and_stops_at_the_cap(self):
-        out = self.ns['carry'](end_ms=1790270000000)
+        out = self.ns['carry'](end_ms=1790270000000, long_lookback=False)
         pages = out['polymarket_perps']['funding']['WTIOIL-USD']
         self.assertEqual(len(pages), 2)          # 192 hours: two pages of 100 cover it, then it stops
         self.ns['CARRY_LOOKBACK_MS'] = 60 * 24 * 3600 * 1000
-        pages = self.ns['carry'](end_ms=1790270000000)['polymarket_perps']['funding']['WTIOIL-USD']
+        pages = self.ns['carry'](end_ms=1790270000000, long_lookback=False)['polymarket_perps']['funding']['WTIOIL-USD']
         self.assertEqual(len(pages), self.ns['POLY_PERP_MAX_PAGES'])
         his = [p['request']['end_timestamp'] for p in pages]
         self.assertEqual(his, sorted(his, reverse=True))
@@ -1335,7 +1337,7 @@ class CarryStage(unittest.TestCase):
         self.assertTrue(out['hyperliquid']['funding']['BTC']['response']['ok'])
 
     def test_the_archive_version_says_the_carry_stream_exists(self):
-        self.assertEqual(self.ns['ARCHIVE_VERSION'], 7)
+        self.assertGreaterEqual(self.ns['ARCHIVE_VERSION'], 7)
 
 
 class CarryMeasure(unittest.TestCase):
@@ -1380,6 +1382,121 @@ class CarryMeasure(unittest.TestCase):
         self.assertAlmostEqual(p['annualised'], 0.05)
         self.assertIsNone(measure_carry.futures_premium(101.0, 100.0, now - 1, now))
         self.assertIsNone(measure_carry.futures_premium(None, 100.0, now + 1, now))
+
+
+class WaveTwoCollector(unittest.TestCase):
+    """D-120, lifted out of collect.py and run against fakes: the commodity series
+    Kalshi's catalogue is filtered to, a month of funding on the first run of the
+    day with Hyperliquid paged when a reply is full, and the HIP-4 books asked only
+    for threshold-at-a-time outcomes on our underlyings, in the future, under a cap."""
+
+    def setUp(self):
+        import re as _re, time as _time, datetime as _dt
+        self.ns = from_collector('_try', '_hyperliquid', '_poly_perps', '_deribit_futures', 'carry',
+                                 '_hip4_fields', 'hip4', 'CARRY_LOOKBACK_MS', 'CARRY_LOOKBACK_LONG_MS',
+                                 'HL_PAGE_ROWS', 'HL_COINS', 'POLY_PERP_SYMBOLS', 'POLY_PERP_MAX_PAGES',
+                                 'HYPERLIQUID', 'POLY_PERPS', 'DERIBIT', 'DERIBIT_CURRENCIES', 'HOLDERS_HOUR',
+                                 'HIP4_UNDERLYINGS', 'HIP4_MAX_BOOKS', 'KALSHI_COMMODITY_RE', 'ARCHIVE_VERSION')
+        self.re = _re
+        self.tmp = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.tmp)
+        self.ns.update(os=os, time=_time, datetime=_dt, ROOT=self.tmp, DAY='2026-09-24',
+                       now=_dt.datetime(2026, 9, 24, 13, tzinfo=_dt.timezone.utc))
+        self.posts = []
+
+    def test_the_commodity_series_filter(self):
+        pat = self.ns['KALSHI_COMMODITY_RE']
+        for t in ('KXWTI', 'KXWTIW', 'KXWTIMONTHLY', 'KXBRENTD', 'KXGOLDMON', 'KXSILVERW', 'KXWTIMAXM'):
+            self.assertTrue(self.re.match(pat, t), t)
+        for t in ('KXWTI15M', 'KXWTIH', 'KXGOLD15M', 'KXAAAGASD', 'KXGOLDVSSILVER', 'KXNATGASW', 'KXWTIEU'):
+            self.assertFalse(self.re.match(pat, t), t)
+
+    def test_a_month_on_the_first_run_of_the_day_and_hyperliquid_paged(self):
+        H = 3600 * 1000
+
+        def fake_post(url, body, timeout=30, attempts=3):
+            self.posts.append(body)
+            if body['type'] == 'metaAndAssetCtxs':
+                return [{'universe': [{'name': 'BTC'}] if not body.get('dex') else []}, [{}]]
+            if body['type'] == 'fundingHistory':
+                n = min(500, int((body['endTime'] - body['startTime']) // H) + 1)
+                return [{'coin': body['coin'], 'fundingRate': '0.0000125', 'time': body['startTime'] + i * H + 7}
+                        for i in range(n)]
+            return [None]
+        self.ns['post'] = fake_post
+        self.ns['get'] = lambda url, timeout=30, attempts=3: []
+        end = 1790270000000
+        out = self.ns['carry'](end_ms=end)                       # no raw/carry/DAY yet: first run of the day
+        self.assertEqual(out['window']['start_ms'], end - self.ns['CARRY_LOOKBACK_LONG_MS'])
+        btc = out['hyperliquid']['funding']['BTC']
+        self.assertEqual(len(btc['response']['value']), 500)
+        self.assertEqual(len(btc['more_pages']), 1)
+        last = max(x['time'] for x in btc['response']['value'])
+        self.assertEqual(btc['more_pages'][0]['request']['startTime'], last + 1)
+        rows = measure_carry._hl_rows(btc)
+        self.assertEqual(len(rows), 500 + len(btc['more_pages'][0]['response']['value']))
+        os.makedirs(os.path.join(self.tmp, 'raw', 'carry', '2026-09-24'))
+        out = self.ns['carry'](end_ms=end)                       # a later run the same day
+        self.assertEqual(out['window']['start_ms'], end - self.ns['CARRY_LOOKBACK_MS'])
+
+    def test_hip4_books_only_for_future_threshold_outcomes_on_our_underlyings(self):
+        import datetime as _dt
+        outcomes = [
+            {'outcome': 1210, 'name': 'template:binaryPrice', 'description': 'perp:BTC|seconds:1|threshold:100000|time:20261001-0000'},
+            {'outcome': 1230, 'name': 'template:binaryPrice', 'description': 'perp:xyz:CL|seconds:1|threshold:83.196|time:20260929-2100'},
+            {'outcome': 1211, 'name': 'template:priceTouch', 'description': 'perp:BTC|seconds:1|target:100000|time:20261001-0000'},
+            {'outcome': 1209, 'name': 'template:binaryPrice', 'description': 'perp:HYPE|seconds:1|threshold:50|time:20261001-0000'},
+            {'outcome': 1100, 'name': 'template:binaryPrice', 'description': 'perp:BTC|seconds:1|threshold:90000|time:20260920-0000'},
+        ]
+
+        def fake_post(url, body, timeout=30, attempts=3):
+            self.posts.append(body)
+            if body['type'] == 'outcomeMeta':
+                return {'outcomes': outcomes}
+            if body['type'] == 'allMids':
+                return {'#12100': '0.5'}
+            return {'levels': [[], []]}
+        self.ns['post'] = fake_post
+        out = self.ns['hip4'](now_utc=_dt.datetime(2026, 9, 24, 13, tzinfo=_dt.timezone.utc))
+        self.assertEqual(sorted(out['books']), ['#12100', '#12101', '#12300', '#12301'])
+        self.assertEqual(self.ns['_hip4_fields']('perp:xyz:CL|threshold:83.196')['perp'], 'xyz:CL')
+        self.ns['HIP4_MAX_BOOKS'] = 3
+        out = self.ns['hip4'](now_utc=_dt.datetime(2026, 9, 24, 13, tzinfo=_dt.timezone.utc))
+        self.assertEqual(len(out['books']), 3)
+        self.assertEqual(out['skipped_for_cap'], 1)
+
+    def test_the_archive_version(self):
+        self.assertEqual(self.ns['ARCHIVE_VERSION'], 8)
+
+
+class HorizonRule(unittest.TestCase):
+    """D-120: a dated instrument is offered for a horizon only within
+    max(1 day, 30% of the horizon), with its offset, nearest first."""
+
+    D = 24 * 3600 * 1000
+
+    def test_the_window(self):
+        self.assertEqual(horizons.window_days(0.5), 1.0)
+        self.assertEqual(horizons.window_days(2), 1.0)
+        self.assertAlmostEqual(horizons.window_days(7), 2.1)
+        self.assertAlmostEqual(horizons.window_days(100), 30.0)
+
+    def test_a_week_finds_six_days_and_eight_but_not_three(self):
+        now = 1790270000000
+        target = now + 7 * self.D
+        dates = [now + 3 * self.D, now + 6 * self.D, now + 8 * self.D, now + 10 * self.D, now - self.D]
+        got = horizons.matches(dates, target, now)
+        self.assertEqual([g['offset_days'] for g in got], [-1.0, 1.0])
+        self.assertEqual(horizons.matches([now + 3 * self.D], target, now), [])
+
+    def test_expiry_codes_and_stamps(self):
+        import datetime as _dt
+        ms = horizons.deribit_expiry_ms('2OCT26')
+        self.assertEqual(_dt.datetime.fromtimestamp(ms / 1000, _dt.timezone.utc).isoformat(), '2026-10-02T08:00:00+00:00')
+        self.assertIsNone(horizons.deribit_expiry_ms('PERPETUAL'))
+        ms = horizons.hip4_time_ms('20260929-2100')
+        self.assertEqual(_dt.datetime.fromtimestamp(ms / 1000, _dt.timezone.utc).isoformat(), '2026-09-29T21:00:00+00:00')
+        self.assertIsNone(horizons.hip4_time_ms('soon'))
 
 
 if __name__ == '__main__':
