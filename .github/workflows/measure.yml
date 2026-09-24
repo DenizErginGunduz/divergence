@@ -137,6 +137,14 @@ jobs:
       - name: Kill test — ETH above $5,000 against the local grid
         run: python scripts/kill_test_eth5k.py
 
+      # The buyer's comparison (D-114): for the same terminal payoff, which
+      # venue charged less to buy it, one side's costs only. Its verdict rules
+      # were written before the script, like the kill test's. Writes
+      # findings/payoff_frontier.json; the combo-fee sensitivity rides along
+      # and never enters the verdict (D-115).
+      - name: Buyer's comparison — the same payoff on Kalshi and on Deribit
+        run: python scripts/measure_payoff.py
+
       # The third settlement difference (D-075), measured rather than left
       # UNKNOWN: Kalshi settles on BRTI, Deribit on its own index, and both
       # halves are already archived.
