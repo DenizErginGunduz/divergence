@@ -1,31 +1,31 @@
 {
  "archive": {
   "day_count": 25,
-  "snapshot_count": 117,
+  "snapshot_count": 118,
   "first": "2026-08-30T1611Z",
-  "last": "2026-09-24T1834Z"
+  "last": "2026-09-24T1942Z"
  },
  "produced_by": "scripts/measure_sensitivity.py",
- "rung_observations": 10078,
+ "rung_observations": 10801,
  "grid": {
   "year_end": {
-   "n": 222,
+   "n": 224,
    "median_pct": 11.8,
-   "p90_pct": 19.1,
+   "p90_pct": 19.2,
    "worst_pct": 26.5
   },
   "intraday": {
-   "n": 8285,
-   "median_pct": 6.7,
-   "p90_pct": 126.5,
+   "n": 8912,
+   "median_pct": 6.5,
+   "p90_pct": 141.2,
    "worst_pct": 37600.0
   }
  },
  "expiry_verdicts": {
-  "above BOTH": 443,
-  "inside the band": 774,
-  "under the bound": 5874,
-  "above the bound": 768,
+  "above BOTH": 444,
+  "inside the band": 776,
+  "under the bound": 6508,
+  "above the bound": 854,
   "below both": 2219
  },
  "expiry_hours_by_tenor": {
@@ -42,6 +42,6 @@
  },
  "flat_rung_percent": {
   "year_end": 0.0,
-  "intraday": 70.3
+  "intraday": 71.2
  }
 }

@@ -1,9 +1,9 @@
 {
  "archive": {
   "day_count": 25,
-  "snapshot_count": 117,
+  "snapshot_count": 118,
   "first": "2026-08-30T1611Z",
-  "last": "2026-09-24T1834Z"
+  "last": "2026-09-24T1942Z"
  },
  "produced_by": "scripts/measure_basis.py",
  "pairs": 153,

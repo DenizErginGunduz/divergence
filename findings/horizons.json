@@ -1,0 +1,851 @@
+{
+ "produced_by": "scripts/horizons.py",
+ "decision": "D-120",
+ "archive": "/tmp/mirror/raw",
+ "computed_at_ms": 1790279439328,
+ "newest_files": {
+  "deribit": "deribit_2026-09-24T1942Z.json.gz",
+  "kalshi": "kalshi_2026-09-24T1942Z.json.gz",
+  "polymarket_events": "polymarket_events_2026-09-24T1942Z.json.gz",
+  "polymarket_other": "polymarket_other_2026-09-24T1942Z.json.gz",
+  "hip4": "hip4_2026-09-24T1942Z.json.gz"
+ },
+ "rule": {
+  "min_window_days": 1.0,
+  "window_share": 0.3,
+  "text": "a dated instrument qualifies if it settles within max(1 day, 30% of the horizon) of it; the offset is always shown; nothing outside is offered"
+ },
+ "assets": {
+  "BTC": {
+   "options": [
+    {
+     "settles_ms": 1790323200000,
+     "source": "Deribit",
+     "what": "option chain 25SEP26",
+     "markets": 140
+    },
+    {
+     "settles_ms": 1790409600000,
+     "source": "Deribit",
+     "what": "option chain 26SEP26",
+     "markets": 60
+    },
+    {
+     "settles_ms": 1790496000000,
+     "source": "Deribit",
+     "what": "option chain 27SEP26",
+     "markets": 62
+    },
+    {
+     "settles_ms": 1790582400000,
+     "source": "Deribit",
+     "what": "option chain 28SEP26",
+     "markets": 58
+    },
+    {
+     "settles_ms": 1790928000000,
+     "source": "Deribit",
+     "what": "option chain 2OCT26",
+     "markets": 48
+    },
+    {
+     "settles_ms": 1791532800000,
+     "source": "Deribit",
+     "what": "option chain 9OCT26",
+     "markets": 52
+    },
+    {
+     "settles_ms": 1792137600000,
+     "source": "Deribit",
+     "what": "option chain 16OCT26",
+     "markets": 38
+    },
+    {
+     "settles_ms": 1793347200000,
+     "source": "Deribit",
+     "what": "option chain 30OCT26",
+     "markets": 112
+    },
+    {
+     "settles_ms": 1795766400000,
+     "source": "Deribit",
+     "what": "option chain 27NOV26",
+     "markets": 96
+    },
+    {
+     "settles_ms": 1798185600000,
+     "source": "Deribit",
+     "what": "option chain 25DEC26",
+     "markets": 118
+    },
+    {
+     "settles_ms": 1806048000000,
+     "source": "Deribit",
+     "what": "option chain 26MAR27",
+     "markets": 104
+    },
+    {
+     "settles_ms": 1813910400000,
+     "source": "Deribit",
+     "what": "option chain 25JUN27",
+     "markets": 108
+    },
+    {
+     "settles_ms": 1821772800000,
+     "source": "Deribit",
+     "what": "option chain 24SEP27",
+     "markets": 82
+    }
+   ],
+   "touch": [
+    {
+     "settles_ms": 1790568000000,
+     "source": "Polymarket",
+     "what": "What price will Bitcoin hit September 21-27?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1790812800000,
+     "source": "Hyperliquid HIP-4",
+     "what": "priceTouch",
+     "markets": 6
+    },
+    {
+     "settles_ms": 1790827199000,
+     "source": "Kalshi",
+     "what": "KXBTCMAXMON",
+     "markets": 5
+    },
+    {
+     "settles_ms": 1790827199000,
+     "source": "Kalshi",
+     "what": "KXBTCMINMON",
+     "markets": 18
+    },
+    {
+     "settles_ms": 1790827200000,
+     "source": "Polymarket",
+     "what": "What price will Bitcoin hit in September?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1798779540000,
+     "source": "Kalshi",
+     "what": "KXBTCMAXY",
+     "markets": 7
+    },
+    {
+     "settles_ms": 1798779600000,
+     "source": "Kalshi",
+     "what": "KXBTCMINY",
+     "markets": 4
+    },
+    {
+     "settles_ms": 1798779600000,
+     "source": "Polymarket",
+     "what": "What price will Bitcoin hit in 2026?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1798779600000,
+     "source": "Polymarket",
+     "what": "When will Bitcoin hit $150k?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1798779600000,
+     "source": "Polymarket",
+     "what": "Will Bitcoin kimchi premium hit 8% in 2026?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1830315600000,
+     "source": "Polymarket",
+     "what": "When will Bitcoin hit $100k?",
+     "markets": 1
+    }
+   ],
+   "prediction_terminal": [
+    {
+     "settles_ms": 1790280000000,
+     "source": "Hyperliquid HIP-4",
+     "what": "binaryPrice",
+     "markets": 4
+    },
+    {
+     "settles_ms": 1790280000000,
+     "source": "Kalshi",
+     "what": "KXBTC",
+     "markets": 188
+    },
+    {
+     "settles_ms": 1790280000000,
+     "source": "Kalshi",
+     "what": "KXBTCD",
+     "markets": 188
+    },
+    {
+     "settles_ms": 1790283600000,
+     "source": "Kalshi",
+     "what": "KXBTC",
+     "markets": 80
+    },
+    {
+     "settles_ms": 1790283600000,
+     "source": "Kalshi",
+     "what": "KXBTCD",
+     "markets": 80
+    },
+    {
+     "settles_ms": 1790352000000,
+     "source": "Hyperliquid HIP-4",
+     "what": "binaryPrice",
+     "markets": 3
+    },
+    {
+     "settles_ms": 1790352000000,
+     "source": "Polymarket",
+     "what": "Bitcoin above ___ on September 25?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1790352000000,
+     "source": "Polymarket",
+     "what": "Bitcoin price on September 25?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1790366400000,
+     "source": "Hyperliquid HIP-4",
+     "what": "binaryPrice",
+     "markets": 3
+    },
+    {
+     "settles_ms": 1790370000000,
+     "source": "Kalshi",
+     "what": "KXBTC",
+     "markets": 50
+    },
+    {
+     "settles_ms": 1790370000000,
+     "source": "Kalshi",
+     "what": "KXBTCD",
+     "markets": 50
+    },
+    {
+     "settles_ms": 1790438400000,
+     "source": "Polymarket",
+     "what": "Bitcoin above ___ on September 26?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1790438400000,
+     "source": "Polymarket",
+     "what": "Bitcoin price on September 26?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1790524800000,
+     "source": "Polymarket",
+     "what": "Bitcoin above ___ on September 27?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1790524800000,
+     "source": "Polymarket",
+     "what": "Bitcoin price on September 27?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1790611200000,
+     "source": "Polymarket",
+     "what": "Bitcoin above ___ on September 28?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1790611200000,
+     "source": "Polymarket",
+     "what": "Bitcoin price on September 28?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1790625600000,
+     "source": "Hyperliquid HIP-4",
+     "what": "binaryPrice",
+     "markets": 3
+    },
+    {
+     "settles_ms": 1790697600000,
+     "source": "Polymarket",
+     "what": "Bitcoin above ___ on September 29?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1790697600000,
+     "source": "Polymarket",
+     "what": "Bitcoin price on September 29?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1790784000000,
+     "source": "Polymarket",
+     "what": "Bitcoin above ___ on September 30?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1790784000000,
+     "source": "Polymarket",
+     "what": "Bitcoin price on September 30?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1790798400000,
+     "source": "Hyperliquid HIP-4",
+     "what": "binaryPrice",
+     "markets": 3
+    },
+    {
+     "settles_ms": 1790812800000,
+     "source": "Hyperliquid HIP-4",
+     "what": "binaryPrice",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1790928000000,
+     "source": "Hyperliquid HIP-4",
+     "what": "binaryPrice",
+     "markets": 7
+    },
+    {
+     "settles_ms": 1791187200000,
+     "source": "Hyperliquid HIP-4",
+     "what": "binaryPrice",
+     "markets": 7
+    },
+    {
+     "settles_ms": 1798779600000,
+     "source": "Kalshi",
+     "what": "KXBTCY",
+     "markets": 28
+    }
+   ],
+   "perpetual": "every horizon (funding means, D-119)"
+  },
+  "ETH": {
+   "options": [
+    {
+     "settles_ms": 1790323200000,
+     "source": "Deribit",
+     "what": "option chain 25SEP26",
+     "markets": 154
+    },
+    {
+     "settles_ms": 1790409600000,
+     "source": "Deribit",
+     "what": "option chain 26SEP26",
+     "markets": 66
+    },
+    {
+     "settles_ms": 1790496000000,
+     "source": "Deribit",
+     "what": "option chain 27SEP26",
+     "markets": 68
+    },
+    {
+     "settles_ms": 1790582400000,
+     "source": "Deribit",
+     "what": "option chain 28SEP26",
+     "markets": 60
+    },
+    {
+     "settles_ms": 1790928000000,
+     "source": "Deribit",
+     "what": "option chain 2OCT26",
+     "markets": 40
+    },
+    {
+     "settles_ms": 1791532800000,
+     "source": "Deribit",
+     "what": "option chain 9OCT26",
+     "markets": 40
+    },
+    {
+     "settles_ms": 1792137600000,
+     "source": "Deribit",
+     "what": "option chain 16OCT26",
+     "markets": 32
+    },
+    {
+     "settles_ms": 1793347200000,
+     "source": "Deribit",
+     "what": "option chain 30OCT26",
+     "markets": 84
+    },
+    {
+     "settles_ms": 1795766400000,
+     "source": "Deribit",
+     "what": "option chain 27NOV26",
+     "markets": 72
+    },
+    {
+     "settles_ms": 1798185600000,
+     "source": "Deribit",
+     "what": "option chain 25DEC26",
+     "markets": 88
+    },
+    {
+     "settles_ms": 1806048000000,
+     "source": "Deribit",
+     "what": "option chain 26MAR27",
+     "markets": 84
+    },
+    {
+     "settles_ms": 1813910400000,
+     "source": "Deribit",
+     "what": "option chain 25JUN27",
+     "markets": 86
+    },
+    {
+     "settles_ms": 1821772800000,
+     "source": "Deribit",
+     "what": "option chain 24SEP27",
+     "markets": 72
+    }
+   ],
+   "prediction_terminal": [
+    {
+     "settles_ms": 1790280000000,
+     "source": "Kalshi",
+     "what": "KXETH",
+     "markets": 300
+    },
+    {
+     "settles_ms": 1790280000000,
+     "source": "Kalshi",
+     "what": "KXETHD",
+     "markets": 300
+    },
+    {
+     "settles_ms": 1790283600000,
+     "source": "Kalshi",
+     "what": "KXETH",
+     "markets": 40
+    },
+    {
+     "settles_ms": 1790283600000,
+     "source": "Kalshi",
+     "what": "KXETHD",
+     "markets": 40
+    },
+    {
+     "settles_ms": 1790352000000,
+     "source": "Polymarket",
+     "what": "Ethereum above ___ on September 25?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1790352000000,
+     "source": "Polymarket",
+     "what": "Ethereum price on September 25?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1790370000000,
+     "source": "Kalshi",
+     "what": "KXETH",
+     "markets": 50
+    },
+    {
+     "settles_ms": 1790370000000,
+     "source": "Kalshi",
+     "what": "KXETHD",
+     "markets": 50
+    },
+    {
+     "settles_ms": 1790438400000,
+     "source": "Polymarket",
+     "what": "Ethereum above ___ on September 26?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1790438400000,
+     "source": "Polymarket",
+     "what": "Ethereum price on September 26?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1790524800000,
+     "source": "Polymarket",
+     "what": "Ethereum above ___ on September 27?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1790524800000,
+     "source": "Polymarket",
+     "what": "Ethereum price on September 27?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1790611200000,
+     "source": "Polymarket",
+     "what": "Ethereum above ___ on September 28?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1790611200000,
+     "source": "Polymarket",
+     "what": "Ethereum price on September 28?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1790697600000,
+     "source": "Polymarket",
+     "what": "Ethereum above ___ on September 29?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1790697600000,
+     "source": "Polymarket",
+     "what": "Ethereum price on September 29?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1790784000000,
+     "source": "Polymarket",
+     "what": "Ethereum above ___ on September 30?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1790784000000,
+     "source": "Polymarket",
+     "what": "Ethereum price on September 30?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1798779600000,
+     "source": "Kalshi",
+     "what": "KXETHY",
+     "markets": 18
+    }
+   ],
+   "touch": [
+    {
+     "settles_ms": 1790568000000,
+     "source": "Polymarket",
+     "what": "What price will Ethereum hit September 21-27?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1790827199000,
+     "source": "Kalshi",
+     "what": "KXETHMAXMON",
+     "markets": 6
+    },
+    {
+     "settles_ms": 1790827199000,
+     "source": "Kalshi",
+     "what": "KXETHMINMON",
+     "markets": 8
+    },
+    {
+     "settles_ms": 1790827200000,
+     "source": "Polymarket",
+     "what": "What price will Ethereum hit in September?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1798779600000,
+     "source": "Kalshi",
+     "what": "KXETHMAXY",
+     "markets": 8
+    },
+    {
+     "settles_ms": 1798779600000,
+     "source": "Kalshi",
+     "what": "KXETHMINY",
+     "markets": 4
+    },
+    {
+     "settles_ms": 1798779600000,
+     "source": "Polymarket",
+     "what": "What price will Ethereum hit in 2026?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1798779600000,
+     "source": "Polymarket",
+     "what": "Will Ethereum hit $1,000 or $3,000 first?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1830315600000,
+     "source": "Polymarket",
+     "what": "When will Ethereum hit $3k?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1830315600000,
+     "source": "Polymarket",
+     "what": "When will Ethereum hit $4k?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1830315600000,
+     "source": "Polymarket",
+     "what": "When will Ethereum hit $6k?",
+     "markets": 1
+    }
+   ],
+   "perpetual": "every horizon (funding means, D-119)"
+  },
+  "WTI": {
+   "touch": [
+    {
+     "settles_ms": 1790373600000,
+     "source": "Polymarket",
+     "what": "What will WTI Crude Oil (WTI) hit Week of September 21 2026?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1790809200000,
+     "source": "Kalshi",
+     "what": "KXWTIMAX",
+     "markets": 40
+    },
+    {
+     "settles_ms": 1790809200000,
+     "source": "Kalshi",
+     "what": "KXWTIMIN",
+     "markets": 20
+    },
+    {
+     "settles_ms": 1790827199999,
+     "source": "Polymarket",
+     "what": "What will WTI Crude Oil (WTI) hit in September 2026?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1798745400000,
+     "source": "Kalshi",
+     "what": "KXWTIMAX",
+     "markets": 10
+    },
+    {
+     "settles_ms": 1798745400000,
+     "source": "Kalshi",
+     "what": "KXWTIMIN",
+     "markets": 12
+    }
+   ],
+   "prediction_terminal": [
+    {
+     "settles_ms": 1790280000000,
+     "source": "Hyperliquid HIP-4",
+     "what": "binaryPrice",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1790287200000,
+     "source": "Polymarket",
+     "what": "WTI Crude Oil (WTI) closes above ___ on September 24?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1790361000000,
+     "source": "Kalshi",
+     "what": "KXWTI",
+     "markets": 30
+    },
+    {
+     "settles_ms": 1790361000000,
+     "source": "Kalshi",
+     "what": "KXWTIW",
+     "markets": 27
+    },
+    {
+     "settles_ms": 1790373600000,
+     "source": "Polymarket",
+     "what": "WTI Crude Oil (WTI) closes above ___ on September 25?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1790715600000,
+     "source": "Hyperliquid HIP-4",
+     "what": "binaryPrice",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1790798400000,
+     "source": "Hyperliquid HIP-4",
+     "what": "binaryPrice",
+     "markets": 3
+    },
+    {
+     "settles_ms": 1793734200000,
+     "source": "Kalshi",
+     "what": "KXWTI",
+     "markets": 75
+    }
+   ],
+   "perpetual": "every horizon (funding means, D-119)"
+  },
+  "BRENT": {
+   "prediction_terminal": [
+    {
+     "settles_ms": 1790283600000,
+     "source": "Kalshi",
+     "what": "KXBRENTD",
+     "markets": 30
+    },
+    {
+     "settles_ms": 1790370000000,
+     "source": "Kalshi",
+     "what": "KXBRENTW",
+     "markets": 20
+    },
+    {
+     "settles_ms": 1790802000000,
+     "source": "Kalshi",
+     "what": "KXBRENTMON",
+     "markets": 40
+    }
+   ],
+   "perpetual": "every horizon (funding means, D-119)"
+  },
+  "GOLD": {
+   "prediction_terminal": [
+    {
+     "settles_ms": 1790280000000,
+     "source": "Hyperliquid HIP-4",
+     "what": "binaryPrice",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1790283600000,
+     "source": "Kalshi",
+     "what": "KXGOLDD",
+     "markets": 40
+    },
+    {
+     "settles_ms": 1790370000000,
+     "source": "Kalshi",
+     "what": "KXGOLDW",
+     "markets": 40
+    },
+    {
+     "settles_ms": 1790798400000,
+     "source": "Hyperliquid HIP-4",
+     "what": "binaryPrice",
+     "markets": 2
+    },
+    {
+     "settles_ms": 1790802000000,
+     "source": "Kalshi",
+     "what": "KXGOLDMON",
+     "markets": 50
+    }
+   ],
+   "touch": [
+    {
+     "settles_ms": 1790370000000,
+     "source": "Polymarket",
+     "what": "What will Gold (XAUUSD) hit Week of September 21 2026?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1790827199999,
+     "source": "Polymarket",
+     "what": "What will Gold (XAUUSD) hit in September 2026?",
+     "markets": 1
+    }
+   ],
+   "perpetual": "every horizon (funding means, D-119)"
+  },
+  "SILVER": {
+   "prediction_terminal": [
+    {
+     "settles_ms": 1790280000000,
+     "source": "Hyperliquid HIP-4",
+     "what": "binaryPrice",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1790283600000,
+     "source": "Kalshi",
+     "what": "KXSILVERD",
+     "markets": 40
+    },
+    {
+     "settles_ms": 1790370000000,
+     "source": "Kalshi",
+     "what": "KXSILVERW",
+     "markets": 40
+    },
+    {
+     "settles_ms": 1790802000000,
+     "source": "Kalshi",
+     "what": "KXSILVERMON",
+     "markets": 40
+    }
+   ],
+   "touch": [
+    {
+     "settles_ms": 1790370000000,
+     "source": "Polymarket",
+     "what": "What will Silver (XAGUSD) hit Week of September 21 2026?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1790827199999,
+     "source": "Polymarket",
+     "what": "What will Silver (XAGUSD) hit in September 2026?",
+     "markets": 1
+    }
+   ],
+   "perpetual": "every horizon (funding means, D-119)"
+  },
+  "SPX": {
+   "touch": [
+    {
+     "settles_ms": 1798750800000,
+     "source": "Polymarket",
+     "what": "What will S&P 500 (SPX) hit by end of December?",
+     "markets": 1
+    },
+    {
+     "settles_ms": 1798801200000,
+     "source": "Kalshi",
+     "what": "KXINXMAXY",
+     "markets": 6
+    }
+   ],
+   "prediction_terminal": [
+    {
+     "settles_ms": 1790366400000,
+     "source": "Hyperliquid HIP-4",
+     "what": "binaryPrice",
+     "markets": 3
+    },
+    {
+     "settles_ms": 1790625600000,
+     "source": "Hyperliquid HIP-4",
+     "what": "binaryPrice",
+     "markets": 3
+    },
+    {
+     "settles_ms": 1790798400000,
+     "source": "Hyperliquid HIP-4",
+     "what": "binaryPrice",
+     "markets": 3
+    },
+    {
+     "settles_ms": 1798750800000,
+     "source": "Polymarket",
+     "what": "What will S&P 500 (SPX) close at end of 2026?",
+     "markets": 1
+    }
+   ],
+   "perpetual": "every horizon (funding means, D-119)"
+  }
+ }
+}
