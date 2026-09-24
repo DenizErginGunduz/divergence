@@ -261,6 +261,18 @@ before any number is computed. Also open, and deliberately not in D-114: the
 intraday Kalshi series, the perpetual's carry once someone states a reading of the
 funding unit (D-111), and dated futures (B-018).
 
+---
+
+## B-027 — Deribit's combo fee rule, read and applied (2026-09-24)
+Deribit's Combo Books page says the cheapest direction of a combo "has reduced
+fees" against executing each leg individually, without saying by how much
+(D-115). Every spread in the project is charged leg by leg in full. Two things
+follow. Read the fee schedule for combos and record the rule verbatim in
+`DATA_SOURCES.md`; and make the kill test (D-092) report the same zero-fee
+sensitivity the buyer's comparison already reports, so that "the null does not
+depend on the combo rule" is a number the workflow produced over the mirror, not
+a local check. D-103's verdict is not re-opened by this item; it is tested.
+
 ## B-011 — The "x band" grammar
 Removed by D-076, which replaced `threshold` with an executable envelope.
 
