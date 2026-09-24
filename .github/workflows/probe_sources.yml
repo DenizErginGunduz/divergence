@@ -1,0 +1,78 @@
+name: probe-sources
+
+# One-off probe for the next data wave (the owner's approval of 2026-09-24):
+# Kalshi's Commodities catalogue and how many OPEN markets the hourly/daily
+# series really have (the collector's open pass stops at 200), Polymarket's
+# commodity events, and Hyperliquid's HIP-4 outcome markets. Prints compact
+# summaries to the log and writes nothing to the repository. Manual only; to be
+# deleted once the decision record is written.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Probe
+        shell: python
+        run: |
+          import json, urllib.request, collections, time
+          UA = {'User-Agent': 'divergence-research/0.3 (+github)'}
+          K = 'https://external-api.kalshi.com/trade-api/v2'
+          def get(u):
+              with urllib.request.urlopen(urllib.request.Request(u, headers=UA), timeout=40) as r:
+                  return json.loads(r.read())
+          def post(u, b):
+              h = dict(UA); h['Content-Type'] = 'application/json'
+              with urllib.request.urlopen(urllib.request.Request(u, data=json.dumps(b).encode(), headers=h), timeout=40) as r:
+                  return json.loads(r.read())
+          def show(title, fn):
+              print('\n=== ' + title)
+              try:
+                  fn()
+              except Exception as e:
+                  print('ERROR', str(e)[:300])
+          def commodities():
+              d = get(K + '/series?category=Commodities')
+              s = d.get('series') or []
+              print('series:', len(s))
+              for x in s:
+                  print(' ', x.get('ticker'), '|', x.get('frequency'), '|', (x.get('title') or '')[:60], '|', ','.join(x.get('tags') or []))
+          show('Kalshi Commodities catalogue', commodities)
+          def open_markets(t):
+              rows, cur = [], ''
+              for _ in range(25):
+                  u = K + '/markets?series_ticker=%s&status=open&limit=200' % t + ('&cursor=' + cur if cur else '')
+                  d = get(u); m = d.get('markets') or []; rows += m; cur = d.get('cursor') or ''
+                  if not cur or not m: break
+                  time.sleep(0.1)
+              c = collections.Counter(r.get('close_time', '')[:13] for r in rows)
+              days = collections.Counter(r.get('close_time', '')[:10] for r in rows)
+              print('%s open=%d events(close hours)=%d days=%s' % (t, len(rows), len(c), dict(sorted(days.items()))))
+              if rows:
+                  r = rows[0]
+                  print('   sample:', r.get('ticker'), r.get('close_time'), r.get('strike_type'), r.get('floor_strike'), r.get('cap_strike'), r.get('yes_ask_dollars'), (r.get('title') or '')[:70])
+          for t in ['KXBTCD', 'KXBTC', 'KXETHD', 'KXETH', 'KXBTCMAXW', 'KXINX', 'KXINXW', 'KXINXU',
+                    'KXWTI', 'KXWTIW', 'KXWTIMONTHLY', 'KXBRENTD', 'KXBRENTW', 'KXBRENTMON',
+                    'KXGOLDD', 'KXGOLDW', 'KXGOLDMON', 'KXSILVERD', 'KXSILVERW', 'KXSILVERMON']:
+              show('Kalshi open markets ' + t, lambda t=t: open_markets(t))
+          def gamma(slug):
+              d = get('https://gamma-api.polymarket.com/events?tag_slug=%s&closed=false&limit=200' % slug)
+              print(slug, 'events:', len(d))
+              for e in sorted(d, key=lambda e: e.get('endDate') or '')[:25]:
+                  print('  ', (e.get('endDate') or '')[:10], '|', (e.get('title') or '')[:70], '| markets', len(e.get('markets') or []), '| vol24', round(float(e.get('volume24hr') or 0)))
+          for slug in ['commodities', 'oil', 'crude-oil', 'gold', 'silver', 'sp-500', 'stocks']:
+              show('Polymarket tag ' + slug, lambda s=slug: gamma(s))
+          HL = 'https://api.hyperliquid.xyz/info'
+          def outcomes():
+              d = post(HL, {'type': 'outcomeMeta'})
+              txt = json.dumps(d)
+              print('bytes', len(txt)); print(txt[:2500])
+          show('Hyperliquid outcomeMeta', outcomes)
+          def mids():
+              d = post(HL, {'type': 'allMids'})
+              ks = [k for k in d if k.startswith('#') or k.startswith('+')]
+              print('allMids keys', len(d), 'outcome-like', len(ks), ks[:10], [d[k] for k in ks[:10]])
+          show('Hyperliquid allMids', mids)
