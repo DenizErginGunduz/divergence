@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""The buyer's comparison (D-114): for the same terminal payoff, is it cheaper
-to buy on Kalshi or from the Deribit option chain, and does the answer depend
-on the condition?
+"""The buyer's comparison (D-114), as a template over families (D-117): for the
+same terminal payoff, is it cheaper to buy on the prediction market or from the
+Deribit option chain, and does the answer depend on the condition?
 
 WHY THIS IS NOT THE KILL TEST AGAIN
 Every earlier test asked an arbitrageur's question: sell one venue, buy the
@@ -11,58 +11,72 @@ arbitrage can still decide where the buyer should pay less. This script asks
 that question and nothing more. It never says which condition anyone should
 buy; it says, for a given condition, what each venue charged for it.
 
-THE FAMILY (D-114)
-The year-end ladders KXBTCY and KXETHY, in every snapshot where they are
-exhaustive (D-105). Every condition is an interval of the terminal price:
-  - each listed bucket [lo, hi), including the two open-ended rungs;
-  - "above K" and "below K" for every internal boundary K.
-A condition is identified by its interval, so "above the top boundary" and the
-top 'greater' bucket are the same condition and are judged once.
+THE TEMPLATE (D-117)
+What is fixed, for every family, is D-114 as written (the RULES below). What
+varies is declared per family, in FAMILIES and in that family's reader:
+  - which events, and so which conditions (intervals of the terminal price);
+  - how the prediction side is bought: every market is a LEG with a YES interval,
+    optionally a NO interval, its asks, its fee and its published price step;
+    'tile' legs partition the line and can be summed into a wider interval;
+  - the close instant, which picks the two option chains that straddle it.
+Each family gets its own verdict. Families are never pooled.
+
+  kalshi_year_end    KXBTCY, KXETHY; buckets tile the line; a NO exists for the
+                     two open-ended buckets, whose complements are intervals
+                     (D-114).
+  polymarket_daily   "Bitcoin/Ethereum above ___ on DATE?" (threshold legs: YES
+                     is above K, NO is below K) and "... price on DATE?" (bucket
+                     legs that tile the line). NO ask = 1 - YES best bid, from
+                     Polymarket's own description of its book (D-117). Depth is
+                     not in the payload: UNKNOWN.
 
 WHAT EACH SIDE COSTS, per dollar of payoff, at the best level
-  Kalshi   the cheaper of: the sum of the YES asks of the buckets that make up
-           the interval, each plus fees.rate(ask); or, when the interval is the
-           complement of a single bucket, that bucket's NO ask plus
-           fees.rate(no_ask). The per-order round-up is not in this number; it
-           is applied in the reference ticket, where an order size exists.
-  Deribit  the same payoff from vertical spreads, ask on every leg bought and
-           bid on every leg sold, plus Deribit's fee on those crossed prices
-           (kill_test_eth5k.deribit_fee_usd). Side rule as in production: the
-           call spread at or above the forward, the discount factor D held and
-           the put spread traded below it (D-025, D-032, D-073).
+  prediction  the cheapest route: one leg whose YES (or NO) interval is the
+              condition, or a sum of tile legs covering it exactly; each leg's
+              ask plus that venue's per-contract taker fee.
+  options     the same payoff from vertical spreads, ask on every leg bought and
+              bid on every leg sold, plus Deribit's fee on those crossed prices
+              (kill_test_eth5k.deribit_fee_usd). Call spread at or above the
+              forward; below it, D held and the put spread traded (D-025, D-032,
+              D-073).
 
 THE BAND
 The options cost is an interval, not a point: the cheapest and the dearest of
-the tight and one-skip brackets (measure_sensitivity.wide_bracket, skip 0 and
-1) on both chains that straddle the Kalshi close (measure_sensitivity.
-neighbours). A band needs both ends, so a condition with no estimate on one of
-the two chains is 'unquoted' in that snapshot. That is this script's reading
-of D-114's "on both bracketing chains"; it can only make a verdict harder to
-reach, never easier.
+the tight and one-skip brackets (measure_sensitivity.wide_bracket, skip 0 and 1)
+on both chains that straddle the close (measure_sensitivity.neighbours). A band
+needs both ends, so a condition with no estimate on one of the chains is
+'unquoted' in that snapshot, and so is every condition of a snapshot whose
+chains do not straddle.
 
-THE RULES — written in D-114 before this file existed; not editable here
-  cheaper on Kalshi    opt_min - kalshi >= max(REL * kalshi, ABS)
-  cheaper on Deribit   kalshi - opt_max >= max(REL * opt_max, ABS)
-  indistinguishable    otherwise
-  unquoted             either side has no executable price; not judged
-A condition is STABLY cheaper on a venue when it is so in more than
-PERSISTENCE of its judged snapshots and it has at least MIN_JUDGED of them.
-Verdict over the family: stable conditions on both venues -> VERDICT_DEPENDS;
-on one venue only -> VERDICT_ONE; none -> VERDICT_NONE.
+THE RULES — D-114, not editable here
+  cheaper on the prediction market   opt_min - pred >= max(REL * pred, step)
+  cheaper on the options             pred - opt_max >= max(REL * opt_max, step)
+  indistinguishable                  otherwise
+  unquoted                           no executable price on a side; not judged
+step is the price step the venue publishes for the markets bought — the largest
+among a route's legs (D-117; 0.001 on the Kalshi year-end ladders, D-078).
+A condition is STABLY cheaper on a side when it is so in more than PERSISTENCE
+of its judged snapshots and it has at least MIN_JUDGED of them. Verdict per
+family: stable conditions on both sides -> VERDICT_DEPENDS; on one side only ->
+VERDICT_ONE; none -> VERDICT_NONE.
 
-COMBO FEES — found after D-114 was written, reported as a sensitivity only
-Deribit's Combo Books page says "The cheapest direction of a Combo has reduced
-fees, meaning less fees to pay compared to executing each leg individually."
-The reduction is not quantified there, and every spread here is charged leg by
-leg, as the kill test charges it. So the options cost may be overstated for a
-buyer who enters the spread as one combo. The verdict keeps D-114's fee model;
-beside it the same rules are applied with every Deribit fee set to zero, the
-most favourable case for Deribit, and reported as a sensitivity (D-115).
+THE NARROW BAND (D-117)
+Beside the verdict over every judged snapshot, the same verdict over the
+snapshots whose two chains are both within NARROW_HOURS of the close. For the
+year-end family it is empty until a chain within a week after 1 January 2027 is
+listed; for the dailies nearly every judged snapshot is narrow.
 
-WHAT IS NOT IN ANY NUMBER HERE (D-114, "What stays UNKNOWN")
-Perpetual funding (unit and sign of interest_8h UNKNOWN, D-111), dated futures
-(B-018), the depth of the option book (book_summary has no sizes), the margin
-a long spread ties up, Deribit's minimum order size, the settlement basis.
+COMBO FEES (D-115) — reported, never in a verdict
+Deribit says combo orders carry reduced fees and does not say by how much; every
+spread here is charged leg by leg. The same rules with every Deribit fee at zero
+are reported per family as a sensitivity. The owner set the question aside
+(D-117); the sensitivity stays because it costs nothing.
+
+WHAT IS NOT IN ANY NUMBER HERE
+Perpetual funding (unit and sign UNKNOWN, D-111), dated futures (B-018), the
+depth of the option book (book_summary has no sizes), Polymarket's depth (not in
+the payload), the margin a long spread ties up, Deribit's minimum order size,
+the settlement basis (BRTI or Binance against the Deribit index).
 
 Usage:
     python scripts/measure_payoff.py            # whole archive
@@ -71,6 +85,7 @@ Usage:
 import json
 import math
 import os
+import re
 import sys
 
 import fees
@@ -82,40 +97,47 @@ from kill_test_eth5k import deribit_fee_usd
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# (asset label, Kalshi series, Deribit currency) — D-096's year-end family.
-FAMILY = [
-    ('BTC', 'KXBTCY', 'BTC'),
-    ('ETH', 'KXETHY', 'ETH'),
-]
-
-# The constants of D-114. Written there before this script existed; changing
-# them here without a new record is exactly what the pre-commitment forbids,
+# ---------------------------------------------------------------------------
+# The rules of D-114. Written there before the first version of this script;
+# changing them here without a new record is what the pre-commitment forbids,
 # and tests/test_measurement.py pins them.
 REL = 0.10            # the dearer side must cost at least 10% more
-ABS = 0.001           # and at least one price step of the year-end ladders (D-078)
+ABS = 0.001           # the Kalshi year-end ladders' price step (D-078); the default step
 PERSISTENCE = 0.9     # stability.py's always_above, the same rule as D-092
 MIN_JUDGED = 10       # fewer judged snapshots and a condition is not classified
 SKIPS = (0, 1)        # tight and one-skip brackets
+NARROW_HOURS = 168.0  # D-117: both chains within a week of the close
 
 VERDICT_DEPENDS = 'the cheaper venue depends on the condition'
 VERDICT_ONE = 'one venue is cheaper wherever either is'
 VERDICT_NONE = 'no condition is stably cheaper on either venue'
 
-KALSHI, DERIBIT, TIE, UNQUOTED = 'kalshi', 'deribit', 'indistinguishable', 'unquoted'
+PREDICTION, OPTIONS, TIE, UNQUOTED = 'prediction', 'options', 'indistinguishable', 'unquoted'
 
 # The owner's example (D-114, reference ticket). Illustration only: nothing in
-# the verdict reads it.
+# any verdict reads it.
 TICKET_CAPITAL = 1000.0
 TICKET_TARGET = 0.20
 LEVERAGES = (2, 5)
 
+# (family, prediction venue, what it is) — the declared part of the template.
+FAMILIES = [
+    ('kalshi_year_end', 'Kalshi', 'KXBTCY and KXETHY year-end buckets (D-114)'),
+    ('polymarket_daily', 'Polymarket',
+     'daily "above ___ on DATE" thresholds and "price on DATE" buckets (D-117)'),
+]
+KALSHI_SERIES = [('BTC', 'KXBTCY', 'BTC'), ('ETH', 'KXETHY', 'ETH')]
+POLY_ASSETS = [('BTC', 'bitcoin', 'BTC', 'Bitcoin'), ('ETH', 'ethereum', 'ETH', 'Ethereum')]
+POLY_ABOVE = re.compile(r'^(Bitcoin|Ethereum) above ___ on ', re.I)
+POLY_BUCKETS = re.compile(r'^(Bitcoin|Ethereum) price on ', re.I)
+
 
 # ---------------------------------------------------------------------------
-# Kalshi side
+# Legs: the prediction side, whatever the venue
 
 def price(value):
-    """A Kalshi dollar price, or None when it is not a live quote. 0 and 1 are
-    what an empty side of the book reads as, and neither can be bought at."""
+    """A dollar price, or None when it is not a live quote. 0 and 1 are what an
+    empty side of the book reads as, and neither can be bought at."""
     try:
         p = float(value)
     except (TypeError, ValueError):
@@ -123,78 +145,212 @@ def price(value):
     return p if 0.0 < p < 1.0 else None
 
 
-def buckets(M):
-    """The ladder's buckets as intervals, lowest first. Edges as measure_band
-    reads them (D-067): a 'between' cap of 24,999.99 is an upper edge of
-    25,000, and a 'greater' floor of 149,999.99 a lower edge of 150,000."""
-    out = []
-    for m in M:
-        kind = m.get('strike_type')
-        if kind == 'less':
-            lo, hi = None, round(m['cap_strike'])
-        elif kind == 'greater':
-            lo, hi = round(m['floor_strike'] + .01), None
-        else:
-            lo, hi = round(m['floor_strike']), round(m['cap_strike'] + .01)
-        out.append({'lo': lo, 'hi': hi, 'ticker': m.get('ticker'),
-                    'yes_ask': price(m.get('yes_ask_dollars')),
-                    'no_ask': price(m.get('no_ask_dollars')),
-                    # The quantity at the best NO ask is the quantity at the
-                    # best YES bid: the same resting order seen from the
-                    # other side (measure_band.size_fp).
-                    'yes_ask_size': size_fp(m.get('yes_ask_size_fp')),
-                    'no_ask_size': size_fp(m.get('yes_bid_size_fp'))})
-    out.sort(key=lambda b: -1 if b['lo'] is None else b['lo'])
-    return out
+def complement(iv):
+    """The complement of an interval when it is itself an interval (only for
+    the open-ended ones); None otherwise."""
+    lo, hi = iv
+    if lo is None and hi is not None:
+        return (hi, None)
+    if hi is None and lo is not None:
+        return (None, lo)
+    return None
 
 
-def conditions(B):
-    """Every interval D-114 judges, once each: the buckets, then 'above K' and
-    'below K' for every internal boundary. Keyed by (lo, hi) so a duplicate
-    payoff collapses into one condition."""
-    seen = {}
-    for b in B:
-        seen[(b['lo'], b['hi'])] = None
-    for K in [b['lo'] for b in B if b['lo'] is not None]:
-        seen[(K, None)] = None
-        seen[(None, K)] = None
-    return list(seen)
-
-
-def inside(b, lo, hi):
-    """Is bucket b wholly inside the interval [lo, hi)? None is open-ended."""
-    b_lo = -math.inf if b['lo'] is None else b['lo']
-    b_hi = math.inf if b['hi'] is None else b['hi']
+def inside(iv, lo, hi):
+    """Is interval iv wholly inside [lo, hi)? None is open-ended."""
+    b_lo = -math.inf if iv[0] is None else iv[0]
+    b_hi = math.inf if iv[1] is None else iv[1]
     c_lo = -math.inf if lo is None else lo
     c_hi = math.inf if hi is None else hi
     return c_lo <= b_lo and b_hi <= c_hi
 
 
-def kalshi_cost(B, lo, hi, series):
-    """Cheapest way the ladder sells the interval at the top of the book, per
-    dollar of payoff, taker fee at its per-contract rate. Returns
-    {cost, route, depth, legs} or None when no route has a live quote."""
-    legs = [b for b in B if inside(b, lo, hi)]
-    rest = [b for b in B if not inside(b, lo, hi)]
+def covers(ivs, lo, hi):
+    """Do these intervals, sorted, cover [lo, hi) exactly and without gaps?"""
+    if not ivs:
+        return False
+    key = lambda iv: -math.inf if iv[0] is None else iv[0]
+    s = sorted(ivs, key=key)
+    if s[0][0] != lo or s[-1][1] != hi:
+        return False
+    return all(a[1] is not None and a[1] == b[0] for a, b in zip(s, s[1:]))
+
+
+def venue_cost(legs, lo, hi):
+    """Cheapest way the venue sells [lo, hi) at the top of the book, per dollar
+    of payoff, taker fee in. Returns {cost, route, depth, step, legs} or None.
+    A leg whose fee is UNKNOWN is not a route: a fee that quietly becomes zero
+    is the error fees.py exists to prevent."""
     routes = []
-    if legs and all(b['yes_ask'] is not None for b in legs):
-        cost = sum(b['yes_ask'] + fees.rate(b['yes_ask'], series) for b in legs)
-        sizes = [b['yes_ask_size'] for b in legs]
-        routes.append({'cost': cost, 'route': 'yes',
-                       'depth': None if None in sizes else min(sizes),
-                       'legs': [(b['ticker'], 'yes', b['yes_ask']) for b in legs]})
-    if len(rest) == 1 and rest[0]['no_ask'] is not None:
-        b = rest[0]
-        routes.append({'cost': b['no_ask'] + fees.rate(b['no_ask'], series),
-                       'route': 'no', 'depth': b['no_ask_size'],
-                       'legs': [(b['ticker'], 'no', b['no_ask'])]})
+
+    def add(parts, route):
+        total, depth, step = 0.0, [], []
+        for leg, side, p in parts:
+            if p is None:
+                return
+            r = leg['rate'](p)
+            if r is None:
+                return
+            total += p + r
+            depth.append(leg['yes_depth'] if side == 'yes' else leg['no_depth'])
+            step.append(leg['step'])
+        routes.append({'cost': total, 'route': route,
+                       'depth': None if (not depth or None in depth) else min(depth),
+                       'step': max(step),
+                       'legs': [(leg['id'], side, p) for leg, side, p in parts],
+                       '_legs': parts})
+
+    for leg in legs:
+        if leg['yes'] == (lo, hi):
+            add([(leg, 'yes', leg['yes_ask'])], 'yes')
+        if leg['no'] == (lo, hi):
+            add([(leg, 'no', leg['no_ask'])], 'no')
+    tiles = [leg for leg in legs if leg['tile'] and inside(leg['yes'], lo, hi)]
+    if len(tiles) > 1 and covers([t['yes'] for t in tiles], lo, hi):
+        add([(t, 'yes', t['yes_ask']) for t in tiles], 'yes, summed')
     if not routes:
         return None
     return min(routes, key=lambda r: r['cost'])
 
 
+def conditions(legs):
+    """Every interval the family judges, once each: what the legs sell directly
+    (YES and NO intervals), plus above and below every tile edge. Keyed by
+    (lo, hi), so the same payoff reached two ways is one condition."""
+    seen = {}
+    for leg in legs:
+        seen[leg['yes']] = None
+        if leg['no']:
+            seen[leg['no']] = None
+    for leg in legs:
+        if leg['tile']:
+            for K in leg['yes']:
+                if K is not None:
+                    seen[(K, None)] = None
+                    seen[(None, K)] = None
+    return list(seen)
+
+
 # ---------------------------------------------------------------------------
-# Deribit side
+# Family readers
+
+def kalshi_step(m):
+    """The price step the market publishes. The year-end ladders publish one
+    uniform 0.0010 band (D-078); a market that publishes nothing gets D-114's
+    ABS, which is that same step."""
+    steps = []
+    for r in (m.get('price_ranges') or []):
+        try:
+            steps.append(float(r['step']))
+        except (KeyError, TypeError, ValueError):
+            pass
+    return max(steps) if steps else ABS
+
+
+def kalshi_legs(M, series):
+    """One leg per bucket. Edges as measure_band reads them (D-067): a
+    'between' cap of 24,999.99 is an upper edge of 25,000, a 'greater' floor
+    of 149,999.99 a lower edge of 150,000. The quantity at the best NO ask is
+    the quantity at the best YES bid (measure_band.size_fp)."""
+    out = []
+    for m in M:
+        kind = m.get('strike_type')
+        if kind == 'less':
+            iv = (None, round(m['cap_strike']))
+        elif kind == 'greater':
+            iv = (round(m['floor_strike'] + .01), None)
+        else:
+            iv = (round(m['floor_strike']), round(m['cap_strike'] + .01))
+        out.append({'id': m.get('ticker'), 'yes': iv, 'no': complement(iv),
+                    'yes_ask': price(m.get('yes_ask_dollars')),
+                    'no_ask': price(m.get('no_ask_dollars')),
+                    'yes_depth': size_fp(m.get('yes_ask_size_fp')),
+                    'no_depth': size_fp(m.get('yes_bid_size_fp')),
+                    'step': kalshi_step(m), 'tile': True,
+                    'rate': (lambda p, s=series: fees.rate(p, s)),
+                    'order_fee': (lambda p, n, s=series: fees.order_fee(p, n, s))})
+    out.sort(key=lambda leg: -1 if leg['yes'][0] is None else leg['yes'][0])
+    return out
+
+
+def poly_number(s):
+    """'72,000' -> 72000.0; None when there is no number."""
+    m = re.search(r'\d+(?:\.\d+)?', (s or '').replace(',', '').replace('$', ''))
+    return float(m.group(0)) if m else None
+
+
+def poly_bucket(title):
+    """A bucket title -> its interval. '<72,000' -> (None, 72000);
+    '72,000-74,000' -> (72000, 74000); '>90,000' -> (90000, None). Ties go to
+    the higher bracket, so the interval is [lo, hi) (the markets' rule text,
+    quoted in D-117)."""
+    t = (title or '').replace(',', '').replace('$', '').strip()
+    if t.startswith('<'):
+        v = poly_number(t)
+        return None if v is None else (None, v)
+    if t.startswith('>'):
+        v = poly_number(t)
+        return None if v is None else (v, None)
+    parts = re.findall(r'\d+(?:\.\d+)?', t)
+    if len(parts) == 2:
+        return (float(parts[0]), float(parts[1]))
+    return None
+
+
+def poly_leg(m, yes_iv, no_iv, tile):
+    """One Polymarket market as a leg. The payload quotes the YES side; a
+    resting YES bid at p is a NO at 1 - p (D-117). The fee comes from the
+    market's own feeSchedule and is None — the leg unusable — when that
+    schedule is missing or unfamiliar."""
+    bid, ask = price(m.get('bestBid')), price(m.get('bestAsk'))
+    sched, enabled = m.get('feeSchedule'), m.get('feesEnabled', True)
+    try:
+        step = float(m.get('orderPriceMinTickSize'))
+    except (TypeError, ValueError):
+        step = None
+    return {'id': m.get('slug') or m.get('id'), 'yes': yes_iv, 'no': no_iv,
+            'yes_ask': ask, 'no_ask': None if bid is None else price(1.0 - bid),
+            'yes_depth': None, 'no_depth': None,
+            'step': step if step and step > 0 else ABS, 'tile': tile,
+            'rate': (lambda p, s=sched, e=enabled: fees.polymarket_rate(p, s, e)),
+            'order_fee': (lambda p, n, s=sched, e=enabled:
+                          None if fees.polymarket_rate(p, s, e) is None
+                          else n * fees.polymarket_rate(p, s, e))}
+
+
+def poly_legs(events, name):
+    """Group the day's two ladders by close date. Returns
+    {date: {'close': iso, 'legs': [...]}} for one asset."""
+    out = {}
+    for e in events or []:
+        title = e.get('title') or ''
+        if not title.lower().startswith(name.lower()):
+            continue
+        above, bucket = POLY_ABOVE.match(title), POLY_BUCKETS.match(title)
+        if not (above or bucket):
+            continue
+        close = e.get('endDate') or ''
+        if len(close) < 19:
+            continue
+        day = out.setdefault(close[:10], {'close': close, 'legs': []})
+        for m in e.get('markets') or []:
+            if not m.get('active') or m.get('closed'):
+                continue
+            if above:
+                K = poly_number(m.get('groupItemTitle'))
+                if K is None:
+                    continue
+                day['legs'].append(poly_leg(m, (K, None), (None, K), False))
+            else:
+                iv = poly_bucket(m.get('groupItemTitle'))
+                if iv is None:
+                    continue
+                day['legs'].append(poly_leg(m, iv, complement(iv), True))
+    return out
+
+
+# ---------------------------------------------------------------------------
+# The options side
 
 def digital_trade(ch, expiry, K, F, D, idx, skip, fee_on=True):
     """What it costs to BUY and what selling pays for the digital D*Q(S>K),
@@ -274,6 +430,12 @@ def chains(ch, idx, close_at):
     return out
 
 
+def band_hours(legs):
+    """How far the band reaches: the larger distance of the two chains from
+    the close, in hours."""
+    return max(abs(c['hours']) for c in legs) if legs else None
+
+
 def option_band(ch, idx, legs, lo, hi, fee_on=True):
     """Cheapest and dearest estimate over both chains and both brackets.
     None unless each chain supplies at least one estimate (a band needs both
@@ -293,53 +455,58 @@ def option_band(ch, idx, legs, lo, hi, fee_on=True):
 # ---------------------------------------------------------------------------
 # The rules
 
-def classify(kalshi, opt_min, opt_max):
-    """D-114's per-snapshot rule. Arguments are costs per dollar of payoff."""
-    if kalshi is None or opt_min is None or opt_max is None:
+def classify(pred, opt_min, opt_max, step=ABS):
+    """D-114's per-snapshot rule. Costs per dollar of payoff; step is the
+    venue's published price step for the legs bought (D-117)."""
+    if pred is None or opt_min is None or opt_max is None:
         return UNQUOTED
-    if opt_min - kalshi >= max(REL * kalshi, ABS):
-        return KALSHI
-    if kalshi - opt_max >= max(REL * opt_max, ABS):
-        return DERIBIT
+    if opt_min - pred >= max(REL * pred, step):
+        return PREDICTION
+    if pred - opt_max >= max(REL * opt_max, step):
+        return OPTIONS
     return TIE
+
+
+def blank():
+    return {PREDICTION: 0, OPTIONS: 0, TIE: 0, UNQUOTED: 0}
 
 
 def stable_class(t):
     """A condition's class across snapshots, or None when it has none: more
-    than PERSISTENCE of its judged snapshots on one venue, with at least
+    than PERSISTENCE of its judged snapshots on one side, with at least
     MIN_JUDGED judged."""
-    judged = t[KALSHI] + t[DERIBIT] + t[TIE]
+    judged = t[PREDICTION] + t[OPTIONS] + t[TIE]
     if judged < MIN_JUDGED:
         return None
-    if t[KALSHI] / float(judged) > PERSISTENCE:
-        return KALSHI
-    if t[DERIBIT] / float(judged) > PERSISTENCE:
-        return DERIBIT
+    if t[PREDICTION] / float(judged) > PERSISTENCE:
+        return PREDICTION
+    if t[OPTIONS] / float(judged) > PERSISTENCE:
+        return OPTIONS
     return None
 
 
 def verdict(tally):
-    """The pre-committed verdict of D-114 over the whole family."""
-    stable = {KALSHI: [], DERIBIT: []}
+    """The pre-committed verdict of D-114 over one family."""
+    stable = {PREDICTION: [], OPTIONS: []}
     classified = 0
     for key, t in tally.items():
-        judged = t[KALSHI] + t[DERIBIT] + t[TIE]
-        if judged >= MIN_JUDGED:
+        if t[PREDICTION] + t[OPTIONS] + t[TIE] >= MIN_JUDGED:
             classified += 1
         s = stable_class(t)
         if s:
             stable[s].append(key)
     out = {'conditions': len(tally),
            'conditions_with_enough_judged_snapshots': classified,
-           'stably_cheaper_on_kalshi': len(stable[KALSHI]),
-           'stably_cheaper_on_deribit': len(stable[DERIBIT]),
-           'rules': {'rel': REL, 'abs': ABS, 'persistence': PERSISTENCE,
-                     'min_judged': MIN_JUDGED, 'skips': list(SKIPS)}}
-    if stable[KALSHI] and stable[DERIBIT]:
+           'stably_cheaper_on_prediction_market': len(stable[PREDICTION]),
+           'stably_cheaper_on_options': len(stable[OPTIONS]),
+           'rules': {'rel': REL, 'abs_default': ABS, 'step': 'venue price step (D-117)',
+                     'persistence': PERSISTENCE, 'min_judged': MIN_JUDGED,
+                     'skips': list(SKIPS)}}
+    if stable[PREDICTION] and stable[OPTIONS]:
         out['verdict'] = VERDICT_DEPENDS
-    elif stable[KALSHI] or stable[DERIBIT]:
+    elif stable[PREDICTION] or stable[OPTIONS]:
         out['verdict'] = VERDICT_ONE
-        out['venue'] = KALSHI if stable[KALSHI] else DERIBIT
+        out['venue'] = 'prediction market' if stable[PREDICTION] else 'options'
     else:
         out['verdict'] = VERDICT_NONE
     return out, stable
@@ -357,20 +524,26 @@ def stake_for_target(cost, capital=TICKET_CAPITAL, target=TICKET_TARGET):
     return target * capital * cost / (1.0 - cost)
 
 
-def kalshi_ticket(k, series, capital=TICKET_CAPITAL, target=TICKET_TARGET):
-    """The same target on Kalshi with whole contracts and the fee's per-order
-    round-up (fees.order_fee): contracts, exact stake, profit if right, and
-    whether the resting depth at the best level covers it."""
-    stake = stake_for_target(k['cost'], capital, target)
+def venue_ticket(route, capital=TICKET_CAPITAL, target=TICKET_TARGET):
+    """The same target with whole contracts and each venue's order fee
+    (Kalshi's per-order round-up; Polymarket's rate times size, its rounding
+    UNKNOWN): contracts, exact stake, profit if right, and whether the resting
+    depth at the best level covers it (None when depth is not published)."""
+    stake = stake_for_target(route['cost'], capital, target)
     if stake is None:
         return None
-    n = int(math.ceil(stake / k['cost']))
-    exact = sum(n * p + fees.order_fee(p, n, series) for _t, _s, p in k['legs'])
+    n = int(math.ceil(stake / route['cost']))
+    exact = 0.0
+    for leg, _side, p in route['_legs']:
+        f = leg['order_fee'](p, n)
+        if f is None:
+            return None
+        exact += n * p + f
     return {'contracts': n, 'stake_usd': round(exact, 2),
             'profit_if_right_usd': round(n - exact, 2),
             'max_loss_usd': round(exact, 2),
-            'depth_at_best': k['depth'],
-            'depth_covers': None if k['depth'] is None else n <= k['depth']}
+            'depth_at_best': route['depth'],
+            'depth_covers': None if route['depth'] is None else n <= route['depth']}
 
 
 def linear_references(idx, target=TICKET_TARGET):
@@ -392,62 +565,88 @@ def linear_references(idx, target=TICKET_TARGET):
 # ---------------------------------------------------------------------------
 # One snapshot
 
+def fmt(x):
+    return format(int(x), ',') if float(x) == int(x) else format(x, ',')
+
+
 def describe(asset, lo, hi):
     if lo is None:
-        return '%s below %s' % (asset, format(hi, ','))
+        return '%s below %s' % (asset, fmt(hi))
     if hi is None:
-        return '%s above %s' % (asset, format(lo, ','))
-    return '%s in [%s, %s)' % (asset, format(lo, ','), format(hi, ','))
+        return '%s above %s' % (asset, fmt(lo))
+    return '%s in [%s, %s)' % (asset, fmt(lo), fmt(hi))
+
+
+def judge(legs, ch, idx, close_at):
+    """Every condition of one ladder set, in one snapshot."""
+    opt = chains(ch, idx, close_at)
+    hours = band_hours(opt)
+    rows = []
+    for lo, hi in conditions(legs):
+        k = venue_cost(legs, lo, hi)
+        band = option_band(ch, idx, opt, lo, hi) if opt else None
+        step = k['step'] if k else ABS
+        cls = classify(k['cost'] if k else None, band['min'] if band else None,
+                       band['max'] if band else None, step)
+        free = option_band(ch, idx, opt, lo, hi, fee_on=False) if opt else None
+        cls_free = classify(k['cost'] if k else None, free['min'] if free else None,
+                            free['max'] if free else None, step)
+        rows.append({'lo': lo, 'hi': hi, 'pred': k, 'options': band, 'class': cls,
+                     'class_without_deribit_fees': cls_free, 'band_hours': hours})
+    chains_out = opt and [{x: c[x] for x in ('side', 'expiry', 'D', 'D_estimated', 'hours')}
+                          for c in opt]
+    return rows, chains_out
 
 
 def run(stamp):
-    """Every condition of the family in one snapshot. Never raises on a
-    missing piece; the row says what was missing."""
+    """Every family in one snapshot. Returns {family: [group, ...]} where a
+    group is one ladder set (an asset's year-end ladder, or an asset's day)
+    with its rows. Never raises on a missing piece; the group says what was
+    missing."""
     g = snapshot(stamp)
-    out = {'stamp': stamp, 'assets': {}}
-    for asset, series, currency in FAMILY:
+    out = {'kalshi_year_end': [], 'polymarket_daily': []}
+    for asset, series, currency in KALSHI_SERIES:
+        grp = {'asset': asset, 'event': series}
         M, _events = event_ladder(g.kalshi, series)
         if not M:
-            out['assets'][asset] = {'error': 'no ladder'}
+            grp['error'] = 'no ladder'
+        elif ladder_shape(M)[0] != 'exhaustive':
+            grp['error'] = 'ladder not exhaustive'
+        else:
+            close_at = iso_instant(M[0].get('close_time', ''))
+            if close_at is None:
+                grp['error'] = 'no close_time'
+            else:
+                ch, idx = chain(g.deribit, currency)
+                grp['legs'] = kalshi_legs(M, series)
+                grp['rows'], grp['chains'] = judge(grp['legs'], ch, idx, close_at)
+                grp['index'] = idx
+        out['kalshi_year_end'].append(grp)
+    for asset, key, currency, name in POLY_ASSETS:
+        try:
+            ch, idx = chain(g.deribit, currency)
+        except (KeyError, TypeError):
             continue
-        shape, _breaks = ladder_shape(M)
-        if shape != 'exhaustive':
-            out['assets'][asset] = {'error': 'ladder not exhaustive (%s)' % shape}
-            continue
-        close_at = iso_instant(M[0].get('close_time', ''))
-        if close_at is None:
-            out['assets'][asset] = {'error': 'no close_time'}
-            continue
-        ch, idx = chain(g.deribit, currency)
-        legs = chains(ch, idx, close_at)
-        B = buckets(M)
-        rows = []
-        for lo, hi in conditions(B):
-            k = kalshi_cost(B, lo, hi, series)
-            band = option_band(ch, idx, legs, lo, hi) if legs else None
-            cls = classify(k['cost'] if k else None,
-                           band['min'] if band else None,
-                           band['max'] if band else None)
-            # The sensitivity to Deribit's combo fee rule, which is not
-            # modelled (see COMBO FEES in the header). Never read by the
-            # verdict.
-            free = option_band(ch, idx, legs, lo, hi, fee_on=False) if legs else None
-            cls_free = classify(k['cost'] if k else None,
-                                free['min'] if free else None,
-                                free['max'] if free else None)
-            rows.append({'lo': lo, 'hi': hi, 'kalshi': k, 'options': band,
-                         'class': cls, 'class_without_deribit_fees': cls_free})
-        out['assets'][asset] = {
-            'series': series, 'index': idx, 'rows': rows,
-            'chains': legs and [{k2: c[k2] for k2 in ('side', 'expiry', 'D',
-                                                     'D_estimated', 'hours')}
-                                for c in legs]}
+        for day, d in sorted(poly_legs((g.polymarket or {}).get(key), name).items()):
+            grp = {'asset': asset, 'event': day}
+            close_at = iso_instant(d['close'])
+            if close_at is None or not d['legs']:
+                grp['error'] = 'no close or no legs'
+            else:
+                grp['legs'] = d['legs']
+                grp['rows'], grp['chains'] = judge(d['legs'], ch, idx, close_at)
+                grp['index'] = idx
+            out['polymarket_daily'].append(grp)
     return out
 
 
 def median(xs):
     xs = sorted(x for x in xs if x is not None)
     return xs[len(xs) // 2] if xs else None
+
+
+def r6(x):
+    return None if x is None else round(x, 6)
 
 
 def main():
@@ -458,9 +657,10 @@ def main():
         every = every[-last:]
     o = summary()
 
-    tally, track, errors = {}, {}, []
-    tally_free = {}
-    newest = {}
+    fam = {name: {'all': {}, 'narrow': {}, 'free': {}, 'track': {}, 'newest': {},
+                  'narrow_rows': 0, 'errors': 0}
+           for name, _v, _d in FAMILIES}
+    errors = []
     for stamp in every:
         try:
             r = run(stamp)
@@ -470,128 +670,143 @@ def main():
         except (KeyError, TypeError, ValueError) as e:
             errors.append({'stamp': stamp, 'error': '%s: %s' % (type(e).__name__, e)})
             continue
-        for asset, a in r['assets'].items():
-            if 'error' in a:
-                errors.append({'stamp': stamp, 'asset': asset, 'error': a['error']})
+        for name, groups in r.items():
+            F = fam[name]
+            for grp in groups:
+                if 'error' in grp:
+                    F['errors'] += 1
+                    if name == 'kalshi_year_end':
+                        errors.append({'stamp': stamp, 'family': name,
+                                       'asset': grp['asset'], 'error': grp['error']})
+                    continue
+                if name == 'kalshi_year_end' or grp['chains']:
+                    prev = F['newest'].get(grp['asset'])
+                    if prev is None or prev[0] < stamp or \
+                            (prev[0] == stamp and grp['event'] < prev[1]['event']):
+                        F['newest'][grp['asset']] = (stamp, grp)
+                for row in grp['rows']:
+                    key = '%s:%s:%s:%s' % (grp['asset'], grp['event'], row['lo'], row['hi'])
+                    F['all'].setdefault(key, blank())[row['class']] += 1
+                    F['free'].setdefault(key, blank())[row['class_without_deribit_fees']] += 1
+                    narrow = row['band_hours'] is not None and row['band_hours'] <= NARROW_HOURS
+                    if narrow:
+                        F['narrow'].setdefault(key, blank())[row['class']] += 1
+                        if row['class'] != UNQUOTED:
+                            F['narrow_rows'] += 1
+                    tr = F['track'].setdefault(key, {'asset': grp['asset'], 'event': grp['event'],
+                                                     'lo': row['lo'], 'hi': row['hi'],
+                                                     'pred': [], 'opt_min': [], 'opt_max': []})
+                    if row['class'] != UNQUOTED:
+                        tr['pred'].append(row['pred']['cost'])
+                        tr['opt_min'].append(row['options']['min'])
+                        tr['opt_max'].append(row['options']['max'])
+
+    families = {}
+    for name, venue, what in FAMILIES:
+        F = fam[name]
+        v, stable = verdict(F['all'])
+        vn, stable_n = verdict(F['narrow'])
+        vf, stable_f = verdict(F['free'])
+        per_condition = []
+        for key, t in F['all'].items():
+            if t[PREDICTION] + t[OPTIONS] + t[TIE] == 0:
                 continue
-            newest[asset] = (stamp, a)
-            for row in a['rows']:
-                key = '%s:%s:%s' % (asset, row['lo'], row['hi'])
-                t = tally.setdefault(key, {KALSHI: 0, DERIBIT: 0, TIE: 0, UNQUOTED: 0})
-                t[row['class']] += 1
-                tf = tally_free.setdefault(key, {KALSHI: 0, DERIBIT: 0, TIE: 0, UNQUOTED: 0})
-                tf[row['class_without_deribit_fees']] += 1
-                tr = track.setdefault(key, {'asset': asset, 'lo': row['lo'],
-                                            'hi': row['hi'], 'kalshi': [],
-                                            'opt_min': [], 'opt_max': []})
-                if row['class'] != UNQUOTED:
-                    tr['kalshi'].append(row['kalshi']['cost'])
-                    tr['opt_min'].append(row['options']['min'])
-                    tr['opt_max'].append(row['options']['max'])
+            tr = F['track'][key]
+            per_condition.append({
+                'condition': describe(tr['asset'], tr['lo'], tr['hi']),
+                'asset': tr['asset'], 'event': tr['event'], 'lo': tr['lo'], 'hi': tr['hi'],
+                'judged': t[PREDICTION] + t[OPTIONS] + t[TIE], 'unquoted': t[UNQUOTED],
+                'cheaper_on_prediction_market': t[PREDICTION],
+                'cheaper_on_options': t[OPTIONS], 'indistinguishable': t[TIE],
+                'stable': stable_class(t),
+                'stable_in_narrow_band': stable_class(F['narrow'][key]) if key in F['narrow'] else None,
+                'stable_without_deribit_fees': stable_class(F['free'][key]),
+                'median_prediction_cost': r6(median(tr['pred'])),
+                'median_options_min': r6(median(tr['opt_min'])),
+                'median_options_max': r6(median(tr['opt_max']))})
+        per_condition.sort(key=lambda c: (c['asset'], str(c['event']),
+                                          -1 if c['lo'] is None else c['lo'],
+                                          math.inf if c['hi'] is None else c['hi']))
+        ticket = {}
+        for asset, (stamp, grp) in sorted(F['newest'].items()):
+            rows = []
+            for row in grp['rows']:
+                k, band = row['pred'], row['options']
+                rows.append({
+                    'condition': describe(asset, row['lo'], row['hi']),
+                    'prediction_cost': None if not k else r6(k['cost']),
+                    'prediction_route': None if not k else k['route'],
+                    'prediction': None if not k else venue_ticket(k),
+                    'options_cost_min': None if not band else r6(band['min']),
+                    'options_cost_max': None if not band else r6(band['max']),
+                    'options_stake_range_usd': None if not band else [
+                        None if stake_for_target(band['min']) is None else round(stake_for_target(band['min']), 2),
+                        None if stake_for_target(band['max']) is None else round(stake_for_target(band['max']), 2)],
+                    'options_depth': 'UNKNOWN (book_summary carries no sizes)',
+                    'class_in_this_snapshot': row['class']})
+            ticket[asset] = {'stamp': stamp, 'event': grp['event'], 'index': grp['index'],
+                             'chains': grp['chains'], 'band_hours': rows and grp['rows'][0]['band_hours'],
+                             'rows': rows, 'linear_references': linear_references(grp['index'])}
+        families[name] = {
+            'prediction_venue': venue, 'what': what,
+            'verdict': v,
+            'stable_conditions': {PREDICTION: sorted(stable[PREDICTION]),
+                                  OPTIONS: sorted(stable[OPTIONS])},
+            'narrow_band': {'hours': NARROW_HOURS, 'judged_rows': F['narrow_rows'],
+                            'verdict': vn,
+                            'stable_conditions': {PREDICTION: sorted(stable_n[PREDICTION]),
+                                                  OPTIONS: sorted(stable_n[OPTIONS])}},
+            'sensitivity_combo_fees': {
+                'what': 'the same rules with every Deribit fee set to zero (D-115)',
+                'reads_into_verdict': False,
+                'verdict_if_deribit_fees_were_zero': vf['verdict'],
+                'stably_cheaper_on_prediction_market': vf['stably_cheaper_on_prediction_market'],
+                'stably_cheaper_on_options': vf['stably_cheaper_on_options']},
+            'ladder_sets_skipped': F['errors'],
+            'conditions': per_condition,
+            'reference_ticket': {'capital_usd': TICKET_CAPITAL, 'target': TICKET_TARGET,
+                                 'note': 'illustration of D-114; nothing in any verdict reads it',
+                                 'assets': ticket},
+        }
 
-    v, stable = verdict(tally)
-    v_free, stable_free = verdict(tally_free)
-    sensitivity = {
-        'what': 'the same rules with every Deribit fee set to zero',
-        'why': ("Deribit states that combo orders carry reduced fees; the size of the "
-                "reduction is UNKNOWN and this script charges every leg in full. Zero "
-                "is the most favourable case for Deribit, so a condition that stays "
-                "cheaper on Kalshi here does not depend on the combo rule."),
-        'reads_into_verdict': False,
-        'verdict_if_deribit_fees_were_zero': v_free['verdict'],
-        'stably_cheaper_on_kalshi': v_free['stably_cheaper_on_kalshi'],
-        'stably_cheaper_on_deribit': v_free['stably_cheaper_on_deribit'],
-        'stable_conditions': {KALSHI: sorted(stable_free[KALSHI]),
-                              DERIBIT: sorted(stable_free[DERIBIT])},
-    }
-
-    per_condition = []
-    for key, t in tally.items():
-        tr = track[key]
-        per_condition.append({
-            'condition': describe(tr['asset'], tr['lo'], tr['hi']),
-            'asset': tr['asset'], 'lo': tr['lo'], 'hi': tr['hi'],
-            'judged': t[KALSHI] + t[DERIBIT] + t[TIE], 'unquoted': t[UNQUOTED],
-            'cheaper_on_kalshi': t[KALSHI], 'cheaper_on_deribit': t[DERIBIT],
-            'indistinguishable': t[TIE], 'stable': stable_class(t),
-            'stable_without_deribit_fees': stable_class(tally_free[key]),
-            'median_kalshi_cost': median(tr['kalshi']),
-            'median_options_min': median(tr['opt_min']),
-            'median_options_max': median(tr['opt_max'])})
-    per_condition.sort(key=lambda c: (c['asset'],
-                                      -1 if c['lo'] is None else c['lo'],
-                                      math.inf if c['hi'] is None else c['hi']))
-
-    # The reference ticket, on the newest snapshot of each asset.
-    ticket = {'capital_usd': TICKET_CAPITAL, 'target': TICKET_TARGET,
-              'note': 'illustration of D-114; nothing in the verdict reads it',
-              'assets': {}}
-    for asset, series, _cur in FAMILY:
-        if asset not in newest:
-            continue
-        stamp, a = newest[asset]
-        rows = []
-        for row in a['rows']:
-            k, band = row['kalshi'], row['options']
-            rows.append({
-                'condition': describe(asset, row['lo'], row['hi']),
-                'kalshi_cost': None if not k else round(k['cost'], 6),
-                'kalshi_route': None if not k else k['route'],
-                'kalshi': None if not k else kalshi_ticket(k, series),
-                'options_cost_min': None if not band else round(band['min'], 6),
-                'options_cost_max': None if not band else round(band['max'], 6),
-                'options_stake_range_usd': None if not band else [
-                    None if stake_for_target(band['min']) is None else round(stake_for_target(band['min']), 2),
-                    None if stake_for_target(band['max']) is None else round(stake_for_target(band['max']), 2)],
-                'options_depth': 'UNKNOWN (book_summary carries no sizes)',
-                'class_in_this_snapshot': row['class']})
-        ticket['assets'][asset] = {'stamp': stamp, 'index': a['index'],
-                                   'chains': a['chains'], 'rows': rows,
-                                   'linear_references': linear_references(a['index'])}
-
-    print("THE BUYER'S COMPARISON (D-114)")
+    print("THE BUYER'S COMPARISON (D-114, D-117)")
     print('archive: %(snapshot_count)d snapshots / %(day_count)d days' % o)
-    print('conditions: %d, with >= %d judged snapshots: %d'
-          % (v['conditions'], MIN_JUDGED, v['conditions_with_enough_judged_snapshots']))
-    print()
-    print('%-34s %6s %5s %5s %5s  %-8s %8s %8s %8s'
-          % ('condition', 'judged', 'K', 'D', 'tie', 'stable', 'kalshi', 'opt_min', 'opt_max'))
-    print('-' * 104)
-    for c in per_condition:
-        fmt = lambda x: '-' if x is None else '%.4f' % x
-        print('%-34s %6d %5d %5d %5d  %-8s %8s %8s %8s'
-              % (c['condition'][:34], c['judged'], c['cheaper_on_kalshi'],
-                 c['cheaper_on_deribit'], c['indistinguishable'], c['stable'] or '-',
-                 fmt(c['median_kalshi_cost']), fmt(c['median_options_min']),
-                 fmt(c['median_options_max'])))
-    print('-' * 104)
-    print('VERDICT: %s%s' % (v['verdict'], (' (%s)' % v['venue']) if v.get('venue') else ''))
-    print('  stably cheaper on Kalshi: %d, on Deribit: %d'
-          % (v['stably_cheaper_on_kalshi'], v['stably_cheaper_on_deribit']))
-    print('SENSITIVITY (not the verdict): with every Deribit fee set to zero,')
-    print('  stably cheaper on Kalshi: %d, on Deribit: %d -> %s'
-          % (v_free['stably_cheaper_on_kalshi'], v_free['stably_cheaper_on_deribit'],
-             v_free['verdict']))
+    for name, venue, what in FAMILIES:
+        f = families[name]
+        v = f['verdict']
+        print()
+        print('== %s — %s' % (name, what))
+        print('conditions judged: %d, with >= %d judged snapshots: %d'
+              % (len(f['conditions']), MIN_JUDGED, v['conditions_with_enough_judged_snapshots']))
+        stab = [c for c in f['conditions'] if c['stable']]
+        for c in stab[:40]:
+            print('  %-36s %-10s judged %3d  pred %8.4f  opt %8.4f-%8.4f'
+                  % ((c['condition'] + ' ' + str(c['event']))[:36], c['stable'], c['judged'],
+                     c['median_prediction_cost'], c['median_options_min'], c['median_options_max']))
+        print('VERDICT (%s vs options): %s%s' % (venue, v['verdict'],
+                                                (' (%s)' % v['venue']) if v.get('venue') else ''))
+        print('  stably cheaper on %s: %d, on the options: %d'
+              % (venue, v['stably_cheaper_on_prediction_market'], v['stably_cheaper_on_options']))
+        nb = f['narrow_band']
+        print('NARROW BAND (both chains within %d h): %d judged rows -> %s'
+              % (NARROW_HOURS, nb['judged_rows'], nb['verdict']['verdict']))
+        s = f['sensitivity_combo_fees']
+        print('SENSITIVITY (not a verdict), Deribit fees at zero: %s'
+              % s['verdict_if_deribit_fees_were_zero'])
     print()
     print('Reading note: costs are per dollar of payoff at the best level, fees in.')
     print('The options side is a band over two brackets and both chains that straddle')
     print('the close; a condition is cheaper on a venue only against the whole band.')
     print('This is what each venue charged for a payoff, not a recommendation, a')
-    print('signal or an edge (D-114). Option depth, spread margin, perpetual carry and')
-    print('the settlement basis are not in any number here.')
+    print('signal or an edge (D-114). Families are judged separately (D-117).')
 
     record = {
         'archive': o,
         'archive_source': ('private mirror' if os.environ.get('DIVERGENCE_RAW')
                            else '14-day public window'),
         'produced_by': 'scripts/measure_payoff.py',
-        'decision': 'D-114',
-        'family': [s for _a, s, _c in FAMILY],
-        'verdict': v,
-        'stable_conditions': {KALSHI: sorted(stable[KALSHI]), DERIBIT: sorted(stable[DERIBIT])},
-        'sensitivity_combo_fees': sensitivity,
-        'conditions': per_condition,
-        'reference_ticket': ticket,
+        'decision': 'D-114, D-117',
+        'families': families,
         'errors': errors,
     }
     folder = os.path.join(ROOT, 'findings')
