@@ -145,6 +145,13 @@ jobs:
       - name: Buyer's comparison — the same payoff on Kalshi and on Deribit
         run: python scripts/measure_payoff.py
 
+      # What holding a linear position has cost, per venue (D-119): Hyperliquid's
+      # and Polymarket's perpetual funding over the last day and week, and
+      # Deribit's dated futures over the index. Writes findings/carry.json.
+      # Descriptions of what was charged, not forecasts.
+      - name: Carry — funding per venue and the dated futures' premium
+        run: python scripts/measure_carry.py
+
       # The third settlement difference (D-075), measured rather than left
       # UNKNOWN: Kalshi settles on BRTI, Deribit on its own index, and both
       # halves are already archived.
