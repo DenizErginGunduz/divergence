@@ -3517,3 +3517,55 @@ unchanged with every Deribit fee set to zero. That is not the mirror and not the
 workflow, so it settles nothing on the record; B-027 makes it a sensitivity the
 workflow reports. Until then D-103 stands as written, with this caveat attached to it
 here and not edited into it.
+
+## D-116 — The buyer's comparison over the mirror: one venue is cheaper wherever either is, and it is Kalshi, on single buckets only
+**Date:** 2026-09-24 · **Applies:** D-114's pre-committed verdict (with D-115's sensitivity beside it) · **Evidence:** `findings/payoff_frontier.json`, written by the `measure` workflow run #29 over the private mirror, 112 snapshots from 2026-08-30T1611Z to 2026-09-23T2117Z; six early snapshots are not judged — five have no Kalshi stream and one has no year-end ladder — so each condition is seen at most 106 times · **Gate:** an input to G4; nothing is promoted
+
+### The verdict, in D-114's words
+**"One venue is cheaper wherever either is"** — Kalshi. Of 130 conditions, 118 have at
+least ten judged snapshots; 15 are stably cheaper on Kalshi and none is stably cheaper
+on Deribit.
+
+### Where the 15 are, and what that says in one line
+All 15 are single bounded buckets. None is an "above K" or a "below K".
+- **Buckets** (38 with enough judged snapshots): in no snapshot was any bucket cheaper
+  on Deribit. 15 were cheaper on Kalshi in more than 90% of their snapshots — eight on
+  BTC (50,000–70,000 and 90,000–110,000, in 5,000-dollar steps) and seven on ETH
+  (1,000–2,250 and 4,000–4,500, in 250-dollar steps); the other 23 were
+  cheaper on Kalshi in some snapshots and indistinguishable in the rest.
+- **"Above K" and "below K"** (80 with enough judged snapshots): none is stable either
+  way. Deribit was the cheaper venue in at least one snapshot for 35 of them, Kalshi
+  for 8; the most persistent is ETH above 2,500, cheaper on Deribit in 75 of 106
+  snapshots — 71%, under the 90% bar, so it is not a finding and is not reported as one.
+
+The one line D-114 asked for: **for a single year-end bucket, Kalshi's ask plus its fee
+was never dearer than the Deribit replication at executable prices, and was materially
+cheaper in over 90% of snapshots for 15 of 38 buckets; for "above K" and "below K"
+neither venue was persistently cheaper.**
+
+### Why that shape, offered as a reading and not as a measurement
+A bucket is one Kalshi contract and four Deribit legs — two vertical spreads, each
+crossing two bid-ask spreads and paying two fees. "Above K" is two Deribit legs and,
+on Kalshi, a sum of buckets, each with its own spread and fee. Each venue is cheapest
+where its native contract matches the payoff. Nothing in the script tests this
+explanation; it is consistent with the counts above and is written down so that the
+next record can test it rather than assume it.
+
+### The combo-fee sensitivity (D-115)
+With every Deribit fee set to zero, 13 of the 15 stay stably cheaper on Kalshi; the
+verdict is unchanged ("one venue is cheaper wherever either is", Kalshi, none on
+Deribit). Two buckets — ETH 1,500–1,750 and ETH 4,250–4,500 — depend on the fee and
+therefore on the unquantified combo discount. The combo books' own quotes are not in
+the archive (B-027).
+
+### What this does and does not change
+It does not name a trade, a recommendation or an edge; it is what each venue charged
+for the same payoff at the quotes that existed. Under D-114's second outcome, V0, if it
+is ever built, reduces on cost to the line above, and its case would have to rest on
+something else — the payoff shape, the size a user can actually get (Kalshi's depth is
+in the reference ticket; Deribit's is not archived), or the view the user brings. G4's
+other conditions — discovery, data rights, venue access — are untouched and still
+open. The band's late end is the March chain, 2,019 hours after the Kalshi close;
+December's Deribit weeklies will narrow it, and the same script re-run then is the
+natural next test of whether any "above K" lean becomes persistent. Polymarket's
+ladders are B-026.
