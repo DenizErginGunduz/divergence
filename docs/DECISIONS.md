@@ -3832,3 +3832,85 @@ them. Deribit's perpetual funding remains `UNKNOWN` (D-111). Kalshi's commodity
 series are not added here. The data-rights order the owner set on 2026-09-24 —
 raw data private and derived data public, evaluated at the end — is B-029; it does
 not change what this record collects.
+
+## D-120 — More markets and more dates for the same view: Kalshi's commodity ladders, Polymarket's commodity and index events, Hyperliquid's outcome markets, a month of funding, and a horizon matcher
+**Date:** 2026-09-24 · **Owner's decision of:** 2026-09-24 · **Builds on:** D-119 · **Produced by:** `collector/collect.py` (`kalshi()`, `polymarket_other()`, `hip4()`, `carry()`), `scripts/measure_carry.py`, `scripts/horizons.py`, `docs/ARCHIVE_SCHEMA.md` · **Archive version:** 7 → 8
+
+### Why
+The owner wants more of what a buyer can use for one view, and above all more dates:
+a view held for a week should find something even where no venue lists that exact
+date. A diagnosis of the empty cells on the prototype card found two kinds. Most are
+markets that do not exist on that date (no terminal prediction market settles on
+30 October or 27 November; Kalshi lists its crypto dailies one to two days ahead,
+Polymarket six). Two are ours: Kalshi's catalogue is read from the Crypto and
+Financials categories only, so the commodity ladders were never seen; and the pass
+that asks Kalshi for OPEN markets reads one page of 200, while the probe found 318
+open KXBTCD markets and 390 open KXETHD.
+
+### The probe
+`probe_sources.yml`, run 36048362565, from a GitHub runner:
+
+- Kalshi's Commodities category lists 152 series. The ones on our assets are terminal
+  ladders ("close price above X on date") at three cadences: daily (KXWTI, KXBRENTD,
+  KXGOLDD, KXSILVERD), weekly, settling Friday (KXWTIW, KXBRENTW, KXGOLDW, KXSILVERW)
+  and monthly, settling on the last day (KXBRENTMON, KXGOLDMON, KXSILVERMON,
+  KXWTIMONTHLY). KXWTI also lists a 3 November event. KXBTCMAXW and KXINXW had no
+  open markets.
+- Polymarket's `commodities` tag carries "WTI Crude Oil (WTI) closes above ___ on
+  <date>" (a daily terminal ladder), weekly and monthly "hit" events for WTI, gold and
+  silver, and "What will Gold (GC) hit__ by end of December?". The `sp-500` tag
+  carries "What will S&P 500 (SPX) close at end of 2026?" and "hit by end of
+  December". Up/Down markets are there too and are not a price level.
+- Hyperliquid answers `outcomeMeta` (74,653 bytes) with outcomes whose `name` is a
+  template — `template:binaryPrice` (a threshold at a time) or `template:priceTouch`
+  (a target touched before a time) — and whose `description` names the underlying
+  perpetual, e.g. `perp:BTC|…|threshold:100000|time:20261001-0000` and
+  `perp:xyz:CL|…|threshold:83.196|time:20260929-2100`. `allMids` returns 450
+  outcome sides (`#<10 × outcome + side>`), as mids.
+
+### What is collected
+- **Kalshi:** the catalogue adds the Commodities category. A new selection,
+  `commodities`, takes the series whose ticker is `KX(WTI|BRENT|GOLD|SILVER)` followed
+  by `D`, `W`, `MON`, `MONTHLY` or nothing, plus their `MAX`/`MIN` touch series, and
+  stores their markets under a new key `commodities` beside `markets` and
+  `observed`, by the same `markets()` pass. The OPEN pass pages to at most five pages
+  instead of one.
+- **Polymarket, other events:** a new stream `raw/polymarket_other/`, the Gamma events
+  for the tags `commodities` and `sp-500`, exactly as returned. A separate stream, not
+  new keys in `polymarket_events`, so the trade-flow stage and every reader of the
+  crypto ladders are unchanged.
+- **Hyperliquid outcome markets (HIP-4):** a new stream `raw/hip4/`: `outcomeMeta`
+  whole, `allMids` whole, and the `l2Book` of both sides of every `binaryPrice`
+  outcome on BTC, ETH, xyz:CL, xyz:BRENTOIL, xyz:GOLD, xyz:SILVER or xyz:SP500 whose
+  time is after the run, at most 80 books a run. Mids are not asks; the books are
+  what a buyer would pay. No number from this stream is shown until its settlement,
+  fees and the relation between the two sides' books are read in the HIP-4
+  documentation and written down, the same condition D-111 set for funding.
+- **Funding over a month:** the first carry run of each UTC day asks for 31 days
+  instead of eight, so a 30-day mean exists from the first day and every day after;
+  the other runs keep eight. Hyperliquid's history is paged if a reply reaches 500
+  rows; Polymarket's paging cap rises to nine pages.
+
+### What is derived
+- `measure_carry.py` adds a 720-hour window beside 24 and 168, with the same 90%
+  coverage rule.
+- `scripts/horizons.py` writes `findings/horizons.json`: for each asset and each
+  instrument family, the dates on which something settles, read from the newest
+  snapshot of each stream. Perpetuals have no date and match every horizon, carried
+  by the funding means.
+
+### The horizon rule
+For a horizon *h* days away, a dated instrument qualifies if it settles within
+max(1 day, 30% of *h*) of the horizon, and the offset is always shown with it
+("30 Sep, 1 day early"). Nothing is silently substituted, and nothing outside the
+window is offered. The nearest qualifying date is shown first. The 30% is the
+owner's approval of 2026-09-24 of the proposed default; it is a display rule, not a
+measurement rule, and no verdict of D-114 depends on it.
+
+### What the owner decided not to do
+Kalshi's and Deribit's perpetuals, dYdX, Lighter, Coinbase, Bybit, Limitless, Binance
+options, Derive and Aevo are not collected. Relaxing D-117's two-chain rule for the
+same-day options band is held. The card calls the linear path "futures" and means the
+perpetual: its gain moves with the price, and beside it stands only the carry, as the
+day, week and month means of funding. Deribit's dated futures stay in the archive and
+off the card.
