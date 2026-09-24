@@ -16,6 +16,7 @@ raw/
   deribit/           YYYY-MM-DD/ deribit_<STAMP>.json.gz
   polymarket_events/ YYYY-MM-DD/ polymarket_events_<STAMP>.json.gz
   funding/           YYYY-MM-DD/ funding_<STAMP>.json.gz      (archive version 6+)
+  carry/             YYYY-MM-DD/ carry_<STAMP>.json.gz        (archive version 7+)
   events/trades/     YYYY-MM-DD/ trades_<STAMP>.ndjson.gz
   holders/           YYYY-MM-DD/ holders_<STAMP>.json.gz
   coverage/          YYYY-MM-DD/ coverage_<STAMP>.json
@@ -147,6 +148,62 @@ the `UNKNOWN`s above before it uses a number.
 asked for, so an empty run is visible without opening the file. `state/latest.json`
 lists the newest funding file under `paths.funding`; it is not one of the streams
 whose absence marks the pointer incomplete.
+
+---
+
+## `carry/` — other venues' perpetuals and Deribit's dated futures
+
+Written every run since archive version 7 (D-119, 2026-09-24). One gzipped JSON file
+per run. Every vendor payload sits under `response` exactly as returned, wrapped as
+`{"ok": true, "value": <payload>}` or `{"ok": false, "error": "<message>"}` so one
+failed call is visible without failing the stage. `request` blocks are ours.
+
+```json
+{
+  "window": { "start_ms": ..., "end_ms": ... },            // eight days ending at the run
+  "hyperliquid": {
+    "perpDexs": { "ok": true, "value": [ null, { "name": "xyz", ... } ] },
+    "ctx": { "main": { "request": {"type": "metaAndAssetCtxs"}, "response": {...} },
+             "xyz":  { "request": {"type": "metaAndAssetCtxs", "dex": "xyz"}, "response": {...} } },
+    "funding": { "BTC":    { "request": {"type": "fundingHistory", "coin": "BTC",
+                                         "startTime": ..., "endTime": ...},
+                             "response": { "ok": true, "value": [ { "coin", "fundingRate",
+                                                                    "premium", "time" } ] } },
+                 "xyz:CL": { ... } },
+    "absent": [ "xyz:SILVER" ]                              // not in that dex's universe, not asked
+  },
+  "polymarket_perps": {
+    "tickers": { "ok": true, "value": [ { "instrument_id", "symbol", "index_price",
+                                          "mark_price", "funding_rate", "next_funding", ... } ] },
+    "instruments": { ... },                                 // first run of the day only
+    "funding": { "WTIOIL-USD": [ { "request": { "instrument_id", "start_timestamp",
+                                                "end_timestamp" },
+                                   "response": { "ok": true, "value": { "data": [ { "funding_rate",
+                                                                                    "timestamp" } ],
+                                                                        "more": false } } } ] },
+    "absent": [ ... ]
+  },
+  "deribit_futures": {
+    "BTC": { "book_summary": {...}, "instruments": {...}, "index": {...} },  // kind=future; btc_usd
+    "ETH": { ... }
+  }
+}
+```
+
+**Units (D-119).** Hyperliquid `fundingRate` and Polymarket `funding_rate` are the
+hourly rate as a fraction; positive means the long pays. Hyperliquid's `time` lands
+a few milliseconds after the hour; readers floor to the hour before de-duplicating.
+HIP-3 funding multipliers are in `perpDexs` (`assetToFundingMultiplier`).
+Polymarket's history is paged, at most four pages, toward whichever end its rows
+show; each page is stored. The unit of its `start_timestamp` parameter is not stated
+by the venue; milliseconds are sent and the rows show whether they fell inside.
+
+**Overlap.** Eight days asked every run, so each hour appears in about 24 files.
+Readers de-duplicate; `measure_carry.py` counts hours two files report differently.
+
+`_meta.carry_summary` carries rows per coin and per symbol, the absent lists, and
+whether each Deribit block came back. `state/latest.json` lists the newest file under
+`paths.carry`; like `funding`, it is not a required stream.
 
 ---
 
