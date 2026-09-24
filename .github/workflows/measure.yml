@@ -69,7 +69,9 @@ jobs:
             exit 0
           fi
           cd /tmp/mirror
-          git sparse-checkout set raw/_meta raw/kalshi raw/deribit raw/polymarket_events
+          # raw/carry (D-119) is read by measure_carry.py; without it the carry step
+          # measured an empty directory on the first run.
+          git sparse-checkout set raw/_meta raw/kalshi raw/deribit raw/polymarket_events raw/carry
           echo "DIVERGENCE_RAW=/tmp/mirror/raw" >> "$GITHUB_ENV"
           echo "mirror: $(du -sh /tmp/mirror/raw | cut -f1), $(ls /tmp/mirror/raw/_meta | wc -l) days"
 
