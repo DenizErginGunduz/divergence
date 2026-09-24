@@ -247,6 +247,20 @@ and +0.82 percentage points for BTC and +0.21 and +0.48 for ETH. Any Note 3 that
 does not engage that number is not worth writing. Whether our tenor and venue mix
 can say anything it does not is UNKNOWN and is the first question to answer when
 Note 3 is specified.
+---
+
+## B-026 — The buyer's comparison beyond the year-end Kalshi ladders (2026-09-24)
+D-114 judges one family: `KXBTCY` and `KXETHY`, the ladders with the longest
+history and an exhaustive shape. The same question — for the same terminal payoff,
+which venue is cheaper to buy it on — applies to the Polymarket terminal ladders,
+and those are the ones a Polymarket-facing product would show. Not done in D-114
+because their nearest Deribit expiries usually do not straddle the close (D-082), so
+the options side is a one-sided bound rather than a band, and the D-114 rules were
+written for a band. Needs its own reading of what "cheaper" means against a bound
+before any number is computed. Also open, and deliberately not in D-114: the
+intraday Kalshi series, the perpetual's carry once someone states a reading of the
+funding unit (D-111), and dated futures (B-018).
+
 ## B-011 — The "x band" grammar
 Removed by D-076, which replaced `threshold` with an executable envelope.
 
