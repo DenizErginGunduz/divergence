@@ -5,7 +5,7 @@ Reads raw/carry/ (archive version 7+) and writes findings/carry.json:
 
   perpetuals  Hyperliquid (first dex and trade[XYZ]) and Polymarket's perpetuals.
               Hourly funding points, de-duplicated on time across every file, then
-              the mean hourly rate over the last 24 and 168 hours ending at the
+              the mean hourly rate over the last 24, 168 and 720 hours ending at the
               newest point, and what a $1,000 long pays at that mean per day and per
               week. A window with fewer than 90% of its hours present is UNKNOWN.
   futures     Deribit's dated futures at the newest snapshot: mark over index minus
@@ -29,7 +29,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, 'findings', 'carry.json')
 
 HOUR_MS = 3600 * 1000
-WINDOWS = (24, 168)
+WINDOWS = (24, 168, 720)      # a day, a week, a month (D-120)
 MIN_COVERAGE = 0.9          # the same 90% as D-114's persistence
 NOTIONAL = 1000.0
 
@@ -121,11 +121,16 @@ def carry_files():
 
 
 def _hl_rows(block):
-    r = block.get('response') or {}
-    if not r.get('ok') or not isinstance(r.get('value'), list):
-        return []
-    return [(int(x['time']), float(x['fundingRate'])) for x in r['value']
-            if x.get('time') is not None and x.get('fundingRate') is not None]
+    """One coin's funding block: the first reply and, since D-120, any further
+    pages under `more_pages`."""
+    rows = []
+    for page in [block] + list(block.get('more_pages') or []):
+        r = page.get('response') or {}
+        if not r.get('ok') or not isinstance(r.get('value'), list):
+            continue
+        rows += [(int(x['time']), float(x['fundingRate'])) for x in r['value']
+                 if x.get('time') is not None and x.get('fundingRate') is not None]
+    return rows
 
 
 def _poly_rows(pages):
@@ -213,6 +218,7 @@ def run(files):
                 'mean_hourly': m, 'coverage': round(cov, 4),
                 'long_pays_per_1000_per_day': long_pays(m, 24),
                 'long_pays_per_1000_per_week': long_pays(m, 168),
+                'long_pays_per_1000_per_30_days': long_pays(m, 720),
             }
         last = [series[h] for h in series if h > end - 168 * HOUR_MS]
         rec['share_positive_168h'] = sum(1 for x in last if x > 0) / float(len(last))
