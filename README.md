@@ -69,8 +69,8 @@ after the contract settles (D-103).
 ## What has actually been measured
 
 Three venues, collected three times daily since 2026-08-30. The public `raw/` window
-is a rolling 14 days; the results below were computed over 68 snapshots and 17 days
-from the private mirror, last snapshot 2026-09-16T1314Z. Those are two different
+is a rolling 14 days; the results below were computed over 112 snapshots and 24 days
+from the private mirror, last snapshot 2026-09-23T2117Z. Those are two different
 things on purpose, and D-089 says why.
 
 Every number in this section is produced by a script in this repository, and
@@ -79,11 +79,11 @@ Every number in this section is produced by a script in this repository, and
 
 | setup | result | strength |
 |---|---|---|
-| Kalshi year-end buckets | 3 of 44 rungs show an edge at quoted prices after both venues' fees, in over 90% of their observations — the weakest in 61 of 62. A quoted-executable discrepancy, not a size-executable one (D-095); no dollar figure is quoted as a trade. | model-free |
+| Kalshi year-end buckets | 3 of 44 rungs show an edge at quoted prices after both venues' fees, in over 90% of their observations — the weakest in 102 of 106. A quoted-executable discrepancy, not a size-executable one (D-095); no dollar figure is quoted as a trade. | model-free |
 | The same, against BOTH bracketing expiries (mark prices) | only **1 of the 3** clears the option value at either end. The other two cannot be separated from a seven-day expiry gap. | model-free |
 | The survivor, against executable prices and the local strike grid | **not a surviving discrepancy**: the pre-committed kill test (D-092) finds the margin positive in 0 of 62 snapshots (D-103). 0 of 44 rungs in the declared family survive the full test (D-096). | model-free |
-| Polymarket dailies | 9.9% of quotable rungs show an edge under the same test. Was **24.2%** until the same repairs reached this script; more than half of it was method (D-085). | model-free, noisy |
-| Long-horizon touch bound | 0.3% arithmetic violations; 93.3% above the 2x bound | model-dependent, weak |
+| Polymarket dailies | 10% of quotable rungs show an edge under the same test. Was **24.2%** until the same repairs reached this script; more than half of it was method (D-085). | model-free, noisy |
+| Long-horizon touch bound | 0.2% arithmetic violations; 92.9% above the 2x bound | model-dependent, weak |
 
 The three Kalshi rungs are all tails: BTC above $150k, ETH above $5k, ETH **below**
 $1k. Nothing in the body of any distribution shows an edge. On mark prices, after the
