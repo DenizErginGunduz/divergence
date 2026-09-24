@@ -273,6 +273,46 @@ sensitivity the buyer's comparison already reports, so that "the null does not
 depend on the combo rule" is a number the workflow produced over the mirror, not
 a local check. D-103's verdict is not re-opened by this item; it is tested.
 
+---
+
+## B-028 — Binance funding and basis from a runner that Binance serves (2026-09-24, D-119)
+The owner's first preference for funding. GitHub's hosted runners are in the US and
+`fapi.binance.com` refuses them with 451 on eligibility grounds (D-119's probe). The
+refusal is about where the runner is, not where the owner is. Ways to meet it: a
+runner in a region Binance serves (a paid cloud machine, or a self-hosted runner,
+which would also need the "no collector on the owner's machine" rule revisited), or
+the monthly `data.binance.vision` files for history only. Parked because the owner
+judged Hyperliquid enough for now: it converges with Binance within a short time.
+Not to be met by a different Binance host that happens to answer (D-119).
+
+---
+
+## B-029 — Data rights, taken up last (2026-09-24, owner's order)
+The owner's words: "Önce bu yayın hakları olayını göz ardı edeceğiz sonra dediğin
+gibi ham veri herkese açık olmayıp türetilmiş veriyi yayınlayacağız. O lisans
+olayları en son da değerlendirilir." Recorded for when it is taken up:
+
+- Kalshi's Developer Agreement v1.1 was read on 2026-09-24 through a fetch tool (the
+  owner is to confirm against the PDF). §3: "Use of Kalshi APIs is expressly limited
+  to facilitating a members own trading on the Exchange; all other usages are
+  disallowed and may result in account suspension." §3.1 lists "Collecting, caching,
+  aggregating, or storing data or content accessed via the API except for purposes
+  of facilitating your own trading on Kalshi. You may not share such data or content
+  with third parties in any manner without prior written authorization from
+  Kalshi." It answers the "unread" line in `DATA_SOURCES.md` *Still open*, which is
+  rewritten when this item is taken up.
+- Deribit's membership terms (clause 2.10) reach derived data as well as raw.
+- Hyperliquid's terms (last updated 2026-06-15) have no data or redistribution
+  clause; the nearest is automated use that "exceed[s] reasonable usage, bypass[es]
+  rate limits". OKX's API agreement forbids publishing market data from public
+  endpoints and building an analytics platform on it. Binance's Vision datasets are
+  CC BY-NC-SA 4.0 with a research permission.
+- The direction the owner set: the public repository stops carrying raw vendor
+  payloads (the private mirror keeps them), and only derived numbers are published.
+  Written permission from Kalshi and Deribit is to be assessed then; the options
+  considered on 2026-09-24 were a narrow request (derived, attributed,
+  non-commercial) through Kalshi Research or Builders, and info@deribit.com.
+
 ## B-011 — The "x band" grammar
 Removed by D-076, which replaced `threshold` with an executable envelope.
 
