@@ -28,6 +28,7 @@ import measure_band
 import measure_exhaustive
 import measure_touch
 import kill_test_eth5k
+import measure_payoff
 import discount_referee
 import prune_archive
 from stability import Stability
@@ -1054,6 +1055,149 @@ class FundingStage(unittest.TestCase):
     def test_the_archive_version_says_the_stream_exists(self):
         """A reader checks `_meta.version` before assuming raw/funding is there."""
         self.assertEqual(self.ns['ARCHIVE_VERSION'], 6)
+
+
+class PayoffBuyerComparison(unittest.TestCase):
+    """D-114: the buyer's comparison. One venue, one side's costs, the options
+    side as a band, and the verdict rules written before the script. Chains
+    here are in USD, shaped like measure_band.chain() output for one expiry."""
+
+    IDX = 100000.0
+    D = 0.98
+
+    def chain(self):
+        # strike -> (mark, bid, ask) in USD, calls falling and puts rising in K.
+        calls = {90000: (15000, 14800, 15200), 100000: (8000, 7900, 8100),
+                 110000: (4000, 3900, 4100)}
+        puts = {90000: (5000, 4900, 5100), 100000: (8000, 7900, 8100),
+                110000: (14000, 13800, 14200)}
+        mk = lambda d: {float(k): {'mark': float(m), 'bid': float(b), 'ask': float(a)}
+                        for k, (m, b, a) in d.items()}
+        return {'E': {'C': mk(calls), 'P': mk(puts)}}
+
+    def fee(self, x):
+        return kill_test_eth5k.deribit_fee_usd(x, self.IDX)
+
+    def test_the_constants_are_the_ones_d114_wrote_down(self):
+        self.assertEqual(measure_payoff.REL, 0.10)
+        self.assertEqual(measure_payoff.ABS, 0.001)
+        self.assertEqual(measure_payoff.PERSISTENCE, 0.9)
+        self.assertEqual(measure_payoff.PERSISTENCE, kill_test_eth5k.PERSISTENCE)
+        self.assertEqual(measure_payoff.MIN_JUDGED, 10)
+        self.assertEqual(tuple(measure_payoff.SKIPS), (0, 1))
+
+    def test_kalshi_is_cheaper_only_against_the_cheapest_option_estimate(self):
+        c = measure_payoff.classify
+        self.assertEqual(c(0.05, 0.06, 0.20), measure_payoff.KALSHI)
+        # 0.004 short of the 10% margin on 0.05: a tie, however dear the band's top.
+        self.assertEqual(c(0.05, 0.054, 0.90), measure_payoff.TIE)
+
+    def test_deribit_is_cheaper_only_when_its_dearest_estimate_is(self):
+        c = measure_payoff.classify
+        self.assertEqual(c(0.10, 0.02, 0.08), measure_payoff.DERIBIT)
+        self.assertEqual(c(0.10, 0.02, 0.095), measure_payoff.TIE)
+
+    def test_one_price_step_is_the_floor_on_a_tail(self):
+        """On a 0.4-cent tail a 10% margin is 0.04 cents, below one step of
+        the ladder's price grid; the step is what binds (D-078)."""
+        self.assertEqual(measure_payoff.classify(0.004, 0.0048, 0.01), measure_payoff.TIE)
+        self.assertEqual(measure_payoff.classify(0.004, 0.0051, 0.01), measure_payoff.KALSHI)
+
+    def test_a_missing_side_is_unquoted_not_a_tie(self):
+        c = measure_payoff.classify
+        self.assertEqual(c(None, 0.1, 0.2), measure_payoff.UNQUOTED)
+        self.assertEqual(c(0.1, None, None), measure_payoff.UNQUOTED)
+
+    def test_the_call_side_buys_at_the_ask_and_pays_the_crossed_fee(self):
+        """K above the forward: the bracket around 100,000 is 90,000 / 110,000,
+        long the lower call at its ask, short the upper at its bid."""
+        t = measure_payoff.digital_trade(self.chain(), 'E', 100000.0, 95000.0,
+                                         self.D, self.IDX, 0)
+        w = 20000.0
+        self.assertEqual(t['side'], 'C')
+        self.assertAlmostEqual(t['buy'], (15200 - 3900) / w + (self.fee(15200) + self.fee(3900)) / w)
+        self.assertAlmostEqual(t['sell'], (14800 - 4100) / w - (self.fee(14800) + self.fee(4100)) / w)
+        self.assertGreater(t['buy'], t['sell'])
+
+    def test_the_put_side_holds_d_and_trades_the_put_spread(self):
+        t = measure_payoff.digital_trade(self.chain(), 'E', 100000.0, 105000.0,
+                                         self.D, self.IDX, 0)
+        w = 20000.0
+        self.assertEqual(t['side'], 'P')
+        self.assertAlmostEqual(t['buy'], self.D - (13800 - 5100) / w
+                               + (self.fee(5100) + self.fee(13800)) / w)
+        self.assertAlmostEqual(t['sell'], self.D - (14200 - 4900) / w
+                               - (self.fee(4900) + self.fee(14200)) / w)
+
+    def test_below_is_d_less_the_digital_sold_and_both_sides_cost_at_least_d(self):
+        ch, F = self.chain(), 95000.0
+        t = measure_payoff.digital_trade(ch, 'E', 100000.0, F, self.D, self.IDX, 0)
+        below = measure_payoff.option_cost(ch, 'E', None, 100000.0, F, self.D, self.IDX, 0)
+        above = measure_payoff.option_cost(ch, 'E', 100000.0, None, F, self.D, self.IDX, 0)
+        self.assertAlmostEqual(below, self.D - t['sell'])
+        # Owning both halves is owning D for sure; crossing spreads cannot make it cheaper.
+        self.assertGreaterEqual(above + below, self.D)
+
+    def test_zero_fees_are_the_combo_sensitivity_and_only_lower_the_cost(self):
+        ch, F = self.chain(), 95000.0
+        full = measure_payoff.option_cost(ch, 'E', 100000.0, None, F, self.D, self.IDX, 0)
+        free = measure_payoff.option_cost(ch, 'E', 100000.0, None, F, self.D, self.IDX, 0,
+                                          fee_on=False)
+        self.assertAlmostEqual(free, (15200 - 3900) / 20000.0)
+        self.assertLess(free, full)
+
+    def ladder(self):
+        mk = lambda kind, fl, cap, ask, bid, t: {
+            'strike_type': kind, 'floor_strike': fl, 'cap_strike': cap, 'ticker': t,
+            'yes_ask_dollars': '%.4f' % ask, 'yes_bid_dollars': '%.4f' % bid,
+            'no_ask_dollars': '%.4f' % (1 - bid), 'yes_ask_size_fp': '100.00',
+            'yes_bid_size_fp': '40.00'}
+        return measure_payoff.buckets([
+            mk('less', None, 100000, 0.30, 0.28, 'L'),
+            mk('between', 100000, 109999.99, 0.40, 0.38, 'M'),
+            mk('greater', 109999.99, None, 0.35, 0.33, 'G')])
+
+    def test_every_payoff_is_judged_once(self):
+        """Above the top boundary is the 'greater' rung and below the bottom
+        one is the 'less' rung; they collapse into the bucket they are."""
+        conds = sorted(measure_payoff.conditions(self.ladder()), key=str)
+        self.assertEqual(len(conds), 5)
+        self.assertIn((None, 110000), conds)
+        self.assertIn((100000, None), conds)
+
+    def test_kalshi_takes_the_no_side_when_it_is_the_cheaper_way(self):
+        B = self.ladder()
+        k = measure_payoff.kalshi_cost(B, None, 110000, 'KXBTCY')
+        yes = 0.30 + fees.rate(0.30) + 0.40 + fees.rate(0.40)
+        no = 0.67 + fees.rate(0.67)
+        self.assertLess(no, yes)
+        self.assertEqual(k['route'], 'no')
+        self.assertAlmostEqual(k['cost'], no)
+        self.assertEqual(k['depth'], 40.0)       # the resting YES bid, seen as a NO ask
+
+    def test_the_verdict_has_three_outcomes_and_a_minimum_sample(self):
+        mp = measure_payoff
+        z = lambda k=0, d=0, t=0: {mp.KALSHI: k, mp.DERIBIT: d, mp.TIE: t, mp.UNQUOTED: 0}
+        v, _ = mp.verdict({'a': z(k=20), 'b': z(t=20)})
+        self.assertEqual((v['verdict'], v['venue']), (mp.VERDICT_ONE, mp.KALSHI))
+        v, _ = mp.verdict({'a': z(k=20), 'b': z(d=19, t=1)})
+        self.assertEqual(v['verdict'], mp.VERDICT_DEPENDS)
+        v, _ = mp.verdict({'a': z(k=18, t=2), 'b': z(t=20)})   # 90% is not MORE than 90%
+        self.assertEqual(v['verdict'], mp.VERDICT_NONE)
+        v, _ = mp.verdict({'a': z(k=9)})                        # too few to classify
+        self.assertEqual(v['verdict'], mp.VERDICT_NONE)
+
+    def test_the_stake_for_a_target_and_the_round_up_on_kalshi(self):
+        self.assertAlmostEqual(measure_payoff.stake_for_target(0.5), 200.0)
+        self.assertAlmostEqual(measure_payoff.stake_for_target(0.2), 50.0)
+        self.assertIsNone(measure_payoff.stake_for_target(1.02))
+        k = {'cost': 0.5 + fees.rate(0.5), 'depth': 1000.0,
+             'legs': [('X', 'yes', 0.5)]}
+        t = measure_payoff.kalshi_ticket(k, 'KXBTCY')
+        n = t['contracts']
+        self.assertAlmostEqual(t['stake_usd'], round(n * 0.5 + fees.order_fee(0.5, n), 2))
+        self.assertAlmostEqual(t['profit_if_right_usd'], round(n - t['stake_usd'], 2), places=2)
+        self.assertTrue(t['depth_covers'])
 
 
 if __name__ == '__main__':
