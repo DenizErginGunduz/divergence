@@ -3327,3 +3327,145 @@ stay as written. No section was added that praises the project; the picture, the
 badges and the link are things a visitor can verify, not things they are asked to
 believe. The empty Wiki and Projects tabs are switched off because an empty tab is a
 promise of content that does not exist.
+
+## D-114 — The buyer's comparison: for the same condition, which venue is cheaper to buy it on, and does the answer depend on the condition
+**Date:** 2026-09-24 · **Asked by:** the owner, 2026-09-24 · **Produces:** `scripts/measure_payoff.py`, `findings/payoff_frontier.json`, the `payoff_frontier` block of `findings/latest.json` · **Gate:** an input to G4 (V0), nothing more · **Builds on:** D-108 (the worked example), D-092/D-103 (the kill test), D-095, D-096
+
+### The question, and why it is not the kill test again
+Every test so far asked an arbitrageur's question: sell one venue, buy the other, pay
+both sides' costs — is anything left? D-103 answered it: nothing survives. The owner's
+question on 2026-09-24 is a different one. Someone with a view does not trade both
+venues; they buy the condition they believe in on ONE of them, and pay one side's
+costs. For that person the question is not "is there a spread to capture" but "for
+the payoff I want, which venue sells it cheaper". The arbitrage test cannot answer
+that: a gap that is smaller than two sides' costs can still be larger than one.
+
+So this record asks: **for each condition on the year-end BTC and ETH terminal price,
+is buying it on Kalshi or buying the same payoff from the Deribit option chain
+materially and persistently cheaper — and does the cheaper venue change from one
+condition to another?** If it never changes, a product built on the comparison is a
+one-line rule and not a product. If it does, the comparison carries information and
+G4 has an input. That is the whole reach of the answer.
+
+D-108 specified one row of this — one view, four instruments, every layer. This record
+is the screen before it: across the whole ladder, on executable prices only, is there
+any row where the choice of venue is not obvious in advance?
+
+### The family
+The two year-end ladders of D-096's family, `KXBTCY` and `KXETHY`, in every snapshot
+where they are exhaustive (D-105). The conditions, each identified by asset, kind and
+edges so that the same condition is followed across snapshots:
+- every bucket as listed — "the terminal price is in [lo, hi)", including the two
+  open-ended rungs;
+- for every internal boundary K of the ladder, "above K" and "below K".
+
+A condition on Kalshi is bought as the ladder sells it; the options side replicates
+the same terminal payoff. Nothing outside these ladders is judged. The Polymarket
+ladders, the intraday series and every other asset are not in the family (B-026).
+
+### What a condition costs on each venue — per dollar of payoff, at the best level
+**Kalshi.** The cheapest of the ways the ladder offers at the top of the book: the sum
+of the YES asks of the buckets that make up the condition, each plus
+`fees.rate(ask)`; or, when the condition is the complement of a single bucket, that
+bucket's NO ask plus `fees.rate(no_ask)`. Depth is the smallest resting size among
+the legs used. The taker fee's per-order round-up is not in the per-dollar cost; it
+is in the reference ticket below, where an order size exists.
+
+**Deribit.** The same payoff built from vertical spreads, priced at the side one would
+actually hit — the ask on every leg bought, the bid on every leg sold — plus Deribit's
+fee on those crossed prices (0.03% of the index, capped at 12.5% of the option
+price), exactly as `kill_test_eth5k.estimate()` charges it:
+- "above K": the call spread over the bracket around K when K is at or above the
+  forward, otherwise the discount factor D held and the put spread over the bracket
+  sold — the same side rule production uses (D-025, D-032);
+- "below K": the mirror of that;
+- a bucket: above its lower edge bought, above its upper edge sold, on the same
+  estimator and the same chain.
+
+### The band on the options side, and why a single number is refused
+Two approximations sit under every option price here and both are measured, not
+assumed away: the strike grid (D-079; a median sensitivity of 11.5% on the year-end chain, D-084)
+and the expiry that is not the settlement date (the early chain is about 165 hours
+before the Kalshi close, the late one months after). So the options cost is an
+interval, not a point: the cheapest and the dearest of the tight and the one-skip
+brackets (`measure_sensitivity.wide_bracket`, skip 0 and 1) on both bracketing chains
+(`measure_sensitivity.neighbours`) — up to four estimates. The two-chain band is the
+stress test of D-094, not a bound; it is used here as the conservative side of the
+comparison, which is what it is for.
+
+### When one venue counts as cheaper — the thresholds, fixed before any number
+In one snapshot a condition is:
+- **cheaper on Kalshi** when the Kalshi cost is below the CHEAPEST options estimate by
+  at least 10% of the Kalshi cost and by at least 0.001;
+- **cheaper on Deribit** when the DEAREST options estimate is below the Kalshi cost by
+  at least 10% of that estimate and by at least 0.001;
+- **indistinguishable** otherwise;
+- **unquoted** when either side has no two-sided price, a leg is outside the strike
+  range, or the chains do not straddle the close. Unquoted is a refusal, not a tie,
+  and is not counted as judged.
+
+Why these numbers. 0.001 is the price step the year-end ladders publish in
+`price_ranges` (D-078's reading: one uniform 0.0010 step on these ladders), so a difference smaller
+than one step is not a difference a buyer can act on. 10% because the options interval
+already contains the grid and the maturity approximations, and what it does not
+contain — the settlement basis (D-075, `measure_basis.py`), the drift inside the sync
+window, the depth of the option book, which the archive does not record — could each
+plausibly move a cost by a few percent; a difference of a tenth of the price is one
+that none of them is on record as reaching. Both thresholds were chosen by the
+assistant under the owner's delegation of 2026-09-24 ("do whatever is needed") and
+written here before the script existed. They are not edited after the first run; a
+different threshold is a new record that says it came after the evidence.
+
+A condition is **stably** cheaper on a venue when it is so in more than 90% of its
+judged snapshots — the `always_above` of `stability.py`, the same persistence rule as
+D-092 — and it has at least 10 judged snapshots.
+
+### The verdict — pre-committed, applied by the script, not by a reader
+Over the whole family:
+- at least one condition stably cheaper on Kalshi AND at least one stably cheaper on
+  Deribit → **"the cheaper venue depends on the condition"**;
+- stably cheaper conditions on one venue only → **"one venue is cheaper wherever
+  either is"**, and the report names which;
+- none → **"no condition is stably cheaper on either venue"**.
+
+On every outcome: the result is a statement about the cost of buying a payoff at the
+quotes that existed, not a recommendation, a signal or an edge, and it is not called
+any of those in any file or on any screen. The first outcome passes nothing; it is an
+input to G4, where discovery and the other open questions still stand. The second
+reduces V0, if it is built, to a rule the report states in one line. The third says
+the comparison cannot separate the venues at current quotes, and V0 would have to earn
+its place on something other than cost.
+
+### The reference ticket — an illustration, not a verdict
+The owner's example — 1,000 USD, a target of +20% — is computed on the newest snapshot
+only, for every condition and both venues: the stake needed for the target if the
+condition pays, `stake = R · C · c / (1 − c)` with c the cost per dollar of payoff;
+the payoff that stake buys; and whether Kalshi's resting depth at the best level
+covers it, with the fee's per-order round-up applied (`fees.order_fee`). Beside them,
+the two linear references: the move a spot long needs (+R) and the move a perpetual at
+leverage L needs (+R/L, for L = 2 and 5). These rows are there so the next record can
+put them on a screen; nothing in the verdict reads them.
+
+### What stays UNKNOWN, by name
+- **Perpetual funding in any number.** `raw/funding/` holds the history since
+  2026-09-18, but the unit and sign of `interest_8h` as returned are `UNKNOWN`
+  (`DATA_SOURCES.md` §1a) and D-111 requires the first consumer to state its reading
+  before using a value. This record does not state one; the carry of the perpetual
+  row is `UNKNOWN`, and so is its liquidation distance (the maintenance margin is not
+  archived).
+- **Dated futures** — B-018, not built, not asked for here.
+- **The depth of the option book.** `book_summary` carries prices, not sizes. The
+  options side has no depth figure at all, and a cheaper option price at a size
+  nobody is showing is reported as the price, with this caveat, not as an amount.
+- **The capital a long option spread ties up** under Deribit's margin, and Deribit's
+  minimum order size. The comparison is premium against price; both are cash paid
+  today for a dollar at (about) the same date.
+
+### Set aside by the owner on 2026-09-24, and recorded so it is not forgotten
+Three questions were raised and deliberately deferred by the owner until there are
+users: which venues a given user may legally access (Deribit lists the United States
+among its restricted jurisdictions; Kalshi's list is in its Member Agreement, unread);
+whether ranking instruments against a person's risk profile is regulated advice; and
+the data rights of showing either venue's prices in a product (`DATA_SOURCES.md`,
+*Data rights*; the Kalshi Developer Agreement is unread). None of them is answered
+here. All three stand in front of G4 unchanged.
