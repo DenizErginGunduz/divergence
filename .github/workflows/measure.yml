@@ -71,7 +71,8 @@ jobs:
           cd /tmp/mirror
           # raw/carry (D-119) is read by measure_carry.py; without it the carry step
           # measured an empty directory on the first run.
-          git sparse-checkout set raw/_meta raw/kalshi raw/deribit raw/polymarket_events raw/carry
+          git sparse-checkout set raw/_meta raw/kalshi raw/deribit raw/polymarket_events raw/carry \
+            raw/polymarket_other raw/hip4
           echo "DIVERGENCE_RAW=/tmp/mirror/raw" >> "$GITHUB_ENV"
           echo "mirror: $(du -sh /tmp/mirror/raw | cut -f1), $(ls /tmp/mirror/raw/_meta | wc -l) days"
 
@@ -153,6 +154,11 @@ jobs:
       # Descriptions of what was charged, not forecasts.
       - name: Carry — funding per venue and the dated futures' premium
         run: python scripts/measure_carry.py
+
+      # Which dates something settles on, per asset and family, with the horizon
+      # rule a reader applies (D-120). Lists what exists; prices nothing.
+      - name: Horizons — what settles when, per asset
+        run: python scripts/horizons.py
 
       # The third settlement difference (D-075), measured rather than left
       # UNKNOWN: Kalshi settles on BRTI, Deribit on its own index, and both
