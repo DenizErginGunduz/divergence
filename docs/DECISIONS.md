@@ -3569,3 +3569,88 @@ open. The band's late end is the March chain, 2,019 hours after the Kalshi close
 December's Deribit weeklies will narrow it, and the same script re-run then is the
 natural next test of whether any "above K" lean becomes persistent. Polymarket's
 ladders are B-026.
+
+## D-117 — The buyer's comparison becomes a template; Polymarket's daily ladders are its second family; every family also gets a narrow-band verdict
+**Date:** 2026-09-24 · **Asked by:** the owner, 2026-09-24 ("there will be many comparisons like this"; B-026 and the December re-test approved) · **Extends:** D-114 (its rules are not changed) · **Produces:** `scripts/measure_payoff.py` (restructured), `findings/payoff_frontier.json` (one block per family) · **Closes:** B-026 (built here), B-027 (dropped by the owner)
+
+### Why a template
+The owner expects many comparisons of this kind. Each one so far would have had to
+re-decide the same things — which conditions, which option chains, how each side is
+costed, what counts as cheaper — and a comparison whose rules are re-decided each time
+is a comparison whose rules can drift toward its result. So D-114's rules are lifted
+out and applied to every family unchanged, and what varies between families is
+declared, per family, in one place in the script:
+
+| declared per family | Kalshi year-end (D-114) | Polymarket daily (this record) |
+|---|---|---|
+| assets | BTC, ETH | BTC, ETH |
+| events | `KXBTCY`, `KXETHY` | "Bitcoin/Ethereum above ___ on DATE?" and "Bitcoin/Ethereum price on DATE?" |
+| settlement | 1 January 2027, 05:00 UTC, the CF Benchmarks real-time index (D-075) | DATE 16:00 UTC, the Binance 1-minute close (quoted below) |
+| how the prediction side is bought | YES asks of the buckets making up the interval, or the NO ask of a single bucket whose complement it is | the same, over both ladders of the date: a threshold market's YES ("above K") or NO ("below K"), a bucket's YES, or a sum of buckets |
+| NO price | the payload's `no_ask_dollars` | 1 − the YES best bid (below) |
+| prediction fee | `fees.rate`, Kalshi's schedule | `fees.polymarket_rate`, each market's own `feeSchedule` |
+| price step (the ABS floor) | 0.001, the ladders' `price_ranges` step (D-078) | each market's `orderPriceMinTickSize` — 0.001 in the tails, 0.01 near the middle |
+| depth at the best level | the payload's size fields | `UNKNOWN`: the event payload carries no sizes |
+
+What is common and fixed is D-114 as written: the options side as a band of the tight
+and one-skip brackets on both chains that straddle the close; crossed prices plus
+Deribit's fee; cheaper on a venue only by at least 10% and at least one price step;
+stably cheaper in more than 90% of at least 10 judged snapshots; the three verdicts in
+D-114's words. The one generalisation: D-114's "0.001, one price step" becomes "the
+price step the venue publishes for the markets bought" — the largest step among the
+legs of a route. For the Kalshi ladders that is still 0.001, so D-116's verdict is
+reproduced exactly; the script is checked against it before it runs on anything new.
+
+Each family is judged on its own and gets its own verdict. Families are never pooled:
+a year-end bucket and a noon-tomorrow threshold are not the same evidence.
+
+### The second family: Polymarket's daily terminal ladders
+B-026 held these back because "their nearest Deribit expiries usually do not straddle
+the close (D-082)". That was carried over from the Kalshi intraday series and it is
+wrong for these ladders. Polymarket's dailies close at 16:00 UTC; Deribit lists daily
+options expiring at 08:00 UTC; so a ladder for a later date is straddled by that date's
+08:00 chain, eight hours before, and the next day's, sixteen hours after — a band a
+day wide, narrower than the Kalshi year-end band has ever been. A snapshot taken after
+08:00 on the close date has lost the early chain and does not straddle; those
+snapshots are unquoted, as D-114 already says. Ladders several days out straddle more
+widely, when the dailies run out and the weeklies take over.
+
+Settlement, quoted from the markets' own rule text: the "above" markets resolve "Yes" if
+"the Binance 1 minute candle for BTC/USDT 12:00 in the ET timezone (noon) on the date
+specified in the title has a final "Close" price higher than the price specified in the
+title"; the bucket markets resolve on the same candle, and "If the reported value falls
+exactly between two brackets, then this market will resolve to the higher range
+bracket." So a bucket is [lo, hi) and "above K" is S > K, the intervals the script
+already uses. The Binance close is not the Deribit index; that basis is not measured
+for Polymarket and is not in any number (`UNKNOWN`, as it was in `measure_polymarket.py`).
+
+The NO side. The event payload quotes the YES side only (`bestBid`, `bestAsk`). A NO is
+priced as 1 − the YES best bid, on Polymarket's own description of its book, quoted:
+"Someone places a limit order to buy Yes at a price (e.g., `$0.60`) [and] someone
+places a limit order to buy No at the complementary price (e.g., `$0.40`). Since
+`$0.60` + `$0.40` = `$1.00`, the orders match." A resting YES bid at p is therefore a NO
+available at 1 − p.
+
+Conditions, per asset and date: every interval either ladder sells directly — each
+threshold's "above K" and "below K", each bucket — plus "above" and "below" every
+bucket edge. A condition is followed across snapshots by asset, date and interval.
+
+### A narrow-band verdict for every family — the December re-test, fixed now
+D-116 left one question open: whether an "above K" lean toward Deribit becomes
+persistent once the options band narrows. It narrows on its own — the year-end band's
+late end is the March chain today, and 1 January 2027 is a Friday, the weekday Deribit's
+weeklies expire on. Whether a 1 January expiry will be listed is `UNKNOWN`; if it is, it
+will be three hours after the Kalshi close.
+
+So every family reports, beside its verdict over all judged snapshots, the same verdict
+over the judged snapshots whose band is narrow: **both straddling chains within 168
+hours of the close** (one week, about the early year-end chain's own distance). The
+rules inside are D-114's, unchanged. For the Kalshi family that sub-verdict is empty
+until a chain within a week after 1 January is listed, and it fills by itself in every
+`measure` run after that; nothing has to be decided in December. For the Polymarket
+family nearly every judged snapshot is narrow already.
+
+### B-027, dropped
+The owner has set the combo-fee question aside. B-027 is closed without being done. The
+zero-fee sensitivity of D-115 stays in the output, per family, because it costs nothing
+and D-115 said it would be there; it never enters a verdict.
