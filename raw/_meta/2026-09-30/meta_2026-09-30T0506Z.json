@@ -1,0 +1,158 @@
+{
+ "snapshot_utc": "2026-09-30T05:06:09.490490+00:00",
+ "total_seconds": 229.0,
+ "sync_window_seconds": 1.24,
+ "source_marks_seconds": {
+  "start": 0.0,
+  "deribit_end": 0.71,
+  "polymarket_end": 1.24,
+  "kalshi_end": 43.29,
+  "funding_end": 43.63,
+  "carry_end": 63.97,
+  "polymarket_other_end": 64.18,
+  "hip4_end": 83.09
+ },
+ "stage_seconds": {
+  "deribit": 0.7,
+  "polymarket_events": 0.53,
+  "kalshi": 42.05,
+  "funding": 0.34,
+  "carry": 20.34,
+  "polymarket_other": 0.21,
+  "hip4": 18.92,
+  "flow": 122.48,
+  "holders": 21.33
+ },
+ "errors": {},
+ "complete": true,
+ "flow_summary": {
+  "markets": 478,
+  "out_of_scope_markets": 294,
+  "new_trades": 2100,
+  "limit_hit": 160,
+  "WITH_GAP": 0,
+  "first_time": 50,
+  "pagination_tried": 2,
+  "pagination_worked": 2
+ },
+ "kalshi_summary": {
+  "catalogue": {
+   "Crypto": 276,
+   "Financials": 1115,
+   "Commodities": 158
+  },
+  "crypto_series_tracked": 64,
+  "observed_series_tracked": 30,
+  "series_returning_markets": 23,
+  "total_markets": 7646,
+  "observed_markets": 1020
+ },
+ "holders_unexpected": 1,
+ "funding_summary": {
+  "lookback_hours": 48,
+  "points": {
+   "BTC-PERPETUAL": 48,
+   "ETH-PERPETUAL": 48
+  }
+ },
+ "carry_summary": {
+  "lookback_hours": 192,
+  "lookback_start_ms": 1788066413119,
+  "hyperliquid_rows": {
+   "BTC": 744,
+   "ETH": 744,
+   "xyz:CL": 744,
+   "xyz:BRENTOIL": 744,
+   "xyz:GOLD": 744,
+   "xyz:SILVER": 744,
+   "xyz:SP500": 744,
+   "xyz:XYZ100": 744
+  },
+  "hyperliquid_absent": [],
+  "polymarket_rows": {
+   "BTC-USD": 744,
+   "ETH-USD": 744,
+   "WTIOIL-USD": 744,
+   "BRENTOIL-USD": 744,
+   "GOLD-USD": 744,
+   "SILVER-USD": 744,
+   "SP500-USD": 744
+  },
+  "polymarket_absent": [],
+  "deribit_futures_ok": {
+   "BTC": true,
+   "ETH": true
+  }
+ },
+ "hip4_summary": {
+  "outcomes": 231,
+  "books": 80,
+  "books_failed": 0,
+  "skipped_for_cap": 40
+ },
+ "kalshi_commodities": {
+  "KXSILVERW": 440,
+  "KXSILVERD": 1000,
+  "KXWTIMIN": 68,
+  "KXBRENTW": 230,
+  "KXBRENTMON": 90,
+  "KXWTIMAX": 127,
+  "KXGOLDD": 1000,
+  "KXWTIMONTHLY": 0,
+  "KXBRENTD": 910,
+  "KXWTI": 1065,
+  "KXGOLDW": 440,
+  "KXWTIMAXM": 0,
+  "KXSILVERMON": 120,
+  "KXGOLDMON": 140,
+  "KXWTIW": 927,
+  "KXWTIMINM": 0
+ },
+ "files": [
+  {
+   "file": "raw/deribit/2026-09-30/deribit_2026-09-30T0506Z.json.gz",
+   "bytes": 68115
+  },
+  {
+   "file": "raw/polymarket_events/2026-09-30/polymarket_events_2026-09-30T0506Z.json.gz",
+   "bytes": 351079
+  },
+  {
+   "file": "raw/holders/2026-09-30/holders_2026-09-30T0506Z.json.gz",
+   "bytes": 280858
+  },
+  {
+   "file": "raw/kalshi/2026-09-30/kalshi_2026-09-30T0506Z.json.gz",
+   "bytes": 860520
+  },
+  {
+   "file": "raw/funding/2026-09-30/funding_2026-09-30T0506Z.json.gz",
+   "bytes": 3553
+  },
+  {
+   "file": "raw/carry/2026-09-30/carry_2026-09-30T0506Z.json.gz",
+   "bytes": 149272
+  },
+  {
+   "file": "raw/polymarket_other/2026-09-30/polymarket_other_2026-09-30T0506Z.json.gz",
+   "bytes": 146538
+  },
+  {
+   "file": "raw/hip4/2026-09-30/hip4_2026-09-30T0506Z.json.gz",
+   "bytes": 14959
+  },
+  {
+   "file": "raw/events/trades/2026-09-30/trades_2026-09-30T0506Z.ndjson.gz",
+   "bytes": 161510
+  },
+  {
+   "file": "raw/coverage/2026-09-30/coverage_2026-09-30T0506Z.json",
+   "bytes": 173326
+  }
+ ],
+ "assets": [
+  "bitcoin",
+  "ethereum"
+ ],
+ "version": 8
+}
