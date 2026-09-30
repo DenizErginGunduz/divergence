@@ -382,7 +382,7 @@ methodology was being revised. It was never added, and the page was instead
 kept in step with the code at every commit (D-074, D-076, D-077, D-078).
 
 That turned out better than the plan. A banner would have been honest and would
-have made the site unusable as a portfolio piece for two weeks, while the actual
+have made the site unusable as a public page for two weeks, while the actual
 outcome is a site whose every number matches the record it cites.
 
 Kept here so the decision is visible as a decision. If the methodology is ever

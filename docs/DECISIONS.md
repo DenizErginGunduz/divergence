@@ -381,8 +381,8 @@ not a market view. This is the small-price counterpart of the spread rule (D-021
 **if the PM price is less than a few ticks, no ratio is produced.**
 
 ## D-034 — Product decisions (user-approved, 2026-08-28)
-- **Audience:** the priority is a personal research tool; the site also carries
-  portfolio and brand value. There is no contradiction — to a reader who knows
+- **Audience:** the priority is a research tool that is also read in public. *(Wording narrowed on 2026-09-30, D-121.)*
+  There is no contradiction — to a reader who knows
   derivatives, a tool that goes quiet when it cannot measure looks **more**
   competent than one that invents a number. Silence will not be hidden, it will be
   designed well.
@@ -512,8 +512,8 @@ market during the scheduled 8-hourly runs, and it will be written into
 `github.com/DenizErginGunduz/divergence` — public, three successful runs.
 Uploaded: `.github/`, `collector/`, `raw/`, `state/`.
 **Missing: `README.md`, `docs/`, `scripts/`, `.gitignore`.**
-On the first upload attempt the files arrived flat and were never committed. The
-portfolio value lives in the README and the docs, so this gap has to be closed.
+On the first upload attempt the files arrived flat and were never committed. For a reader,
+the value lives in the README and the docs, so this gap has to be closed. *(Wording narrowed on 2026-09-30, D-121.)*
 
 ## D-069 — The strip became a grid; full width survives only in the dateline
 **Date:** 2026-09-10
@@ -599,7 +599,7 @@ deribit path fails to appear in the pointer — so it never produces a silently
 incomplete pointer.
 
 ### Why it matters
-This defect was exactly the kind that damages the portfolio value: whoever opened
+This defect was exactly the kind that damages a public page *(Wording narrowed on 2026-09-30, D-121.)*: whoever opened
 the site saw an empty screen rather than measurement rigour. And it was getting
 worse on its own.
 
@@ -2617,29 +2617,16 @@ engine; an "AI probability" layer; cosmetic interface expansion as a goal; SVI o
 volatility surface adopted because it sounds quantitative; replacing methodological
 uncertainty with model complexity.
 
-## D-102 — Project 3 is customer discovery only, and the portfolio is written down
-**Date:** 2026-09-16 · **Produces:** the Project 3 section of `docs/STRATEGY.md`, entries in `docs/IDEA_BACKLOG.md`
+## D-102 — The three six-month outputs
+**Date:** 2026-09-16 · **Produces:** the six-month outputs in `docs/STRATEGY.md`
 
-A commercial-first track (Project 3) is not coded now. What is kept is a
-customer-discovery backlog. The most promising problem family identified in the review
-is a post-alert crypto compliance / investigation workflow — alert → evidence
-gathering → transaction reconstruction → case notes → decision or escalation →
-closure evidence — with a small VASP, crypto platform, fintech compliance team or
-prediction-market operator as the potential buyer. Other discovery candidates:
-settlement and integrity tooling for prediction-market operators; cross-venue
-execution-quality analysis; collateral and settlement optimisation; stablecoin reserve
-and compliance workflow; Builder attribution and economics tooling. No revenue
-projection enters any decision without real buyer evidence, and no Project 3 code is
-written before customer discovery has been done.
-
-The portfolio as a whole: Project 1, on-chain and prediction-market research (wallet
-behaviour, integrity, measurement, datasets); Project 2A, Divergence research; Project
-2B, exposure-design research; the Project 2 product spin-off (payoff card → event
-hedge studio → basis-aware exposure engine); Project 3, customer discovery only. If
-only three outputs may exist in six months they are: Research Note 1; the
+If only three outputs may exist in six months they are: Research Note 1; the
 resolved-event dataset with its validation specification; and the Polymarket-native
 payoff / hedge card MVP only if discovery supports it, otherwise an exposure-design
 research note in its place.
+
+The part of this record about work outside Divergence was moved out of the public
+repository on 2026-09-30 (D-121).
 
 ## D-103 — ETH above $5,000 is not a surviving discrepancy: the pre-committed kill test, run
 **Date:** 2026-09-16 · **Produced by:** `scripts/kill_test_eth5k.py` on the full mirror (`measure` run #25, 68 snapshots / 17 days, 2026-08-30T1611Z … 2026-09-16T1314Z) · **Record:** `findings/kill_test_eth5k.json` · **Applies the rules of:** D-092 · **Closes gate:** G1 in `docs/DECISION_GATES.md`
@@ -3914,3 +3901,23 @@ same-day options band is held. The card calls the linear path "futures" and mean
 perpetual: its gain moves with the price, and beside it stands only the carry, as the
 day, week and month means of funding. Deribit's dated futures stay in the archive and
 off the card.
+
+## D-121 — Notes about the owner's work outside Divergence leave the public repository
+**Date:** 2026-09-30 · **Owner's decision of:** 2026-09-30 · **Builds on:** D-091 · **Changes:** D-034, D-043, D-070, D-102; `docs/STRATEGY.md` §5–6, `docs/PRODUCT.md` §2, `docs/IDEA_BACKLOG.md`, `docs/DECISION_GATES.md` (G8), `docs/BACKLOG.md`, `docs/DATA_SOURCES.md`
+
+### Why
+The repository is public and is the project's memory (D-091). A few passages were not
+about Divergence: they described the owner's other tracks and personal plans. Those
+belong in the owner's private notes, not in a public research record.
+
+### What changed
+The passages were moved, word for word, to a private repository. Records keep their
+numbers, so every citation still resolves, and each edited record points here. D-102
+keeps its six-month outputs and loses the rest; gate G8 and ideas I-201 … I-206 are no
+longer kept here. The research, methodology, product and data-rights reasoning of
+Divergence is unchanged.
+
+### What this record does not do
+It does not rewrite history: earlier commits keep the earlier wording. Old records are
+otherwise not rewritten; this is a narrowing with a pointer, made at the owner's
+request.

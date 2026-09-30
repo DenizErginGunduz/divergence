@@ -346,5 +346,5 @@ is done. The claim is limited to what is measured.
 - Deribit's "derived data" wording arguably reaches `findings/latest.json`. We publish
   it because it is a research result rather than a data feed, but that is our reading,
   not their ruling.
-- The current position suits a research and portfolio project. A commercial product or
+- The current position suits a research project. A commercial product or
   an investment round changes the analysis and would need proper legal review.

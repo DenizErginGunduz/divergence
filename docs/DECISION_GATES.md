@@ -18,7 +18,6 @@ existed and may not be edited after the evidence is in.
 | G5 | Builders application | OPEN |
 | G6 | Event hedge studio (V1) promotion | OPEN |
 | G7 | Cross-asset expansion | OPEN |
-| G8 | Project 3 coding | OPEN |
 
 ---
 
@@ -133,16 +132,6 @@ dividends, early exercise or basis add more noise than information (B-002).
 
 **On fail.** BTC / ETH remain the measured universe. WTI stays a research case for
 exposure design, not a covered asset.
-
-## G8 — Project 3 coding (D-102)
-
-**Pass when:** customer discovery has been conducted with the potential buyers named
-in `STRATEGY.md` §5 and a repeated, paid-for job is documented in `IDEA_BACKLOG.md`
-with the evidence attached. No revenue projection counts as evidence.
-
-**On fail.** Discovery continues; no code.
-
----
 
 ## How a gate changes
 

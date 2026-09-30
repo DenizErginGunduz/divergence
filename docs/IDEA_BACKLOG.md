@@ -108,26 +108,4 @@ REASON: the framework produces no valid independent p-values per rung; family fr
 
 ---
 
-## Project 3 — customer discovery candidates (D-102)
-
-No code before discovery. Each entry is a problem family and a buyer hypothesis, not a
-product.
-
-### I-201 — Post-alert crypto compliance / investigation workflow
-STATUS: CUSTOMER_DISCOVERY · SOURCE: review synthesis, 2026-09-16
-BUYER: small VASP; crypto platform; fintech compliance team; prediction-market operator. · JOB: alert → evidence gathering → transaction reconstruction → case notes → decision / escalation → closure evidence. · WHY INTERESTING: a repeated, regulated, documented job with a budget line. · MAIN RISK: incumbents; the buyer's real workflow is UNKNOWN until asked. · PROMOTION CONDITION: G8.
-
-### I-202 — Settlement / integrity tooling for prediction-market operators
-STATUS: CUSTOMER_DISCOVERY · REUSE: I-005, I-006, I-011. · PROMOTION CONDITION: G8.
-
-### I-203 — Cross-venue TCA / execution-quality analysis
-STATUS: CUSTOMER_DISCOVERY · REUSE: the execution layer of `EXPOSURE_ENGINE.md`. · PROMOTION CONDITION: G8.
-
-### I-204 — Collateral / settlement optimisation
-STATUS: CUSTOMER_DISCOVERY · PROMOTION CONDITION: G8.
-
-### I-205 — Stablecoin reserve / compliance workflow
-STATUS: CUSTOMER_DISCOVERY · PROMOTION CONDITION: G8.
-
-### I-206 — Builder attribution / economics tooling
-STATUS: CUSTOMER_DISCOVERY · same as I-012, seen as a Project 3 candidate. · PROMOTION CONDITION: G8.
+Ideas for work outside Divergence are kept outside this repository (D-121).

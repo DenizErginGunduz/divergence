@@ -27,15 +27,14 @@ would be wrong on 44 rows out of 44.
 
 ## 2. Audience — and the contradiction, resolved
 
-The priority is a **personal research tool**; the site also carries portfolio and
-brand value.
+The priority is a **research tool** that is also read in public (D-121).
 
-Those two look like they pull in opposite directions: a portfolio piece wants to
-look finished, a personal tool wants not to lie. **There is no contradiction.** To
+Those two look like they pull in opposite directions: a public page wants to look
+finished, a research tool wants not to lie. **There is no contradiction.** To
 a reader who knows derivatives, a tool that prints "44%" on a ladder with a spread
 of 0.099 looks amateur; a tool that says "on this row the spread is wider than the
 gap I am measuring, so I am not producing a number" looks like it knows the
-subject. **Saying nothing is not a defect — it is the portfolio value itself.**
+subject. **Saying nothing is not a defect — it is the point.**
 
 Policy: silence is not hidden, it is presented well.
 
@@ -161,7 +160,7 @@ used anywhere. The language stays descriptive.
 **Everything is in English** — the interface, the code, the documents and the
 archive's own field names. Derivatives terminology is settled in English
 ("terminal probability", "touch probability", "implied"), the venues publish in
-English, and a reader coming to this as a portfolio piece reads English. Keeping a
+English, and most readers of a public research page read English. Keeping a
 single language end to end also means a field name on screen, in the archive and in
 a script is literally the same string.
 

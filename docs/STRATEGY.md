@@ -1,7 +1,7 @@
 # STRATEGY.md — what Divergence is now, and what it is not
 
 **Status:** current as of 2026-09-16 · **Decided in:** D-091 (structure), D-097 (Note 1),
-D-099 (product), D-100 (assets), D-101 (waiting), D-102 (Project 3)
+D-099 (product), D-100 (assets), D-101 (waiting), D-102 (six-month outputs), D-121
 **Read next:** `RESEARCH_ROADMAP.md` for the research programme,
 `PRODUCT_ROADMAP.md` for the staged product, `DECISION_GATES.md` for what has to be
 true before anything is promoted.
@@ -101,29 +101,14 @@ sample grows on its own. The do / wait / do-not lists are in D-101 and are bindi
 
 ---
 
-## 5. Project 3 — a separate, commercial-first track (D-102)
+## 5. Other tracks
 
-Not coded. A customer-discovery backlog is kept in `IDEA_BACKLOG.md`. The most
-promising problem family identified so far is a post-alert crypto compliance and
-investigation workflow (alert → evidence → transaction reconstruction → case notes →
-decision → closure evidence) for a small VASP, crypto platform, fintech compliance
-team or prediction-market operator. Other candidates are listed there. No revenue
-projection enters a decision without buyer evidence; no code before discovery.
-
-Project 3 shares nothing with Layers A–C except the people working on it. It is kept
-in this repository's documents only so that the portfolio is written down in one place.
+Work outside Divergence is planned elsewhere and is not recorded in this repository
+(D-121).
 
 ---
 
-## 6. The portfolio, in one place
-
-| track | what | state |
-|---|---|---|
-| Project 1 | on-chain / prediction-market research — wallet behaviour, integrity, measurement, datasets | separate; not in this repository |
-| Project 2A | Divergence research — same-state pricing, methodology, validation | active; finishing Note 1 |
-| Project 2B | exposure-design research — basis, carry, payoff, capital, execution | starting; methodology first |
-| Project 2 product | payoff card → event hedge studio → basis-aware exposure engine | gated; V0 requirements only |
-| Project 3 | commercial-first | customer discovery only |
+## 6. The next six months
 
 **If only three outputs may exist in six months:** Research Note 1; the resolved-event
 dataset with its validation specification; the Polymarket-native payoff / hedge card
